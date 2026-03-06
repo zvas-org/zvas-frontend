@@ -1,74 +1,43 @@
-import type { GetAuditsParams, InternalHandlerAuditListItem, InternalHandlerAuditListResponse } from '@/api/generated/model'
-import { useGetAudits } from '@/api/generated/sdk'
-
-export interface AuditEntryView {
-  id: string
-  actorUserID: string
-  actorUsername: string
-  actorRole: string
-  action: string
-  resourceType: string
-  resourceID: string
-  riskLevel: string
-  result: string
-  traceId: string
-  path: string
-  method: string
-  remoteIP: string
-  errorMessage: string
-  detail: Record<string, unknown>
-  createdAt: string
-}
-
-export interface AuditListView {
-  items: AuditEntryView[]
-  traceId: string
-  pagination: {
-    page: number
-    pageSize: number
-    total: number
-  }
-}
+import type { InternalHandlerAuditListResponse } from '../generated/model/internalHandlerAuditListResponse';
+import { httpClient } from '../client';
+import type { AuditListParams, AuditListResponse, AuditLog, RiskLevel, ActionResult } from '../types/audit.types';
 
 /**
- * useAuditListView 读取审计日志并转换为页面视图结构。
+ * 获取审计日志列表
+ * @param params 分页与筛选参数
  */
-export function useAuditListView(params: GetAuditsParams) {
-  return useGetAudits(params, {
-    query: {
-      select: (response): AuditListView => {
-        const payload = response.data as InternalHandlerAuditListResponse
-        return {
-          items: (payload.data || []).map(toAuditEntryView),
-          traceId: payload.trace_id || 'n/a',
-          pagination: {
-            page: payload.pagination?.page || params.page || 1,
-            pageSize: payload.pagination?.page_size || params.page_size || 20,
-            total: payload.pagination?.total || 0,
-          },
-        }
-      },
-    },
-  })
-}
+export const getAuditLogs = async (params: AuditListParams): Promise<AuditListResponse> => {
+  const response = await httpClient.get<InternalHandlerAuditListResponse>('/audits', {
+    params,
+  });
 
-function toAuditEntryView(item?: InternalHandlerAuditListItem | null): AuditEntryView {
+  const body = response.data;
+
+  // 映射后端模型到前端视图模型
+  const items: AuditLog[] = (body.data || []).map((item) => ({
+    id: item.id || '',
+    actor_user_id: item.actor_user_id || '',
+    actor_username: item.actor_username || '',
+    actor_role: item.actor_role || '',
+    action: item.action || '',
+    resource_type: item.resource_type || '',
+    resource_id: item.resource_id || '',
+    risk_level: (item.risk_level || 'low') as RiskLevel,
+    result: (item.result || 'success') as ActionResult,
+    trace_id: item.trace_id || '',
+    path: item.path || '',
+    method: item.method || '',
+    remote_ip: item.remote_ip || '',
+    error_message: item.error_message,
+    detail: (item.detail || {}) as Record<string, unknown>,
+    created_at: item.created_at || new Date().toISOString(),
+  }));
+
   return {
-    id: item?.id || '',
-    actorUserID: item?.actor_user_id || '',
-    actorUsername: item?.actor_username || '',
-    actorRole: item?.actor_role || '',
-    action: item?.action || '',
-    resourceType: item?.resource_type || '',
-    resourceID: item?.resource_id || '',
-    riskLevel: item?.risk_level || 'unknown',
-    result: item?.result || 'unknown',
-    traceId: item?.trace_id || '',
-    path: item?.path || '',
-    method: item?.method || '',
-    remoteIP: item?.remote_ip || '',
-    errorMessage: item?.error_message || '',
-    detail: (item?.detail || {}) as Record<string, unknown>,
-    createdAt: item?.created_at || '',
-  }
-}
+    items,
+    total: body.pagination?.total || 0,
+    page: body.pagination?.page || params.page || 1,
+    page_size: body.pagination?.page_size || params.page_size || 20,
+    trace_id: body.trace_id,
+  };
+};

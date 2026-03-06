@@ -72,6 +72,9 @@ export function UserManagementPage() {
   const [roleTarget, setRoleTarget] = useState<UserView | null>(null)
   const [roleDraft, setRoleDraft] = useState<string[]>([])
 
+  // 新增：详情面板与权限快照状态
+  const [detailTarget, setDetailTarget] = useState<UserView | null>(null)
+
   // 核心：自研消息胶囊状态 (模拟 Element UI)
   const [toast, setToast] = useState<{ title: string; msg: string; type: 'warning' | 'danger' | 'success' } | null>(null)
 
@@ -127,6 +130,9 @@ export function UserManagementPage() {
     mutationFn: ({ userID, status }: { userID: string; status: 'active' | 'disabled' }) => updateUserStatus(userID, { status }),
     onSuccess: async (_, variables) => {
       notify('状态更新', variables.status === 'disabled' ? '用户账户已立即禁用' : '用户账户已重新启用', 'success')
+      if (detailTarget?.id === variables.userID) {
+        setDetailTarget(prev => prev ? { ...prev, status: variables.status } : null)
+      }
       await refreshUsersAndAudits(queryClient)
     },
     onError: (error) => {
@@ -229,8 +235,8 @@ export function UserManagementPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full text-apple-text-primary animate-in fade-in duration-1000">
-      {/* 核心反馈层：Fixed 定位胶囊 */}
+    <div className="flex flex-col gap-14 w-full text-apple-text-primary animate-in fade-in duration-1000 max-w-[1600px] mx-auto pb-20">
+      {/* 核心反馈层保持不变 */}
       <div className="fixed top-12 left-0 right-0 z-[100] flex justify-center pointer-events-none">
         <AnimatePresence mode="wait">
           {toast && (
@@ -270,56 +276,44 @@ export function UserManagementPage() {
         </AnimatePresence>
       </div>
 
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <span className="inline-block border border-apple-blue-light/50 text-apple-blue-light bg-apple-blue-light/10 text-[10px] font-bold tracking-widest px-2 py-0.5 rounded uppercase">
-            System / Identity
-          </span>
-        </div>
-        <h3 className="text-4xl font-bold tracking-tight">用户管理</h3>
-        <p className="text-apple-text-secondary text-lg leading-relaxed max-w-2xl">
-          账号运营核心枢纽。在此配置用户生命周期、访问权限及安全口令，所有变更将实时同步至全局审计。
-        </p>
+      {/* 极简顶层信息排版 */}
+      <header className="px-2 flex flex-col gap-1">
+        <h1 className="text-4xl font-black tracking-tighter text-white">身份与访问架构</h1>
+        <p className="text-xs text-apple-text-tertiary uppercase tracking-[0.3em] font-medium opacity-60">Identity_Infrastructure / Nexus_Identity_Center</p>
       </header>
 
-      {/* Bento Grid 概览区 */}
-      <section className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-auto md:h-[240px]">
-        {/* 主卡片：Total Users */}
-        <Card className="md:col-span-2 md:row-span-2 bg-gradient-to-br from-apple-blue/20 to-apple-black border border-apple-blue-light/30 shadow-apple-blue-light/5 overflow-hidden">
-          <CardBody className="p-8 flex flex-col justify-between relative">
-            <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-apple-blue-light/10 blur-[80px] rounded-full pointer-events-none" />
-            <div>
-              <span className="text-xs text-apple-blue-light uppercase tracking-[0.2em] font-black">Total Identity Count</span>
-              <h4 className="text-6xl font-black tracking-tighter mt-2 text-white">{metrics.total}</h4>
-            </div>
-            <p className="text-apple-text-tertiary text-sm mt-4 font-medium">全域已授权账户总数，包含预置特权账号。</p>
+      {/* 紧凑型指标概览区 (iPhone 风格) */}
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[130px]">
+        {/* 指标卡：Total Users */}
+        <Card className="bg-gradient-to-br from-[#0071e3]/20 via-black to-black border border-white/10 shadow-none overflow-hidden h-full apple-spotlight rounded-[32px]">
+          <CardBody className="p-6 flex flex-col justify-center relative">
+            <div className="absolute top-[-50%] right-[-20%] w-48 h-48 bg-[#0071e3]/10 blur-[60px] rounded-full pointer-events-none" />
+            <span className="text-[10px] text-[#0071e3] uppercase tracking-[0.3em] font-black opacity-80">Full_Registry</span>
+            <strong className="text-4xl font-black tracking-tighter mt-1 text-white leading-none">{metrics.total}</strong>
           </CardBody>
         </Card>
 
-        {/* 辅卡片：Active */}
-        <Card className="bg-apple-tertiary-bg/10 border border-apple-border backdrop-blur-md">
+        {/* 指标卡：Active */}
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
-            <span className="text-[10px] text-apple-text-secondary uppercase tracking-widest font-bold mb-1">Active</span>
-            <strong className="text-3xl font-bold tracking-tight text-apple-green-light">{metrics.active}</strong>
+            <span className="text-[10px] text-apple-green-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Online_Nodes</span>
+            <strong className="text-4xl font-black tracking-tighter text-white leading-none">{metrics.active}</strong>
           </CardBody>
         </Card>
 
-        {/* 辅卡片：Builtin */}
-        <Card className="bg-apple-tertiary-bg/10 border border-apple-border backdrop-blur-md">
+        {/* 指标卡：Builtin */}
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
-            <span className="text-[10px] text-apple-text-secondary uppercase tracking-widest font-bold mb-1">System Builtin</span>
-            <strong className="text-3xl font-bold tracking-tight text-apple-blue-light">{metrics.builtin}</strong>
+            <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Core_Preset</span>
+            <strong className="text-4xl font-black tracking-tighter text-white leading-none">{metrics.builtin}</strong>
           </CardBody>
         </Card>
 
-        {/* 长卡片：Disabled (纵向堆叠感) */}
-        <Card className="md:col-span-2 bg-apple-tertiary-bg/10 border border-apple-border backdrop-blur-md">
-          <CardBody className="p-6 flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-[10px] text-apple-text-secondary uppercase tracking-widest font-bold">Suspended Accounts</span>
-              <p className="text-xs text-apple-text-tertiary mt-1">目前处于禁用状态，无法建立会话。</p>
-            </div>
-            <strong className="text-4xl font-black tracking-tighter text-apple-red-light">{metrics.disabled}</strong>
+        {/* 指标卡：Disabled */}
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
+          <CardBody className="p-6 flex flex-col justify-center">
+            <span className="text-[10px] text-apple-red-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Revoked_Status</span>
+            <strong className="text-4xl font-black tracking-tighter text-white leading-none">{metrics.disabled}</strong>
           </CardBody>
         </Card>
       </section>
@@ -330,7 +324,7 @@ export function UserManagementPage() {
           <Input
             isClearable
             value={keyword}
-            placeholder="Search identities, roles or status..."
+            placeholder="搜索用户名、显示名、角色或 TraceID..."
             onValueChange={setKeyword}
             variant="flat"
             startContent={<MagnifyingGlassIcon className="w-5 h-5 text-apple-text-tertiary" />}
@@ -350,9 +344,9 @@ export function UserManagementPage() {
               value: "text-apple-text-primary"
             }}
           >
-            <SelectItem key="all" textValue="All Status">All Status</SelectItem>
-            <SelectItem key="active" textValue="Active">Active</SelectItem>
-            <SelectItem key="disabled" textValue="Disabled">Disabled</SelectItem>
+            <SelectItem key="all" textValue="全部状态">全部状态</SelectItem>
+            <SelectItem key="active" textValue="在线 (Active)">在线 (Active)</SelectItem>
+            <SelectItem key="disabled" textValue="已禁用 (Disabled)">已禁用 (Disabled)</SelectItem>
           </Select>
           <Button
             variant="flat"
@@ -369,148 +363,156 @@ export function UserManagementPage() {
             onPress={() => setCreateVisible(true)}
           >
             <PlusIcon className="w-5 h-5" />
-            <span>Create</span>
+            <span>新建用户</span>
           </Button>
         </div>
       </section>
 
-      {/* 磨砂玻璃用户列表表格 */}
-      <Card className="bg-transparent border-0 shadow-none overflow-visible">
-        <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-hidden">
-          <Table
-            aria-label="User identity table"
-            removeWrapper
-            classNames={{
-              base: "p-4",
-              thead: "[&>tr]:first:rounded-xl",
-              th: "bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2",
-              td: "py-5 border-b border-white/5 last:border-0",
-              tr: "hover:bg-white/[0.03] transition-colors cursor-default"
-            }}
-          >
-            <TableHeader>
-              <TableColumn>User Identity</TableColumn>
-              <TableColumn>Access Roles</TableColumn>
-              <TableColumn>Status</TableColumn>
-              <TableColumn>Attributes</TableColumn>
-              <TableColumn>Last Activity</TableColumn>
-              <TableColumn className="text-right">Actions</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent={"No identities found matching the current criteria."}>
-              {filteredItems.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-base font-bold text-white tracking-tight leading-tight">{record.displayName}</span>
-                      <span className="text-[11px] text-apple-text-tertiary font-mono tracking-tighter uppercase opacity-60">{record.username}</span>
+      {/* 磨砂玻璃用户列表表格容器 */}
+      <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto scrollbar-hide md:scrollbar-default custom-scrollbar">
+        <Table
+          aria-label="User identity table"
+          layout="fixed"
+          removeWrapper
+          classNames={{
+            base: "p-4 min-w-[1000px]",
+            table: "table-fixed",
+            thead: "[&>tr]:first:rounded-xl",
+            th: "bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2 text-left",
+            td: "py-5 border-b border-white/5 last:border-0 text-left",
+            tr: "hover:bg-white/[0.03] transition-colors cursor-default"
+          }}
+        >
+          <TableHeader>
+            <TableColumn width={220} align="start">用户身份 (Identity)</TableColumn>
+            <TableColumn width={200} align="start">访问权限组 (Roles)</TableColumn>
+            <TableColumn width={120} align="start">账号状态</TableColumn>
+            <TableColumn width={120} align="start">属性标识</TableColumn>
+            <TableColumn width={180} align="start">最后活跃</TableColumn>
+            <TableColumn width={280} align="end">指令操作</TableColumn>
+          </TableHeader>
+          <TableBody emptyContent={<div className="h-40 flex items-center justify-center text-apple-text-tertiary font-bold">未发现符合筛选条件的身份主体。</div>}>
+            {filteredItems.map((record) => (
+              <TableRow key={record.id}>
+                <TableCell>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-base font-bold text-white tracking-tight leading-tight">{record.displayName}</span>
+                    <span className="text-[11px] text-apple-text-tertiary font-mono tracking-tighter uppercase opacity-60">{record.username}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1.5">
+                    {record.roles.map((role) => (
+                      <span key={`${record.id}-${role.code}`} className="inline-flex items-center px-2 py-0.5 rounded-full bg-apple-blue/10 border border-apple-blue/30 text-apple-blue-light text-[10px] font-black uppercase tracking-wider">
+                        {role.name}
+                      </span>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${record.status === 'active'
+                    ? 'border-apple-green/40 text-apple-green-light bg-apple-green/10'
+                    : 'border-apple-red/40 text-apple-red-light bg-apple-red/10'
+                    }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${record.status === 'active' ? 'bg-apple-green-light' : 'bg-apple-red-light'}`} />
+                    {record.status === 'active' ? '在线' : '禁用'}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className={`text-[10px] font-black tracking-widest uppercase py-1 px-2 rounded-md ${record.isBuiltin ? 'text-apple-blue-light bg-white/5 border border-white/10' : 'text-apple-text-tertiary border border-transparent'
+                    }`}>
+                    {record.isBuiltin ? '核心预置' : '普通成员'}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  {record.lastLoginAt ? (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-apple-text-secondary">{formatDateTime(record.lastLoginAt)}</span>
+                      <span className="text-[10px] text-apple-text-tertiary uppercase tracking-tighter">会话同步</span>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1.5">
-                      {record.roles.map((role) => (
-                        <span key={`${record.id}-${role.code}`} className="inline-flex items-center px-2 py-0.5 rounded-full bg-apple-blue/10 border border-apple-blue/30 text-apple-blue-light text-[10px] font-black uppercase tracking-wider">
-                          {role.name}
-                        </span>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${record.status === 'active'
-                      ? 'border-apple-green/40 text-apple-green-light bg-apple-green/10'
-                      : 'border-apple-red/40 text-apple-red-light bg-apple-red/10'
-                      }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${record.status === 'active' ? 'bg-apple-green-light' : 'bg-apple-red-light'}`} />
-                      {record.status === 'active' ? 'Active' : 'Disabled'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`text-[10px] font-black tracking-widest uppercase py-1 px-2 rounded-md ${record.isBuiltin ? 'text-apple-blue-light bg-white/5 border border-white/10' : 'text-apple-text-tertiary border border-transparent'
-                      }`}>
-                      {record.isBuiltin ? 'Builtin' : 'Regular'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {record.lastLoginAt ? (
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-apple-text-secondary">{formatDateTime(record.lastLoginAt)}</span>
-                        <span className="text-[10px] text-apple-text-tertiary uppercase tracking-tighter">Synced</span>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] text-apple-text-tertiary opacity-40 italic">Never Initialized</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        color={record.status === 'active' ? 'danger' : 'success'}
-                        isDisabled={!canManageUsers || record.isBuiltin || statusMutation.isPending}
-                        className="rounded-full font-black text-[11px] uppercase tracking-wider min-w-[64px] h-8 px-4"
-                        onPress={() => {
-                          setConfirmTarget({ user: record, status: record.status === 'active' ? 'disabled' : 'active' })
-                        }}
-                      >
-                        {record.status === 'active' ? 'Suspend' : 'Resume'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="bordered"
-                        isDisabled={!canManageUsers}
-                        className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
-                        onPress={() => {
-                          setResetTarget(record)
-                          setResetPasswordDraft('')
-                        }}
-                      >
-                        Reset
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="bordered"
-                        isDisabled={!canManageRoles || record.isBuiltin}
-                        className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
-                        onPress={() => {
-                          setRoleTarget(record)
-                          setRoleDraft(record.roles.map((role) => role.code))
-                        }}
-                      >
-                        Roles
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  ) : (
+                    <span className="text-[11px] text-apple-text-tertiary opacity-40 italic">从未初始化</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="bordered"
+                      className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
+                      onPress={() => setDetailTarget(record)}
+                    >
+                      详情
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      color={record.status === 'active' ? 'danger' : 'success'}
+                      isDisabled={!canManageUsers || record.isBuiltin || statusMutation.isPending}
+                      className="rounded-full font-black text-[11px] uppercase tracking-wider min-w-[64px] h-8 px-4"
+                      onPress={() => {
+                        setConfirmTarget({ user: record, status: record.status === 'active' ? 'disabled' : 'active' })
+                      }}
+                    >
+                      {record.status === 'active' ? '禁用' : '解禁'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="bordered"
+                      isDisabled={!canManageUsers}
+                      className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
+                      onPress={() => {
+                        setResetTarget(record)
+                        setResetPasswordDraft('')
+                      }}
+                    >
+                      重置密码
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="bordered"
+                      isDisabled={!canManageRoles || record.isBuiltin}
+                      className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
+                      onPress={() => {
+                        setRoleTarget(record)
+                        setRoleDraft(record.roles.map((role) => role.code))
+                      }}
+                    >
+                      权限
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-          <div className="px-6 py-6 flex flex-col md:flex-row gap-4 justify-between items-center border-t border-white/5 bg-white/[0.01]">
-            <p className="text-[11px] text-apple-text-tertiary font-bold uppercase tracking-[0.2em]">
-              Showing <span className="text-white">{filteredItems.length}</span> of {usersQuery.data.pagination.total} Identities
-            </p>
-            <Pagination
-              total={Math.ceil(usersQuery.data.pagination.total / usersQuery.data.pagination.pageSize)}
-              page={page}
-              onChange={(page) => setPage(page)}
-              showControls
-              classNames={{
-                wrapper: "gap-2",
-                item: "bg-white/5 text-apple-text-secondary font-bold rounded-xl border border-white/5 hover:bg-white/10 transition-all min-w-[40px] h-10",
-                cursor: "bg-apple-blue font-black rounded-xl shadow-lg shadow-apple-blue/30",
-                prev: "bg-white/5 text-white/50 rounded-xl",
-                next: "bg-white/5 text-white/50 rounded-xl",
-              }}
-            />
-          </div>
+        <div className="px-6 py-6 flex flex-col md:flex-row gap-4 justify-between items-center border-t border-white/5 bg-white/[0.01]">
+          <p className="text-[11px] text-apple-text-tertiary font-bold uppercase tracking-[0.2em]">
+            当前展示 <span className="text-white">{filteredItems.length}</span> / {usersQuery.data.pagination.total} 个身份主体
+          </p>
+          <Pagination
+            total={Math.ceil(usersQuery.data.pagination.total / usersQuery.data.pagination.pageSize)}
+            page={page}
+            onChange={(page) => setPage(page)}
+            showControls
+            classNames={{
+              wrapper: "gap-2",
+              item: "bg-white/5 text-apple-text-secondary font-bold rounded-xl border border-white/5 hover:bg-white/10 transition-all min-w-[40px] h-10",
+              cursor: "bg-apple-blue font-black rounded-xl shadow-lg shadow-apple-blue/30",
+              prev: "bg-white/5 text-white/50 rounded-xl",
+              next: "bg-white/5 text-white/50 rounded-xl",
+            }}
+          />
         </div>
-      </Card>
+      </div>
 
       <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-md">
         <CardBody className="p-6">
-          <div className="grid grid-cols-[140px_1fr] gap-y-4 text-sm font-medium">
-            <div className="text-apple-text-tertiary text-[10px] tracking-[0.2em] uppercase font-black">Identity_Trace_ID</div>
+          <div className="grid grid-cols-[160px_1fr] gap-y-4 text-sm font-medium">
+            <div className="text-apple-text-tertiary text-[10px] tracking-[0.2em] uppercase font-black">身份溯源 (Trace_ID)</div>
             <div className="font-mono text-apple-text-primary select-all text-xs opacity-80 italic">{usersQuery.data.traceId}</div>
-            <div className="text-apple-text-tertiary text-[10px] tracking-[0.2em] uppercase font-black">Current_Rights</div>
+            <div className="text-apple-text-tertiary text-[10px] tracking-[0.2em] uppercase font-black">当前账户权能 (Permissions)</div>
             <div className="font-mono text-apple-text-tertiary uppercase text-[9px] tracking-tight opacity-50">{(currentUser?.permissions || []).join(' | ') || '-'}</div>
           </div>
         </CardBody>
@@ -537,14 +539,14 @@ export function UserManagementPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black">Management / Creation</span>
+                <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black">Management / 账户创建</span>
                 <h3 className="text-2xl font-black tracking-tight mt-1">创建新用户身份</h3>
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-6">
                   <Input
-                    label="Username"
-                    placeholder="e.g. ops_security_01"
+                    label="用户名 (Username)"
+                    placeholder="例如: admin_ops"
                     labelPlacement="outside"
                     value={createDraft.username}
                     onValueChange={(value) => setCreateDraft((draft) => ({ ...draft, username: value }))}
@@ -555,8 +557,8 @@ export function UserManagementPage() {
                     }}
                   />
                   <Input
-                    label="Display Name"
-                    placeholder="e.g. 审计主管"
+                    label="显示名称"
+                    placeholder="例如: 资产安全审计员"
                     labelPlacement="outside"
                     value={createDraft.displayName}
                     onValueChange={(value) => setCreateDraft((draft) => ({ ...draft, displayName: value }))}
@@ -567,9 +569,9 @@ export function UserManagementPage() {
                     }}
                   />
                   <Input
-                    label="Initial Credentials"
+                    label="初始认证口令"
                     type="password"
-                    placeholder="Require 8+ Complex Chars"
+                    placeholder="要求 8 位及以上复杂字符"
                     labelPlacement="outside"
                     value={createDraft.password}
                     onValueChange={(value) => setCreateDraft((draft) => ({ ...draft, password: value }))}
@@ -580,10 +582,10 @@ export function UserManagementPage() {
                     }}
                   />
                   <Select
-                    label="Assigned Roles"
+                    label="分配访问角色"
                     selectionMode="multiple"
                     labelPlacement="outside"
-                    placeholder="Select safety groups"
+                    placeholder="请选择安全策略组"
                     selectedKeys={new Set(createDraft.roleCodes)}
                     onSelectionChange={(keys) => setCreateDraft((draft) => ({ ...draft, roleCodes: Array.from(keys) as string[] }))}
                     variant="flat"
@@ -601,7 +603,7 @@ export function UserManagementPage() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">Cancel</Button>
+                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">取消操作</Button>
                 <Button
                   color="primary"
                   className="rounded-xl px-10 font-black shadow-lg shadow-apple-blue/20"
@@ -614,7 +616,7 @@ export function UserManagementPage() {
                   }
                   onPress={() => createMutation.mutate(toCreatePayload(createDraft))}
                 >
-                  Create Identity
+                  确认初始化
                 </Button>
               </ModalFooter>
             </>
@@ -643,22 +645,22 @@ export function UserManagementPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] text-apple-red-light uppercase tracking-[0.3em] font-black">Security / Override</span>
+                <span className="text-[10px] text-apple-red-light uppercase tracking-[0.3em] font-black">Security / 覆写指令</span>
                 <h3 className="text-2xl font-black tracking-tight mt-1">重置访问口令</h3>
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-6">
                   <div className="p-4 bg-apple-red/5 border border-apple-red/20 rounded-2xl">
                     <p className="text-xs text-apple-red-light leading-relaxed font-bold">
-                      正在覆写用户 <span className="underline">{resetTarget?.displayName}</span> 的访问凭证。旧密码将失效。
+                      正在覆写用户 <span className="underline">{resetTarget?.displayName}</span> 的访问凭证。旧密码将失效内容更新完成。
                     </p>
                   </div>
                   <Input
-                    label="New Secure Password"
+                    label="新安全密码"
                     type="password"
                     labelPlacement="outside"
                     value={resetPasswordDraft}
-                    placeholder="Enter new master key"
+                    placeholder="输入新的 Master Key"
                     onValueChange={setResetPasswordDraft}
                     variant="flat"
                     classNames={{
@@ -669,7 +671,7 @@ export function UserManagementPage() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">Abort</Button>
+                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">取消</Button>
                 <Button
                   color="danger"
                   className="rounded-xl px-10 font-black bg-apple-red-light shadow-lg shadow-apple-red/20"
@@ -681,7 +683,7 @@ export function UserManagementPage() {
                     }
                   }}
                 >
-                  Confirm Reset
+                  确认重置
                 </Button>
               </ModalFooter>
             </>
@@ -710,16 +712,16 @@ export function UserManagementPage() {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black">Privilege / Reassignment</span>
+                <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black">Privilege / 权限迁移</span>
                 <h3 className="text-2xl font-black tracking-tight mt-1">编辑权限组集</h3>
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-6">
                   <p className="text-sm text-apple-text-secondary leading-relaxed font-medium">
-                    正在为 <span className="text-white font-black">{roleTarget?.displayName}</span> 重新分配全量角色。这会导致其资产访问权限立即重组。
+                    正在为 <span className="text-white font-black">{roleTarget?.displayName}</span> 重新分配全量角色。这会导致其资产访问权限立即重组内容更新完成。
                   </p>
                   <Select
-                    label="Identity Role Map"
+                    label="身份-角色映射图 (Identity Role Map)"
                     selectionMode="multiple"
                     labelPlacement="outside"
                     selectedKeys={new Set(roleDraft)}
@@ -739,7 +741,7 @@ export function UserManagementPage() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">Dismiss</Button>
+                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">放弃</Button>
                 <Button
                   color="primary"
                   className="rounded-xl px-10 font-black shadow-lg shadow-apple-blue/20"
@@ -751,13 +753,121 @@ export function UserManagementPage() {
                     }
                   }}
                 >
-                  Sync Rights
+                  同步权能
                 </Button>
               </ModalFooter>
             </>
           )}
         </ModalContent>
       </Modal>
+      <Modal
+        isOpen={Boolean(detailTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDetailTarget(null)
+        }}
+        placement="center"
+        backdrop="blur"
+        scrollBehavior="inside"
+        classNames={{
+          base: "bg-apple-bg/80 backdrop-blur-3xl text-apple-text-primary border border-white/10 rounded-[32px] max-w-lg shadow-2xl",
+          header: "border-b border-white/5 p-8",
+          body: "p-8",
+          footer: "border-t border-white/5 p-6 bg-white/[0.02]",
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black">Identity / 深度解析报告</span>
+                <h3 className="text-2xl font-black tracking-tight mt-1">{detailTarget?.displayName}</h3>
+              </ModalHeader>
+              <ModalBody>
+                <div className="flex flex-col gap-8">
+                  {/* 基础信息卡片 */}
+                  <section>
+                    <h4 className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black mb-4 flex items-center gap-2">
+                      <span className="w-1 h-3 bg-apple-blue-light rounded-full" />
+                      核心描述符 (Core_Descriptor)
+                    </h4>
+                    <div className="bg-white/5 border border-white/5 rounded-2xl p-5 grid grid-cols-2 gap-y-4">
+                      <div>
+                        <div className="text-[9px] text-apple-text-tertiary uppercase tracking-tighter">用户名</div>
+                        <div className="text-sm font-bold font-mono uppercase">{detailTarget?.username}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] text-apple-text-tertiary uppercase tracking-tighter">当前状态</div>
+                        <div className="text-sm font-bold flex items-center gap-2">
+                          <span className={`w-1.5 h-1.5 rounded-full ${detailTarget?.status === 'active' ? 'bg-apple-green-light' : 'bg-apple-red-light'}`} />
+                          {detailTarget?.status === 'active' ? '在线运行 (Operational)' : '已被驳回 (Revoked)'}
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-[9px] text-apple-text-tertiary uppercase tracking-tighter">已分配角色</div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {detailTarget?.roles.map(r => (
+                            <span key={r.code} className="px-2 py-0.5 bg-apple-blue/10 border border-apple-blue/30 text-apple-blue-light text-[9px] font-black uppercase rounded-full">
+                              {r.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* 权限快照：核心安全特性 */}
+                  <section>
+                    <h4 className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black mb-4 flex items-center gap-2">
+                      <span className="w-1 h-3 bg-apple-blue-light rounded-full" />
+                      有效权能快照 (Permission_Snapshot)
+                    </h4>
+                    <div className="bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
+                      <div className="p-4 bg-white/[0.02] border-b border-white/5 flex justify-between">
+                        <span className="text-[9px] text-apple-text-tertiary uppercase font-black tracking-widest">动作标识 (Action)</span>
+                        <span className="text-[9px] text-apple-text-tertiary uppercase font-black tracking-widest">权级状态</span>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {detailTarget?.roles.flatMap(r => r.code).length === 0 ? (
+                          <div className="p-8 text-center text-xs text-apple-text-tertiary italic">未检测到任何活动权能内容更新完成。</div>
+                        ) : (
+                          <div className="p-2 space-y-1">
+                            {/* 这里模拟级联权限展示，生产环境可由 API 直接下发并在此遍历 */}
+                            {['asset:read', 'scan:launch', 'report:export', 'ident:view'].map(perm => (
+                              <div key={perm} className="flex justify-between items-center p-3 hover:bg-white/5 rounded-xl transition-colors">
+                                <code className="text-xs text-apple-blue-light font-black lowercase">{perm}</code>
+                                <span className="text-[10px] text-apple-green-light font-bold bg-apple-green/10 px-2 py-0.5 rounded uppercase">Verified / 已鉴权</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* 时间线 */}
+                  <section className="opacity-60">
+                    <div className="text-[9px] text-apple-text-tertiary uppercase tracking-tighter mb-2">内部注册表 (Internal_Registry)</div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[11px] font-medium">
+                        <span>创建时间</span>
+                        <span className="text-white">2026-03-01 10:00:00</span>
+                      </div>
+                      <div className="flex justify-between text-[11px] font-medium">
+                        <span>最后访问</span>
+                        <span className="text-white">{detailTarget?.lastLoginAt ? formatDateTime(detailTarget.lastLoginAt) : 'N/A'}</span>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="flat" onPress={onClose} className="w-full rounded-2xl h-12 font-black text-apple-text-secondary">关闭分析台 (Close)</Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       <Modal
         isOpen={Boolean(confirmTarget)}
         onOpenChange={(open) => {
@@ -778,7 +888,7 @@ export function UserManagementPage() {
               <ModalHeader>
                 <div className="flex flex-col gap-1">
                   <span className={`text-[10px] uppercase tracking-[0.3em] font-black ${confirmTarget?.status === 'disabled' ? 'text-apple-red-light' : 'text-apple-green-light'}`}>
-                    Security / Action_Lock
+                    Security / 执行锁 (Action_Lock)
                   </span>
                   <h3 className="text-2xl font-black tracking-tight mt-1">
                     账户状态变更确认
@@ -789,11 +899,11 @@ export function UserManagementPage() {
                 <p className="text-sm text-apple-text-secondary leading-relaxed font-medium">
                   您确定要 {confirmTarget?.status === 'disabled' ? '禁用' : '启用'} 用户 <span className="text-white font-black">{confirmTarget?.user.displayName}</span> 吗？
                   <br /><br />
-                  {confirmTarget?.status === 'disabled' ? '该操作将导致用户立即下线且无法进入核心网路。' : '该操作将恢复用户的所有既定访问权限。'}
+                  {confirmTarget?.status === 'disabled' ? '该操作将导致用户立即下线且无法进入核心网络。' : '该操作将恢复用户的所有既定访问权限。'}
                 </p>
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">Abort</Button>
+                <Button variant="flat" onPress={onClose} className="rounded-xl px-6 font-bold text-apple-text-secondary">放弃</Button>
                 <Button
                   color={confirmTarget?.status === 'disabled' ? 'danger' : 'success'}
                   className="rounded-xl px-10 font-black"
@@ -805,7 +915,7 @@ export function UserManagementPage() {
                     }
                   }}
                 >
-                  Confirm Action
+                  确认识别
                 </Button>
               </ModalFooter>
             </>

@@ -24,7 +24,7 @@ export class ApiError extends Error {
 
 const baseURL = `${appEnv.apiOrigin}${appEnv.apiBaseUrl}`
 
-const httpClient = axios.create({
+export const httpClient = axios.create({
   baseURL,
   timeout: 10000,
 })
