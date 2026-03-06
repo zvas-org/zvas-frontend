@@ -53,29 +53,50 @@ export function LoginPage() {
     <main className="login-shell">
       <section className="login-grid">
         <Card className="login-hero">
-          <Space direction="vertical" size={18} style={{ width: '100%' }}>
+          <Space direction="vertical" size={22} style={{ width: '100%' }}>
+            <div className="login-brand-badge" aria-hidden>
+              <span className="console-brand-cell console-brand-cell-primary" />
+              <span className="console-brand-cell console-brand-cell-secondary" />
+              <span className="console-brand-cell console-brand-cell-secondary" />
+              <span className="console-brand-cell console-brand-cell-primary" />
+            </div>
             <Tag color="arcoblue" bordered>
-              ZVAS / Console
+              ZVAS / Private Console
             </Tag>
-            <Title heading={1} className="login-title">
-              使用真实账号登录控制台
-            </Title>
+            <div>
+              <Text className="section-label">Identity Access</Text>
+              <Title heading={1} className="login-title">
+                登录控制台，先确认身份，再进入资产和扫描工作面板
+              </Title>
+            </div>
             <Paragraph className="login-copy">
-              当前版本已经接入真实 `/api/v1/auth/login`，前端不再手填 Bearer Token，后续所有页面直接复用统一 JWT 登录态。
+              这套界面不走展示型产品页路线，而是按运维控制台收紧信息密度。当前已接真实 `/api/v1/auth/login`、RBAC 和审计日志链路。
             </Paragraph>
-            <Space wrap size={10}>
-              <Button type="primary" onClick={submit} loading={submitting}>
-                登录并进入控制台
-              </Button>
-              <Button onClick={() => navigate('/system/version')}>查看系统版本</Button>
-            </Space>
+            <div className="login-bullet-list">
+              <div className="login-bullet-item">
+                <Text className="login-bullet-label">Runtime</Text>
+                <Text className="login-bullet-value">PostgreSQL / NATS 已接入</Text>
+              </div>
+              <div className="login-bullet-item">
+                <Text className="login-bullet-label">IAM</Text>
+                <Text className="login-bullet-value">用户、角色、审计已启用</Text>
+              </div>
+              <div className="login-bullet-item">
+                <Text className="login-bullet-label">Mode</Text>
+                <Text className="login-bullet-value">Center Console / Local Dev</Text>
+              </div>
+            </div>
+            <Button onClick={() => navigate('/system/version')}>查看版本元数据</Button>
           </Space>
         </Card>
         <Card className="login-panel">
           <Space direction="vertical" size={18} style={{ width: '100%' }}>
             <div>
               <Text className="section-label">账号密码登录</Text>
-              <Title heading={4}>使用系统管理员或已创建用户登录</Title>
+              <Title heading={4} className="login-panel-title">使用有效账号进入控制台</Title>
+              <Paragraph className="login-copy">
+                默认管理员仅用于本地初始化联调，后续应通过用户管理页创建并分配角色。
+              </Paragraph>
             </div>
             <Form<LoginFormValues>
               layout="vertical"
@@ -97,10 +118,11 @@ export function LoginPage() {
                 </Col>
               </Row>
             </Form>
-            <Card className="token-card" hoverable>
-              <Space direction="vertical" size={10} style={{ width: '100%' }}>
+            <Card className="token-card" hoverable={false}>
+              <Space direction="vertical" size={8} style={{ width: '100%' }}>
                 <Text bold>默认管理员</Text>
-                <Paragraph className="token-copy">用户名：`admin`，密码：`Admin@123456`。首次启动可直接用于本地联调。</Paragraph>
+                <Text className="token-copy">用户名：admin</Text>
+                <Text className="token-copy">密码：Admin@123456</Text>
               </Space>
             </Card>
           </Space>
