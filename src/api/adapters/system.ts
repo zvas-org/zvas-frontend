@@ -4,7 +4,6 @@ import type {
   InternalHandlerSystemVersionResponse,
 } from '@/api/generated/model'
 import { useGetSystemHealth, useGetSystemSettings, useGetSystemVersion } from '@/api/generated/sdk'
-import { ApiError } from '@/api/client'
 
 /**
  * SystemHealthView 定义系统健康页的视图模型。
@@ -42,12 +41,6 @@ export interface SystemSettingsView {
   }
 }
 
-/**
- * isApiError 判断错误是否来自统一请求层。
- */
-export function isApiError(error: unknown): error is ApiError {
-  return error instanceof ApiError
-}
 
 /**
  * useSystemHealthView 将生成代码结果转换为页面更稳定的视图结构。

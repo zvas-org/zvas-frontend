@@ -1,5 +1,14 @@
 import { Avatar, Button, Layout, Menu, Space, Tag, Typography } from '@arco-design/web-react'
-import { IconApps, IconCode, IconDashboard, IconPoweroff, IconSettings, IconUser } from '@arco-design/web-react/icon'
+import {
+  IconApps,
+  IconCode,
+  IconDashboard,
+  IconHistory,
+  IconPoweroff,
+  IconSettings,
+  IconUser,
+  IconUserGroup,
+} from '@arco-design/web-react/icon'
 import { useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -19,7 +28,24 @@ export function ConsoleLayout() {
   const clearSession = useAuthStore((state) => state.clearSession)
   const [logoutPending, setLogoutPending] = useState(false)
 
+  const menuItems = useMemo(() => {
+    const permissions = currentUser?.permissions || []
+    return [
+      { key: 'system-health', path: '/system/health', label: '系统健康', icon: <IconDashboard /> },
+      { key: 'system-version', path: '/system/version', label: '系统版本', icon: <IconCode /> },
+      { key: 'system-settings', path: '/system/settings', label: '系统设置', icon: <IconSettings />, permission: 'settings:manage' },
+      { key: 'iam-users', path: '/iam/users', label: '用户管理', icon: <IconUserGroup />, permission: 'user:read' },
+      { key: 'iam-audits', path: '/iam/audits', label: '审计日志', icon: <IconHistory />, permission: 'audit:read' },
+    ].filter((item) => !item.permission || permissions.includes(item.permission))
+  }, [currentUser?.permissions])
+
   const selectedKeys = useMemo(() => {
+    if (location.pathname.includes('/iam/users')) {
+      return ['iam-users']
+    }
+    if (location.pathname.includes('/iam/audits')) {
+      return ['iam-audits']
+    }
     if (location.pathname.includes('/system/version')) {
       return ['system-version']
     }
@@ -58,26 +84,18 @@ export function ConsoleLayout() {
           selectedKeys={selectedKeys}
           className="console-menu"
           onClickMenuItem={(key) => {
-            const routes: Record<string, string> = {
-              'system-health': '/system/health',
-              'system-version': '/system/version',
-              'system-settings': '/system/settings',
+            const target = menuItems.find((item) => item.key === key)
+            if (target) {
+              navigate(target.path)
             }
-            navigate(routes[key])
           }}
         >
-          <Menu.Item key="system-health">
-            <IconDashboard />
-            系统健康
-          </Menu.Item>
-          <Menu.Item key="system-version">
-            <IconCode />
-            系统版本
-          </Menu.Item>
-          <Menu.Item key="system-settings">
-            <IconSettings />
-            系统设置
-          </Menu.Item>
+          {menuItems.map((item) => (
+            <Menu.Item key={item.key}>
+              {item.icon}
+              {item.label}
+            </Menu.Item>
+          ))}
         </Menu>
       </Sider>
       <Layout>

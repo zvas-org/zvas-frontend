@@ -2,7 +2,8 @@ import { Button, Card, Descriptions, Result, Skeleton, Space, Tag, Typography } 
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { isApiError, useSystemSettingsView } from '@/api/adapters/system'
+import { useSystemSettingsView } from '@/api/adapters/system'
+import { isApiError } from '@/api/client'
 
 const { Paragraph, Title } = Typography
 

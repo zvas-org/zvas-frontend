@@ -6,9 +6,11 @@ import { ErrorPage } from '@/pages/ErrorPage'
 import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { AuditLogPage } from '@/pages/AuditLogPage'
 import { SystemHealthPage } from '@/pages/SystemHealthPage'
 import { SystemSettingsPage } from '@/pages/SystemSettingsPage'
 import { SystemVersionPage } from '@/pages/SystemVersionPage'
+import { UserManagementPage } from '@/pages/UserManagementPage'
 import { RequireAuth, RouterErrorFallback } from '@/router/guards'
 
 /**
@@ -44,6 +46,14 @@ export const router = createBrowserRouter(
             {
               path: 'system/settings',
               element: <SystemSettingsPage />,
+            },
+            {
+              path: 'iam/users',
+              element: <UserManagementPage />,
+            },
+            {
+              path: 'iam/audits',
+              element: <AuditLogPage />,
             },
           ],
         },

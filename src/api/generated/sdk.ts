@@ -25,24 +25,160 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GetAuditsParams,
   GetUsersParams,
+  InternalHandlerAuditListResponse,
   InternalHandlerChangePasswordRequest,
+  InternalHandlerCommonActionResponse,
   InternalHandlerCreateUserRequest,
   InternalHandlerCurrentUserResponse,
   InternalHandlerErrorResponse,
   InternalHandlerLoginRequest,
   InternalHandlerLoginResponse,
   InternalHandlerLogoutResponse,
+  InternalHandlerResetUserPasswordRequest,
   InternalHandlerRoleListResponse,
   InternalHandlerSystemHealthResponse,
   InternalHandlerSystemSettingsResponse,
   InternalHandlerSystemVersionResponse,
+  InternalHandlerUpdateUserRolesRequest,
+  InternalHandlerUpdateUserStatusRequest,
   InternalHandlerUserCreateResponse,
   InternalHandlerUserListResponse
 } from './model';
 
 import { apiClient } from '../client';
 import type { ErrorType } from '../client';
+/**
+ * @summary 查询审计日志
+ */
+export type getAuditsResponse200 = {
+  data: InternalHandlerAuditListResponse
+  status: 200
+}
+
+export type getAuditsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAuditsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAuditsResponseSuccess = (getAuditsResponse200) & {
+  headers: Headers;
+};
+export type getAuditsResponseError = (getAuditsResponse401 | getAuditsResponse403) & {
+  headers: Headers;
+};
+
+export type getAuditsResponse = (getAuditsResponseSuccess | getAuditsResponseError)
+
+export const getGetAuditsUrl = (params?: GetAuditsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/audits?${stringifiedParams}` : `/audits`
+}
+
+export const getAudits = async (params?: GetAuditsParams, options?: RequestInit): Promise<getAuditsResponse> => {
+  
+  return apiClient<getAuditsResponse>(getGetAuditsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAuditsQueryKey = (params?: GetAuditsParams,) => {
+    return [
+    `/audits`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAuditsQueryOptions = <TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalHandlerErrorResponse>>(params?: GetAuditsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuditsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAudits>>> = ({ signal }) => getAudits(params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAuditsQueryResult = NonNullable<Awaited<ReturnType<typeof getAudits>>>
+export type GetAuditsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAudits<TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params: undefined |  GetAuditsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAudits>>,
+          TError,
+          Awaited<ReturnType<typeof getAudits>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAudits<TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetAuditsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAudits>>,
+          TError,
+          Awaited<ReturnType<typeof getAudits>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAudits<TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetAuditsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询审计日志
+ */
+
+export function useGetAudits<TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetAuditsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAuditsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
 /**
  * @summary 修改当前用户密码
  */
@@ -1136,4 +1272,307 @@ export const usePostUsers = <TError = ErrorType<InternalHandlerErrorResponse>,
         TContext
       > => {
       return useMutation(getPostUsersMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 管理员重置用户密码
+ */
+export type postUsersIdResetPasswordResponse200 = {
+  data: InternalHandlerCommonActionResponse
+  status: 200
+}
+
+export type postUsersIdResetPasswordResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type postUsersIdResetPasswordResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type postUsersIdResetPasswordResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type postUsersIdResetPasswordResponseSuccess = (postUsersIdResetPasswordResponse200) & {
+  headers: Headers;
+};
+export type postUsersIdResetPasswordResponseError = (postUsersIdResetPasswordResponse400 | postUsersIdResetPasswordResponse401 | postUsersIdResetPasswordResponse403) & {
+  headers: Headers;
+};
+
+export type postUsersIdResetPasswordResponse = (postUsersIdResetPasswordResponseSuccess | postUsersIdResetPasswordResponseError)
+
+export const getPostUsersIdResetPasswordUrl = (id: string,) => {
+
+
+  
+
+  return `/users/${id}/reset-password`
+}
+
+export const postUsersIdResetPassword = async (id: string,
+    internalHandlerResetUserPasswordRequest: InternalHandlerResetUserPasswordRequest, options?: RequestInit): Promise<postUsersIdResetPasswordResponse> => {
+  
+  return apiClient<postUsersIdResetPasswordResponse>(getPostUsersIdResetPasswordUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerResetUserPasswordRequest,)
+  }
+);}
+  
+
+
+
+export const getPostUsersIdResetPasswordMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersIdResetPassword>>, TError,{id: string;data: InternalHandlerResetUserPasswordRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postUsersIdResetPassword>>, TError,{id: string;data: InternalHandlerResetUserPasswordRequest}, TContext> => {
+
+const mutationKey = ['postUsersIdResetPassword'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsersIdResetPassword>>, {id: string;data: InternalHandlerResetUserPasswordRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postUsersIdResetPassword(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostUsersIdResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof postUsersIdResetPassword>>>
+    export type PostUsersIdResetPasswordMutationBody = InternalHandlerResetUserPasswordRequest
+    export type PostUsersIdResetPasswordMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 管理员重置用户密码
+ */
+export const usePostUsersIdResetPassword = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUsersIdResetPassword>>, TError,{id: string;data: InternalHandlerResetUserPasswordRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postUsersIdResetPassword>>,
+        TError,
+        {id: string;data: InternalHandlerResetUserPasswordRequest},
+        TContext
+      > => {
+      return useMutation(getPostUsersIdResetPasswordMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 替换用户角色集合
+ */
+export type putUsersIdRolesResponse200 = {
+  data: InternalHandlerUserCreateResponse
+  status: 200
+}
+
+export type putUsersIdRolesResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type putUsersIdRolesResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type putUsersIdRolesResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type putUsersIdRolesResponseSuccess = (putUsersIdRolesResponse200) & {
+  headers: Headers;
+};
+export type putUsersIdRolesResponseError = (putUsersIdRolesResponse400 | putUsersIdRolesResponse401 | putUsersIdRolesResponse403) & {
+  headers: Headers;
+};
+
+export type putUsersIdRolesResponse = (putUsersIdRolesResponseSuccess | putUsersIdRolesResponseError)
+
+export const getPutUsersIdRolesUrl = (id: string,) => {
+
+
+  
+
+  return `/users/${id}/roles`
+}
+
+export const putUsersIdRoles = async (id: string,
+    internalHandlerUpdateUserRolesRequest: InternalHandlerUpdateUserRolesRequest, options?: RequestInit): Promise<putUsersIdRolesResponse> => {
+  
+  return apiClient<putUsersIdRolesResponse>(getPutUsersIdRolesUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerUpdateUserRolesRequest,)
+  }
+);}
+  
+
+
+
+export const getPutUsersIdRolesMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUsersIdRoles>>, TError,{id: string;data: InternalHandlerUpdateUserRolesRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putUsersIdRoles>>, TError,{id: string;data: InternalHandlerUpdateUserRolesRequest}, TContext> => {
+
+const mutationKey = ['putUsersIdRoles'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUsersIdRoles>>, {id: string;data: InternalHandlerUpdateUserRolesRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putUsersIdRoles(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutUsersIdRolesMutationResult = NonNullable<Awaited<ReturnType<typeof putUsersIdRoles>>>
+    export type PutUsersIdRolesMutationBody = InternalHandlerUpdateUserRolesRequest
+    export type PutUsersIdRolesMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 替换用户角色集合
+ */
+export const usePutUsersIdRoles = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUsersIdRoles>>, TError,{id: string;data: InternalHandlerUpdateUserRolesRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putUsersIdRoles>>,
+        TError,
+        {id: string;data: InternalHandlerUpdateUserRolesRequest},
+        TContext
+      > => {
+      return useMutation(getPutUsersIdRolesMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 更新用户状态
+ */
+export type patchUsersIdStatusResponse200 = {
+  data: InternalHandlerUserCreateResponse
+  status: 200
+}
+
+export type patchUsersIdStatusResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type patchUsersIdStatusResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type patchUsersIdStatusResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type patchUsersIdStatusResponseSuccess = (patchUsersIdStatusResponse200) & {
+  headers: Headers;
+};
+export type patchUsersIdStatusResponseError = (patchUsersIdStatusResponse400 | patchUsersIdStatusResponse401 | patchUsersIdStatusResponse403) & {
+  headers: Headers;
+};
+
+export type patchUsersIdStatusResponse = (patchUsersIdStatusResponseSuccess | patchUsersIdStatusResponseError)
+
+export const getPatchUsersIdStatusUrl = (id: string,) => {
+
+
+  
+
+  return `/users/${id}/status`
+}
+
+export const patchUsersIdStatus = async (id: string,
+    internalHandlerUpdateUserStatusRequest: InternalHandlerUpdateUserStatusRequest, options?: RequestInit): Promise<patchUsersIdStatusResponse> => {
+  
+  return apiClient<patchUsersIdStatusResponse>(getPatchUsersIdStatusUrl(id),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerUpdateUserStatusRequest,)
+  }
+);}
+  
+
+
+
+export const getPatchUsersIdStatusMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchUsersIdStatus>>, TError,{id: string;data: InternalHandlerUpdateUserStatusRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof patchUsersIdStatus>>, TError,{id: string;data: InternalHandlerUpdateUserStatusRequest}, TContext> => {
+
+const mutationKey = ['patchUsersIdStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchUsersIdStatus>>, {id: string;data: InternalHandlerUpdateUserStatusRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchUsersIdStatus(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchUsersIdStatusMutationResult = NonNullable<Awaited<ReturnType<typeof patchUsersIdStatus>>>
+    export type PatchUsersIdStatusMutationBody = InternalHandlerUpdateUserStatusRequest
+    export type PatchUsersIdStatusMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 更新用户状态
+ */
+export const usePatchUsersIdStatus = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchUsersIdStatus>>, TError,{id: string;data: InternalHandlerUpdateUserStatusRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchUsersIdStatus>>,
+        TError,
+        {id: string;data: InternalHandlerUpdateUserStatusRequest},
+        TContext
+      > => {
+      return useMutation(getPatchUsersIdStatusMutationOptions(options), queryClient);
     }

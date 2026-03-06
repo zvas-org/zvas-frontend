@@ -61,6 +61,13 @@ httpClient.interceptors.response.use(
 export type ErrorType<T> = ApiError & { details?: T }
 
 /**
+ * isApiError 判断错误是否来自统一请求层。
+ */
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError
+}
+
+/**
  * apiClient 为 Orval 生成代码提供统一请求函数。
  */
 export async function apiClient<T>(url: string, options: RequestInit = {}): Promise<T> {
