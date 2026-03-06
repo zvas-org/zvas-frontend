@@ -2,7 +2,6 @@ import { Button, Card, Grid, Input, Message, Space, Tag, Typography } from '@arc
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { appEnv } from '@/app/env'
 import { useAuthStore } from '@/store/auth'
 import { demoTokenPresets } from '@/utils/token'
 
@@ -21,7 +20,7 @@ export function LoginPage() {
 
   const redirectPath = useMemo(() => {
     const search = new URLSearchParams(location.search)
-    return search.get('redirect') || `${appEnv.basePath}/system/health`
+    return search.get('redirect') || '/system/health'
   }, [location.search])
 
   const submit = () => {
@@ -52,7 +51,7 @@ export function LoginPage() {
               <Button type="primary" onClick={submit}>
                 进入控制台
               </Button>
-              <Button onClick={() => navigate(`${appEnv.basePath}/system/health`)}>查看默认路由</Button>
+              <Button onClick={() => navigate('/system/health')}>查看默认路由</Button>
             </Space>
           </Space>
         </Card>

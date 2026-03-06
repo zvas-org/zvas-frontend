@@ -1,8 +1,6 @@
 import { Button, Result } from '@arco-design/web-react'
 import { useNavigate } from 'react-router-dom'
 
-import { appEnv } from '@/app/env'
-
 /**
  * NotFoundPage 展示 404 页面。
  */
@@ -14,10 +12,10 @@ export function NotFoundPage() {
       <Result
         status="404"
         title="页面不存在"
-        subTitle="当前地址不在 ZVAS 控制台路由表内。"
+        subTitle="当前地址未匹配到控制台页面，请检查链接或返回首页。"
         extra={
-          <Button type="primary" onClick={() => navigate(`${appEnv.basePath}/system/health`)}>
-            返回控制台
+          <Button type="primary" onClick={() => navigate('/system/health')}>
+            返回首页
           </Button>
         }
       />

@@ -3,7 +3,6 @@ import { IconApps, IconCode, IconDashboard, IconPoweroff, IconSettings } from '@
 import { useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { appEnv } from '@/app/env'
 import { useAuthStore } from '@/store/auth'
 
 const { Header, Sider, Content } = Layout
@@ -45,9 +44,9 @@ export function ConsoleLayout() {
           className="console-menu"
           onClickMenuItem={(key) => {
             const routes: Record<string, string> = {
-              'system-health': `${appEnv.basePath}/system/health`,
-              'system-version': `${appEnv.basePath}/system/version`,
-              'system-settings': `${appEnv.basePath}/system/settings`,
+              'system-health': '/system/health',
+              'system-version': '/system/version',
+              'system-settings': '/system/settings',
             }
             navigate(routes[key])
           }}
@@ -81,7 +80,7 @@ export function ConsoleLayout() {
               icon={<IconPoweroff />}
               onClick={() => {
                 clearToken()
-                navigate(`${appEnv.basePath}/login`, { replace: true })
+                navigate('/login', { replace: true })
               }}
             >
               清除令牌

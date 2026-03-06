@@ -1,7 +1,6 @@
 import { Result } from '@arco-design/web-react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
-import { appEnv } from '@/app/env'
 import { useAuthStore } from '@/store/auth'
 
 /**
@@ -12,7 +11,7 @@ export function RequireAuth() {
   const location = useLocation()
 
   if (!token) {
-    const redirect = `${appEnv.basePath}/login?redirect=${encodeURIComponent(location.pathname)}`
+    const redirect = `/login?redirect=${encodeURIComponent(location.pathname)}`
     return <Navigate replace to={redirect} />
   }
 

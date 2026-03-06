@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { isApiError, useSystemSettingsView } from '@/api/adapters/system'
-import { appEnv } from '@/app/env'
 
 const { Paragraph, Title } = Typography
 
@@ -21,12 +20,12 @@ export function SystemSettingsPage() {
     }
 
     if (settingsQuery.error.status === 401) {
-      navigate(`${appEnv.basePath}/login?redirect=${encodeURIComponent(location.pathname)}`, { replace: true })
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`, { replace: true })
       return
     }
 
     if (settingsQuery.error.status === 403) {
-      navigate(`${appEnv.basePath}/403`, { replace: true })
+      navigate('/403', { replace: true })
     }
   }, [location.pathname, navigate, settingsQuery.error])
 
