@@ -1,5 +1,9 @@
-import type { InternalHandlerSystemHealthResponse, InternalHandlerSystemSettingsResponse } from '@/api/generated/model'
-import { useGetSystemHealth, useGetSystemSettings } from '@/api/generated/sdk'
+import type {
+  InternalHandlerSystemHealthResponse,
+  InternalHandlerSystemSettingsResponse,
+  InternalHandlerSystemVersionResponse,
+} from '@/api/generated/model'
+import { useGetSystemHealth, useGetSystemSettings, useGetSystemVersion } from '@/api/generated/sdk'
 import { ApiError } from '@/api/client'
 
 /**
@@ -8,6 +12,18 @@ import { ApiError } from '@/api/client'
 export interface SystemHealthView {
   service: string
   status: string
+  traceId: string
+  httpStatus: number
+}
+
+/**
+ * SystemVersionView 定义系统版本页的视图模型。
+ */
+export interface SystemVersionView {
+  service: string
+  version: string
+  commit: string
+  buildTime: string
   traceId: string
   httpStatus: number
 }
@@ -44,6 +60,27 @@ export function useSystemHealthView() {
         return {
           service: payload.data?.service || 'unknown',
           status: payload.data?.status || 'unknown',
+          traceId: payload.trace_id || 'n/a',
+          httpStatus: response.status,
+        }
+      },
+    },
+  })
+}
+
+/**
+ * useSystemVersionView 将系统版本接口响应转换为页面视图结构。
+ */
+export function useSystemVersionView() {
+  return useGetSystemVersion({
+    query: {
+      select: (response): SystemVersionView => {
+        const payload = response.data as InternalHandlerSystemVersionResponse
+        return {
+          service: payload.data?.service || 'unknown',
+          version: payload.data?.version || 'unknown',
+          commit: payload.data?.commit || 'unknown',
+          buildTime: payload.data?.build_time || 'unknown',
           traceId: payload.trace_id || 'n/a',
           httpStatus: response.status,
         }

@@ -11,4 +11,6 @@ export * from './internalHandlerSystemHealthData';
 export * from './internalHandlerSystemHealthResponse';
 export * from './internalHandlerSystemSettingsData';
 export * from './internalHandlerSystemSettingsResponse';
+export * from './internalHandlerSystemVersionData';
+export * from './internalHandlerSystemVersionResponse';
 export * from './zvasPkgAuthAuthUser';

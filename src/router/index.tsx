@@ -8,6 +8,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { SystemHealthPage } from '@/pages/SystemHealthPage'
 import { SystemSettingsPage } from '@/pages/SystemSettingsPage'
+import { SystemVersionPage } from '@/pages/SystemVersionPage'
 import { RequireAuth, RouterErrorFallback } from '@/router/guards'
 
 /**
@@ -35,6 +36,10 @@ export const router = createBrowserRouter(
             {
               path: 'system/health',
               element: <SystemHealthPage />,
+            },
+            {
+              path: 'system/version',
+              element: <SystemVersionPage />,
             },
             {
               path: 'system/settings',

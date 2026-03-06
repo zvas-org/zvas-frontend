@@ -23,7 +23,8 @@ import type {
 import type {
   InternalHandlerErrorResponse,
   InternalHandlerSystemHealthResponse,
-  InternalHandlerSystemSettingsResponse
+  InternalHandlerSystemSettingsResponse,
+  InternalHandlerSystemVersionResponse
 } from './model';
 
 import { apiClient } from '../client';
@@ -252,6 +253,117 @@ export function useGetSystemSettings<TData = Awaited<ReturnType<typeof getSystem
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetSystemSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 获取系统版本信息
+ */
+export type getSystemVersionResponse200 = {
+  data: InternalHandlerSystemVersionResponse
+  status: 200
+}
+
+export type getSystemVersionResponseSuccess = (getSystemVersionResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getSystemVersionResponse = (getSystemVersionResponseSuccess)
+
+export const getGetSystemVersionUrl = () => {
+
+
+  
+
+  return `/system/version`
+}
+
+export const getSystemVersion = async ( options?: RequestInit): Promise<getSystemVersionResponse> => {
+  
+  return apiClient<getSystemVersionResponse>(getGetSystemVersionUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetSystemVersionQueryKey = () => {
+    return [
+    `/system/version`
+    ] as const;
+    }
+
+    
+export const getGetSystemVersionQueryOptions = <TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSystemVersionQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemVersion>>> = ({ signal }) => getSystemVersion({ signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSystemVersionQueryResult = NonNullable<Awaited<ReturnType<typeof getSystemVersion>>>
+export type GetSystemVersionQueryError = ErrorType<unknown>
+
+
+export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemVersion>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemVersion>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 获取系统版本信息
+ */
+
+export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSystemVersionQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

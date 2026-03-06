@@ -1,5 +1,5 @@
 import { Button, Layout, Menu, Space, Tag, Typography } from '@arco-design/web-react'
-import { IconApps, IconDashboard, IconPoweroff, IconSettings } from '@arco-design/web-react/icon'
+import { IconApps, IconCode, IconDashboard, IconPoweroff, IconSettings } from '@arco-design/web-react/icon'
 import { useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -19,6 +19,9 @@ export function ConsoleLayout() {
   const clearToken = useAuthStore((state) => state.clearToken)
 
   const selectedKeys = useMemo(() => {
+    if (location.pathname.includes('/system/version')) {
+      return ['system-version']
+    }
     if (location.pathname.includes('/system/settings')) {
       return ['system-settings']
     }
@@ -43,6 +46,7 @@ export function ConsoleLayout() {
           onClickMenuItem={(key) => {
             const routes: Record<string, string> = {
               'system-health': `${appEnv.basePath}/system/health`,
+              'system-version': `${appEnv.basePath}/system/version`,
               'system-settings': `${appEnv.basePath}/system/settings`,
             }
             navigate(routes[key])
@@ -51,6 +55,10 @@ export function ConsoleLayout() {
           <Menu.Item key="system-health">
             <IconDashboard />
             系统健康
+          </Menu.Item>
+          <Menu.Item key="system-version">
+            <IconCode />
+            系统版本
           </Menu.Item>
           <Menu.Item key="system-settings">
             <IconSettings />
