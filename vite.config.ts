@@ -1,5 +1,6 @@
 import path from 'node:path'
 
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
@@ -11,7 +12,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: env.VITE_BASE_PATH || '/ui/',
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
@@ -19,28 +20,28 @@ export default defineConfig(({ mode }) => {
     },
     server: useLocalProxy
       ? {
-          proxy: {
-            '/api': {
-              target: devProxyTarget,
-              changeOrigin: true,
-            },
-            '/healthz': {
-              target: devProxyTarget,
-              changeOrigin: true,
-            },
-            '/swagger': {
-              target: devProxyTarget,
-              changeOrigin: true,
-            },
+        proxy: {
+          '/api': {
+            target: devProxyTarget,
+            changeOrigin: true,
           },
-        }
+          '/healthz': {
+            target: devProxyTarget,
+            changeOrigin: true,
+          },
+          '/swagger': {
+            target: devProxyTarget,
+            changeOrigin: true,
+          },
+        },
+      }
       : undefined,
     build: {
       rollupOptions: {
         output: {
           manualChunks: {
             react: ['react', 'react-dom', 'react-router-dom'],
-            arco: ['@arco-design/web-react', '@arco-design/web-react/icon'],
+            heroui: ['@heroui/react', 'framer-motion'],
             query: ['@tanstack/react-query'],
           },
         },

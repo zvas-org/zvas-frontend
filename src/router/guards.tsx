@@ -1,4 +1,3 @@
-import { Result } from '@arco-design/web-react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import { useAuthStore } from '@/store/auth'
@@ -23,12 +22,9 @@ export function RequireAuth() {
  */
 export function RouterErrorFallback() {
   return (
-    <div className="status-page-shell">
-      <Result
-        status="error"
-        title="页面渲染失败"
-        subTitle="前端路由在渲染当前页面时发生未处理异常。"
-      />
+    <div className="flex flex-col items-center justify-center p-12 text-[#f5f5f7]">
+      <h1 className="text-2xl font-bold mb-4">页面渲染失败</h1>
+      <p className="text-gray-400">前端路由在渲染当前页面时发生未处理异常。</p>
     </div>
   )
 }

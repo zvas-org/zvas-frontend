@@ -1,10 +1,10 @@
-import { ConfigProvider } from '@arco-design/web-react'
+import { HeroUIProvider } from '@heroui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
 
 /**
- * AppProviders 统一挂载 Arco 与 React Query Provider。
+ * AppProviders 统一挂载 HeroUI 和 React Query。
  */
 export function AppProviders({ children }: PropsWithChildren) {
   const queryClient = useMemo(
@@ -21,8 +21,8 @@ export function AppProviders({ children }: PropsWithChildren) {
   )
 
   return (
-    <ConfigProvider componentConfig={{ Card: { bordered: false } }}>
+    <HeroUIProvider>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </ConfigProvider>
+    </HeroUIProvider>
   )
 }
