@@ -6,7 +6,8 @@ import { ErrorPage } from '@/pages/ErrorPage'
 import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { SystemHealthPage } from '@/pages/SystemHealthPage'
+import { SystemSettingsPage } from '@/pages/SystemSettingsPage'
 import { RequireAuth, RouterErrorFallback } from '@/router/guards'
 
 /**
@@ -33,23 +34,11 @@ export const router = createBrowserRouter(
             },
             {
               path: 'system/health',
-              element: (
-                <PlaceholderPage
-                  badge="System Health"
-                  title="系统健康视图"
-                  subtitle="下一步会接入后端 /api/v1/system/health，展示服务状态、trace_id 与基础联调信息。"
-                />
-              ),
+              element: <SystemHealthPage />,
             },
             {
               path: 'system/settings',
-              element: (
-                <PlaceholderPage
-                  badge="System Settings"
-                  title="系统设置视图"
-                  subtitle="下一步会联调受保护接口 /api/v1/system/settings，并处理 401/403 语义。"
-                />
-              ),
+              element: <SystemSettingsPage />,
             },
           ],
         },
