@@ -49,8 +49,8 @@ export const AuditFilter = ({
                     }}
                     aria-label="筛选风险等级"
                     classNames={{
-                        trigger: "bg-apple-tertiary-bg/10 hover:bg-apple-tertiary-bg/20 transition-colors h-14 rounded-2xl border border-white/5 backdrop-blur-md text-apple-text-primary font-bold",
-                        value: "text-apple-text-primary"
+                        trigger: "bg-apple-tertiary-bg/10 hover:bg-apple-tertiary-bg/20 transition-colors h-14 rounded-2xl border border-white/5 backdrop-blur-md text-apple-text-primary font-bold pr-10",
+                        value: "text-apple-text-primary truncate"
                     }}
                 >
                     <SelectItem key="all">全部风险</SelectItem>
@@ -70,8 +70,8 @@ export const AuditFilter = ({
                     }}
                     aria-label="筛选执行结果"
                     classNames={{
-                        trigger: "bg-apple-tertiary-bg/10 hover:bg-apple-tertiary-bg/20 transition-colors h-14 rounded-2xl border border-white/5 backdrop-blur-md text-apple-text-primary font-bold",
-                        value: "text-apple-text-primary"
+                        trigger: "bg-apple-tertiary-bg/10 hover:bg-apple-tertiary-bg/20 transition-colors h-14 rounded-2xl border border-white/5 backdrop-blur-md text-apple-text-primary font-bold pr-10",
+                        value: "text-apple-text-primary truncate"
                     }}
                 >
                     <SelectItem key="all">全部结果</SelectItem>

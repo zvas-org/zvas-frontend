@@ -10,11 +10,26 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { RequireAuth, RouterErrorFallback } from '@/router/guards'
 
 // 路由懒加载，优化打包体积
+const OverviewPage = lazy(() => import('@/pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
 const SystemHealthPage = lazy(() => import('@/pages/SystemHealthPage').then(m => ({ default: m.SystemHealthPage })))
 const SystemVersionPage = lazy(() => import('@/pages/SystemVersionPage').then(m => ({ default: m.SystemVersionPage })))
 const SystemSettingsPage = lazy(() => import('@/pages/SystemSettingsPage').then(m => ({ default: m.SystemSettingsPage })))
 const UserManagementPage = lazy(() => import('@/pages/UserManagementPage').then(m => ({ default: m.UserManagementPage })))
+const RolesPage = lazy(() => import('@/pages/iam/RolesPage').then(m => ({ default: m.RolesPage })))
 const AuditLogPage = lazy(() => import('@/pages/AuditLogPage').then(m => ({ default: m.AuditLogPage })))
+
+const AssetPoolsPage = lazy(() => import('@/pages/assets/AssetPoolsPage').then(m => ({ default: m.AssetPoolsPage })))
+const AssetInventoryPage = lazy(() => import('@/pages/assets/AssetInventoryPage').then(m => ({ default: m.AssetInventoryPage })))
+const AssetPoolDetailPage = lazy(() => import('@/pages/assets/AssetPoolDetailPage').then(m => ({ default: m.AssetPoolDetailPage })))
+
+const TasksPage = lazy(() => import('@/pages/tasks/TasksPage').then(m => ({ default: m.TasksPage })))
+const TaskTemplatesPage = lazy(() => import('@/pages/tasks/TaskTemplatesPage').then(m => ({ default: m.TaskTemplatesPage })))
+const WorkersPage = lazy(() => import('@/pages/tasks/WorkersPage').then(m => ({ default: m.WorkersPage })))
+const TaskDetailPage = lazy(() => import('@/pages/tasks/TaskDetailPage').then(m => ({ default: m.TaskDetailPage })))
+
+const FindingsPage = lazy(() => import('@/pages/findings/FindingsPage').then(m => ({ default: m.FindingsPage })))
+const EvidencesPage = lazy(() => import('@/pages/findings/EvidencesPage').then(m => ({ default: m.EvidencesPage })))
+const ReportsPage = lazy(() => import('@/pages/findings/ReportsPage').then(m => ({ default: m.ReportsPage })))
 
 /**
  * 局部骨架屏占位
@@ -50,7 +65,15 @@ export const router = createBrowserRouter(
           children: [
             {
               index: true,
-              element: <Navigate replace to="/system/health" />,
+              element: <Navigate replace to="/assets" />,
+            },
+            {
+              path: 'overview',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <OverviewPage />
+                </Suspense>
+              ),
             },
             {
               path: 'system/health',
@@ -85,10 +108,98 @@ export const router = createBrowserRouter(
               ),
             },
             {
+              path: 'iam/roles',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <RolesPage />
+                </Suspense>
+              ),
+            },
+            {
               path: 'iam/audits',
               element: (
                 <Suspense fallback={renderPageLoader()}>
                   <AuditLogPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'assets',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <AssetPoolsPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'assets/inventory',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <AssetInventoryPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'assets/:id',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <AssetPoolDetailPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'tasks',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <TasksPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'tasks/templates',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <TaskTemplatesPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'tasks/workers',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <WorkersPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'tasks/:id',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <TaskDetailPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'findings',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <FindingsPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'findings/evidences',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <EvidencesPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'findings/reports',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <ReportsPage />
                 </Suspense>
               ),
             },

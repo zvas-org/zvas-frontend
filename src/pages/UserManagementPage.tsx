@@ -303,8 +303,8 @@ export function UserManagementPage() {
             onChange={(e) => handleStatusFilterChange((e.target.value as 'all' | 'active' | 'disabled') || 'all')} // handleStatusFilterChange 内部会重置 page 为 1
             variant="flat"
             classNames={{
-              trigger: "bg-apple-tertiary-bg/10 hover:bg-apple-tertiary-bg/20 transition-colors h-14 w-40 rounded-2xl border border-white/5 backdrop-blur-md text-apple-text-primary font-bold",
-              value: "text-apple-text-primary"
+              trigger: "bg-apple-tertiary-bg/10 hover:bg-apple-tertiary-bg/20 transition-colors h-14 w-40 rounded-2xl border border-white/5 backdrop-blur-md text-apple-text-primary font-bold pr-10",
+              value: "text-apple-text-primary truncate text-ellipsis"
             }}
           >
             <SelectItem key="all" textValue="全部状态">全部状态</SelectItem>
@@ -572,25 +572,26 @@ export function UserManagementPage() {
                       label: "text-apple-text-tertiary font-black text-[10px] uppercase tracking-widest",
                     }}
                   />
-                  <Select
-                    label="分配访问角色"
-                    selectionMode="multiple"
-                    labelPlacement="outside"
-                    placeholder="请选择安全策略组"
-                    selectedKeys={new Set(createDraft.roleCodes)}
-                    onSelectionChange={(keys) => setCreateDraft((draft) => ({ ...draft, roleCodes: Array.from(keys) as string[] }))}
-                    variant="flat"
-                    classNames={{
-                      trigger: "bg-white/5 h-12 rounded-2xl border border-white/5",
-                      label: "text-apple-text-tertiary font-black text-[10px] uppercase tracking-widest",
-                    }}
-                  >
+                  <div className="flex flex-col gap-2">
+                    <label className="text-apple-text-secondary text-xs font-bold px-1">分配访问角色</label>
+                    <Select
+                      selectionMode="multiple"
+                      placeholder="请选择安全策略组"
+                      selectedKeys={new Set(createDraft.roleCodes)}
+                      onSelectionChange={(keys) => setCreateDraft((draft) => ({ ...draft, roleCodes: Array.from(keys) as string[] }))}
+                      variant="flat"
+                      classNames={{
+                        trigger: "bg-white/5 h-12 rounded-2xl border border-white/5 pr-10",
+                        value: "truncate text-ellipsis text-sm"
+                      }}
+                    >
                     {roleOptions.map((role) => (
                       <SelectItem key={role.code} textValue={`${role.name} / ${role.code}`}>
                         {role.name} / {role.code}
                       </SelectItem>
                     ))}
                   </Select>
+                  </div>
                 </div>
               </ModalBody>
               <ModalFooter>
@@ -711,24 +712,26 @@ export function UserManagementPage() {
                   <p className="text-sm text-apple-text-secondary leading-relaxed font-medium">
                     正在为 <span className="text-white font-black">{roleTarget?.displayName}</span> 重新分配全量角色。这会导致其资产访问权限立即重组内容更新完成。
                   </p>
-                  <Select
-                    label="身份-角色映射图 (Identity Role Map)"
-                    selectionMode="multiple"
-                    labelPlacement="outside"
-                    selectedKeys={new Set(roleDraft)}
-                    onSelectionChange={(keys) => setRoleDraft(Array.from(keys) as string[])}
-                    variant="flat"
-                    classNames={{
-                      trigger: "bg-white/5 h-12 rounded-2xl border border-white/5",
-                      label: "text-apple-text-tertiary font-black text-[10px] uppercase tracking-widest",
-                    }}
-                  >
+                  <div className="flex flex-col gap-2">
+                    <label className="text-apple-text-secondary text-xs font-bold px-1">身份-角色映射图 (Identity Role Map)</label>
+                    <Select
+                      selectionMode="multiple"
+                      placeholder="请选择安全策略组"
+                      selectedKeys={new Set(roleDraft)}
+                      onSelectionChange={(keys) => setRoleDraft(Array.from(keys) as string[])}
+                      variant="flat"
+                      classNames={{
+                        trigger: "bg-white/5 h-12 rounded-2xl border border-white/5 pr-10",
+                        value: "truncate text-ellipsis text-sm"
+                      }}
+                    >
                     {roleOptions.map((role) => (
                       <SelectItem key={role.code} textValue={`${role.name} / ${role.code}`}>
                         {role.name} / {role.code}
                       </SelectItem>
                     ))}
                   </Select>
+                  </div>
                 </div>
               </ModalBody>
               <ModalFooter>

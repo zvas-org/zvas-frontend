@@ -25,22 +25,46 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GetAssetPoolsIdAssetsParams,
+  GetAssetPoolsIdInputsParams,
+  GetAssetPoolsParams,
   GetAuditsParams,
+  GetTasksIdSnapshotAssetsParams,
+  GetTasksParams,
   GetUsersParams,
+  InternalHandlerAssetObservationListResponse,
+  InternalHandlerAssetPoolActionResponse,
+  InternalHandlerAssetPoolAssetListResponse,
+  InternalHandlerAssetPoolDetailResponse,
+  InternalHandlerAssetPoolListResponse,
+  InternalHandlerAssetPoolTaskCreateResponse,
+  InternalHandlerAssetRelationListResponse,
   InternalHandlerAuditListResponse,
   InternalHandlerChangePasswordRequest,
   InternalHandlerCommonActionResponse,
+  InternalHandlerCreateAssetPoolRequest,
+  InternalHandlerCreateAssetPoolTaskRequest,
+  InternalHandlerCreateTargetSetRequest,
   InternalHandlerCreateUserRequest,
   InternalHandlerCurrentUserResponse,
   InternalHandlerErrorResponse,
+  InternalHandlerImportAssetPoolSeedsRequest,
   InternalHandlerLoginRequest,
   InternalHandlerLoginResponse,
   InternalHandlerLogoutResponse,
+  InternalHandlerPoolInputRecordListResponse,
   InternalHandlerResetUserPasswordRequest,
   InternalHandlerRoleListResponse,
+  InternalHandlerSeedImportResponse,
   InternalHandlerSystemHealthResponse,
   InternalHandlerSystemSettingsResponse,
   InternalHandlerSystemVersionResponse,
+  InternalHandlerTargetSetResponse,
+  InternalHandlerTaskDetailResponse,
+  InternalHandlerTaskListResponse,
+  InternalHandlerTaskProgressResponse,
+  InternalHandlerTaskSnapshotAssetListResponse,
+  InternalHandlerUpdateAssetPoolRequest,
   InternalHandlerUpdateUserRolesRequest,
   InternalHandlerUpdateUserStatusRequest,
   InternalHandlerUserCreateResponse,
@@ -49,6 +73,1402 @@ import type {
 
 import { apiClient } from '../client';
 import type { ErrorType } from '../client';
+/**
+ * @summary 查询资产池列表
+ */
+export type getAssetPoolsResponse200 = {
+  data: InternalHandlerAssetPoolListResponse
+  status: 200
+}
+
+export type getAssetPoolsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsResponseSuccess = (getAssetPoolsResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsResponseError = (getAssetPoolsResponse401 | getAssetPoolsResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsResponse = (getAssetPoolsResponseSuccess | getAssetPoolsResponseError)
+
+export const getGetAssetPoolsUrl = (params?: GetAssetPoolsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/asset-pools?${stringifiedParams}` : `/asset-pools`
+}
+
+export const getAssetPools = async (params?: GetAssetPoolsParams, options?: RequestInit): Promise<getAssetPoolsResponse> => {
+  
+  return apiClient<getAssetPoolsResponse>(getGetAssetPoolsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsQueryKey = (params?: GetAssetPoolsParams,) => {
+    return [
+    `/asset-pools`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalHandlerErrorResponse>>(params?: GetAssetPoolsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPools>>> = ({ signal }) => getAssetPools(params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPools>>>
+export type GetAssetPoolsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAssetPools<TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params: undefined |  GetAssetPoolsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPools>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPools>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPools<TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetAssetPoolsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPools>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPools>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPools<TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetAssetPoolsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询资产池列表
+ */
+
+export function useGetAssetPools<TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetAssetPoolsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 创建资产池
+ */
+export type postAssetPoolsResponse200 = {
+  data: InternalHandlerAssetPoolActionResponse
+  status: 200
+}
+
+export type postAssetPoolsResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type postAssetPoolsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type postAssetPoolsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type postAssetPoolsResponseSuccess = (postAssetPoolsResponse200) & {
+  headers: Headers;
+};
+export type postAssetPoolsResponseError = (postAssetPoolsResponse400 | postAssetPoolsResponse401 | postAssetPoolsResponse403) & {
+  headers: Headers;
+};
+
+export type postAssetPoolsResponse = (postAssetPoolsResponseSuccess | postAssetPoolsResponseError)
+
+export const getPostAssetPoolsUrl = () => {
+
+
+  
+
+  return `/asset-pools`
+}
+
+export const postAssetPools = async (internalHandlerCreateAssetPoolRequest: InternalHandlerCreateAssetPoolRequest, options?: RequestInit): Promise<postAssetPoolsResponse> => {
+  
+  return apiClient<postAssetPoolsResponse>(getPostAssetPoolsUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerCreateAssetPoolRequest,)
+  }
+);}
+  
+
+
+
+export const getPostAssetPoolsMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPools>>, TError,{data: InternalHandlerCreateAssetPoolRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postAssetPools>>, TError,{data: InternalHandlerCreateAssetPoolRequest}, TContext> => {
+
+const mutationKey = ['postAssetPools'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPools>>, {data: InternalHandlerCreateAssetPoolRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postAssetPools(data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAssetPoolsMutationResult = NonNullable<Awaited<ReturnType<typeof postAssetPools>>>
+    export type PostAssetPoolsMutationBody = InternalHandlerCreateAssetPoolRequest
+    export type PostAssetPoolsMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 创建资产池
+ */
+export const usePostAssetPools = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPools>>, TError,{data: InternalHandlerCreateAssetPoolRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAssetPools>>,
+        TError,
+        {data: InternalHandlerCreateAssetPoolRequest},
+        TContext
+      > => {
+      return useMutation(getPostAssetPoolsMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 查询资产池详情
+ */
+export type getAssetPoolsIdResponse200 = {
+  data: InternalHandlerAssetPoolDetailResponse
+  status: 200
+}
+
+export type getAssetPoolsIdResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsIdResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsIdResponseSuccess = (getAssetPoolsIdResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdResponseError = (getAssetPoolsIdResponse401 | getAssetPoolsIdResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdResponse = (getAssetPoolsIdResponseSuccess | getAssetPoolsIdResponseError)
+
+export const getGetAssetPoolsIdUrl = (id: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}`
+}
+
+export const getAssetPoolsId = async (id: string, options?: RequestInit): Promise<getAssetPoolsIdResponse> => {
+  
+  return apiClient<getAssetPoolsIdResponse>(getGetAssetPoolsIdUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdQueryKey = (id: string,) => {
+    return [
+    `/asset-pools/${id}`
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsId>>> = ({ signal }) => getAssetPoolsId(id, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsId>>>
+export type GetAssetPoolsIdQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAssetPoolsId<TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsId>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsId<TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsId>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsId<TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询资产池详情
+ */
+
+export function useGetAssetPoolsId<TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 更新资产池
+ */
+export type patchAssetPoolsIdResponse200 = {
+  data: InternalHandlerAssetPoolActionResponse
+  status: 200
+}
+
+export type patchAssetPoolsIdResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type patchAssetPoolsIdResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type patchAssetPoolsIdResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type patchAssetPoolsIdResponseSuccess = (patchAssetPoolsIdResponse200) & {
+  headers: Headers;
+};
+export type patchAssetPoolsIdResponseError = (patchAssetPoolsIdResponse400 | patchAssetPoolsIdResponse401 | patchAssetPoolsIdResponse403) & {
+  headers: Headers;
+};
+
+export type patchAssetPoolsIdResponse = (patchAssetPoolsIdResponseSuccess | patchAssetPoolsIdResponseError)
+
+export const getPatchAssetPoolsIdUrl = (id: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}`
+}
+
+export const patchAssetPoolsId = async (id: string,
+    internalHandlerUpdateAssetPoolRequest: InternalHandlerUpdateAssetPoolRequest, options?: RequestInit): Promise<patchAssetPoolsIdResponse> => {
+  
+  return apiClient<patchAssetPoolsIdResponse>(getPatchAssetPoolsIdUrl(id),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerUpdateAssetPoolRequest,)
+  }
+);}
+  
+
+
+
+export const getPatchAssetPoolsIdMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchAssetPoolsId>>, TError,{id: string;data: InternalHandlerUpdateAssetPoolRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof patchAssetPoolsId>>, TError,{id: string;data: InternalHandlerUpdateAssetPoolRequest}, TContext> => {
+
+const mutationKey = ['patchAssetPoolsId'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchAssetPoolsId>>, {id: string;data: InternalHandlerUpdateAssetPoolRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchAssetPoolsId(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchAssetPoolsIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchAssetPoolsId>>>
+    export type PatchAssetPoolsIdMutationBody = InternalHandlerUpdateAssetPoolRequest
+    export type PatchAssetPoolsIdMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 更新资产池
+ */
+export const usePatchAssetPoolsId = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchAssetPoolsId>>, TError,{id: string;data: InternalHandlerUpdateAssetPoolRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchAssetPoolsId>>,
+        TError,
+        {id: string;data: InternalHandlerUpdateAssetPoolRequest},
+        TContext
+      > => {
+      return useMutation(getPatchAssetPoolsIdMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 查询资产池资产列表
+ */
+export type getAssetPoolsIdAssetsResponse200 = {
+  data: InternalHandlerAssetPoolAssetListResponse
+  status: 200
+}
+
+export type getAssetPoolsIdAssetsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsIdAssetsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsIdAssetsResponseSuccess = (getAssetPoolsIdAssetsResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdAssetsResponseError = (getAssetPoolsIdAssetsResponse401 | getAssetPoolsIdAssetsResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdAssetsResponse = (getAssetPoolsIdAssetsResponseSuccess | getAssetPoolsIdAssetsResponseError)
+
+export const getGetAssetPoolsIdAssetsUrl = (id: string,
+    params?: GetAssetPoolsIdAssetsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/asset-pools/${id}/assets?${stringifiedParams}` : `/asset-pools/${id}/assets`
+}
+
+export const getAssetPoolsIdAssets = async (id: string,
+    params?: GetAssetPoolsIdAssetsParams, options?: RequestInit): Promise<getAssetPoolsIdAssetsResponse> => {
+  
+  return apiClient<getAssetPoolsIdAssetsResponse>(getGetAssetPoolsIdAssetsUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdAssetsQueryKey = (id: string,
+    params?: GetAssetPoolsIdAssetsParams,) => {
+    return [
+    `/asset-pools/${id}/assets`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdAssetsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string,
+    params?: GetAssetPoolsIdAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>> = ({ signal }) => getAssetPoolsIdAssets(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdAssetsQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>>
+export type GetAssetPoolsIdAssetsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAssetPoolsIdAssets<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params: undefined |  GetAssetPoolsIdAssetsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdAssets>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdAssets>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdAssets<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdAssets>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdAssets>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdAssets<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询资产池资产列表
+ */
+
+export function useGetAssetPoolsIdAssets<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdAssetsQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询资产观测
+ */
+export type getAssetPoolsIdAssetsAssetIdObservationsResponse200 = {
+  data: InternalHandlerAssetObservationListResponse
+  status: 200
+}
+
+export type getAssetPoolsIdAssetsAssetIdObservationsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsIdAssetsAssetIdObservationsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsIdAssetsAssetIdObservationsResponseSuccess = (getAssetPoolsIdAssetsAssetIdObservationsResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdAssetsAssetIdObservationsResponseError = (getAssetPoolsIdAssetsAssetIdObservationsResponse401 | getAssetPoolsIdAssetsAssetIdObservationsResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdAssetsAssetIdObservationsResponse = (getAssetPoolsIdAssetsAssetIdObservationsResponseSuccess | getAssetPoolsIdAssetsAssetIdObservationsResponseError)
+
+export const getGetAssetPoolsIdAssetsAssetIdObservationsUrl = (id: string,
+    assetId: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/assets/${assetId}/observations`
+}
+
+export const getAssetPoolsIdAssetsAssetIdObservations = async (id: string,
+    assetId: string, options?: RequestInit): Promise<getAssetPoolsIdAssetsAssetIdObservationsResponse> => {
+  
+  return apiClient<getAssetPoolsIdAssetsAssetIdObservationsResponse>(getGetAssetPoolsIdAssetsAssetIdObservationsUrl(id,assetId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdAssetsAssetIdObservationsQueryKey = (id: string,
+    assetId: string,) => {
+    return [
+    `/asset-pools/${id}/assets/${assetId}/observations`
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdAssetsAssetIdObservationsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsAssetIdObservationsQueryKey(id,assetId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>> = ({ signal }) => getAssetPoolsIdAssetsAssetIdObservations(id,assetId, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id && assetId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdAssetsAssetIdObservationsQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>>
+export type GetAssetPoolsIdAssetsAssetIdObservationsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAssetPoolsIdAssetsAssetIdObservations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdAssetsAssetIdObservations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdAssetsAssetIdObservations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询资产观测
+ */
+
+export function useGetAssetPoolsIdAssetsAssetIdObservations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdAssetsAssetIdObservationsQueryOptions(id,assetId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询资产关系
+ */
+export type getAssetPoolsIdAssetsAssetIdRelationsResponse200 = {
+  data: InternalHandlerAssetRelationListResponse
+  status: 200
+}
+
+export type getAssetPoolsIdAssetsAssetIdRelationsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsIdAssetsAssetIdRelationsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsIdAssetsAssetIdRelationsResponseSuccess = (getAssetPoolsIdAssetsAssetIdRelationsResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdAssetsAssetIdRelationsResponseError = (getAssetPoolsIdAssetsAssetIdRelationsResponse401 | getAssetPoolsIdAssetsAssetIdRelationsResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdAssetsAssetIdRelationsResponse = (getAssetPoolsIdAssetsAssetIdRelationsResponseSuccess | getAssetPoolsIdAssetsAssetIdRelationsResponseError)
+
+export const getGetAssetPoolsIdAssetsAssetIdRelationsUrl = (id: string,
+    assetId: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/assets/${assetId}/relations`
+}
+
+export const getAssetPoolsIdAssetsAssetIdRelations = async (id: string,
+    assetId: string, options?: RequestInit): Promise<getAssetPoolsIdAssetsAssetIdRelationsResponse> => {
+  
+  return apiClient<getAssetPoolsIdAssetsAssetIdRelationsResponse>(getGetAssetPoolsIdAssetsAssetIdRelationsUrl(id,assetId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdAssetsAssetIdRelationsQueryKey = (id: string,
+    assetId: string,) => {
+    return [
+    `/asset-pools/${id}/assets/${assetId}/relations`
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdAssetsAssetIdRelationsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsAssetIdRelationsQueryKey(id,assetId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>> = ({ signal }) => getAssetPoolsIdAssetsAssetIdRelations(id,assetId, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id && assetId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdAssetsAssetIdRelationsQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>>
+export type GetAssetPoolsIdAssetsAssetIdRelationsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAssetPoolsIdAssetsAssetIdRelations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdAssetsAssetIdRelations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdAssetsAssetIdRelations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询资产关系
+ */
+
+export function useGetAssetPoolsIdAssetsAssetIdRelations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdAssetsAssetIdRelationsQueryOptions(id,assetId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询资产池输入记录
+ */
+export type getAssetPoolsIdInputsResponse200 = {
+  data: InternalHandlerPoolInputRecordListResponse
+  status: 200
+}
+
+export type getAssetPoolsIdInputsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsIdInputsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsIdInputsResponseSuccess = (getAssetPoolsIdInputsResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdInputsResponseError = (getAssetPoolsIdInputsResponse401 | getAssetPoolsIdInputsResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdInputsResponse = (getAssetPoolsIdInputsResponseSuccess | getAssetPoolsIdInputsResponseError)
+
+export const getGetAssetPoolsIdInputsUrl = (id: string,
+    params?: GetAssetPoolsIdInputsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/asset-pools/${id}/inputs?${stringifiedParams}` : `/asset-pools/${id}/inputs`
+}
+
+export const getAssetPoolsIdInputs = async (id: string,
+    params?: GetAssetPoolsIdInputsParams, options?: RequestInit): Promise<getAssetPoolsIdInputsResponse> => {
+  
+  return apiClient<getAssetPoolsIdInputsResponse>(getGetAssetPoolsIdInputsUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdInputsQueryKey = (id: string,
+    params?: GetAssetPoolsIdInputsParams,) => {
+    return [
+    `/asset-pools/${id}/inputs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdInputsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string,
+    params?: GetAssetPoolsIdInputsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdInputsQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>> = ({ signal }) => getAssetPoolsIdInputs(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdInputsQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>>
+export type GetAssetPoolsIdInputsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetAssetPoolsIdInputs<TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params: undefined |  GetAssetPoolsIdInputsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdInputs>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdInputs>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdInputs<TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdInputsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdInputs>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdInputs>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdInputs<TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdInputsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询资产池输入记录
+ */
+
+export function useGetAssetPoolsIdInputs<TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdInputsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdInputsQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 导入资产池输入记录
+ */
+export type postAssetPoolsIdInputsImportResponse200 = {
+  data: InternalHandlerSeedImportResponse
+  status: 200
+}
+
+export type postAssetPoolsIdInputsImportResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type postAssetPoolsIdInputsImportResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type postAssetPoolsIdInputsImportResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type postAssetPoolsIdInputsImportResponseSuccess = (postAssetPoolsIdInputsImportResponse200) & {
+  headers: Headers;
+};
+export type postAssetPoolsIdInputsImportResponseError = (postAssetPoolsIdInputsImportResponse400 | postAssetPoolsIdInputsImportResponse401 | postAssetPoolsIdInputsImportResponse403) & {
+  headers: Headers;
+};
+
+export type postAssetPoolsIdInputsImportResponse = (postAssetPoolsIdInputsImportResponseSuccess | postAssetPoolsIdInputsImportResponseError)
+
+export const getPostAssetPoolsIdInputsImportUrl = (id: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/inputs/import`
+}
+
+export const postAssetPoolsIdInputsImport = async (id: string,
+    internalHandlerImportAssetPoolSeedsRequest: InternalHandlerImportAssetPoolSeedsRequest, options?: RequestInit): Promise<postAssetPoolsIdInputsImportResponse> => {
+  
+  return apiClient<postAssetPoolsIdInputsImportResponse>(getPostAssetPoolsIdInputsImportUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerImportAssetPoolSeedsRequest,)
+  }
+);}
+  
+
+
+
+export const getPostAssetPoolsIdInputsImportMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>, TError,{id: string;data: InternalHandlerImportAssetPoolSeedsRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>, TError,{id: string;data: InternalHandlerImportAssetPoolSeedsRequest}, TContext> => {
+
+const mutationKey = ['postAssetPoolsIdInputsImport'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>, {id: string;data: InternalHandlerImportAssetPoolSeedsRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postAssetPoolsIdInputsImport(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAssetPoolsIdInputsImportMutationResult = NonNullable<Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>>
+    export type PostAssetPoolsIdInputsImportMutationBody = InternalHandlerImportAssetPoolSeedsRequest
+    export type PostAssetPoolsIdInputsImportMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 导入资产池输入记录
+ */
+export const usePostAssetPoolsIdInputsImport = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>, TError,{id: string;data: InternalHandlerImportAssetPoolSeedsRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>,
+        TError,
+        {id: string;data: InternalHandlerImportAssetPoolSeedsRequest},
+        TContext
+      > => {
+      return useMutation(getPostAssetPoolsIdInputsImportMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 导入资产池种子
+ */
+export type postAssetPoolsIdSeedsImportResponse200 = {
+  data: InternalHandlerSeedImportResponse
+  status: 200
+}
+
+export type postAssetPoolsIdSeedsImportResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type postAssetPoolsIdSeedsImportResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type postAssetPoolsIdSeedsImportResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type postAssetPoolsIdSeedsImportResponseSuccess = (postAssetPoolsIdSeedsImportResponse200) & {
+  headers: Headers;
+};
+export type postAssetPoolsIdSeedsImportResponseError = (postAssetPoolsIdSeedsImportResponse400 | postAssetPoolsIdSeedsImportResponse401 | postAssetPoolsIdSeedsImportResponse403) & {
+  headers: Headers;
+};
+
+export type postAssetPoolsIdSeedsImportResponse = (postAssetPoolsIdSeedsImportResponseSuccess | postAssetPoolsIdSeedsImportResponseError)
+
+export const getPostAssetPoolsIdSeedsImportUrl = (id: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/seeds/import`
+}
+
+export const postAssetPoolsIdSeedsImport = async (id: string,
+    internalHandlerImportAssetPoolSeedsRequest: InternalHandlerImportAssetPoolSeedsRequest, options?: RequestInit): Promise<postAssetPoolsIdSeedsImportResponse> => {
+  
+  return apiClient<postAssetPoolsIdSeedsImportResponse>(getPostAssetPoolsIdSeedsImportUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerImportAssetPoolSeedsRequest,)
+  }
+);}
+  
+
+
+
+export const getPostAssetPoolsIdSeedsImportMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>, TError,{id: string;data: InternalHandlerImportAssetPoolSeedsRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>, TError,{id: string;data: InternalHandlerImportAssetPoolSeedsRequest}, TContext> => {
+
+const mutationKey = ['postAssetPoolsIdSeedsImport'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>, {id: string;data: InternalHandlerImportAssetPoolSeedsRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postAssetPoolsIdSeedsImport(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAssetPoolsIdSeedsImportMutationResult = NonNullable<Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>>
+    export type PostAssetPoolsIdSeedsImportMutationBody = InternalHandlerImportAssetPoolSeedsRequest
+    export type PostAssetPoolsIdSeedsImportMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 导入资产池种子
+ */
+export const usePostAssetPoolsIdSeedsImport = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>, TError,{id: string;data: InternalHandlerImportAssetPoolSeedsRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>,
+        TError,
+        {id: string;data: InternalHandlerImportAssetPoolSeedsRequest},
+        TContext
+      > => {
+      return useMutation(getPostAssetPoolsIdSeedsImportMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 创建目标快照
+ */
+export type postAssetPoolsIdTargetSetsResponse200 = {
+  data: InternalHandlerTargetSetResponse
+  status: 200
+}
+
+export type postAssetPoolsIdTargetSetsResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type postAssetPoolsIdTargetSetsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type postAssetPoolsIdTargetSetsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type postAssetPoolsIdTargetSetsResponseSuccess = (postAssetPoolsIdTargetSetsResponse200) & {
+  headers: Headers;
+};
+export type postAssetPoolsIdTargetSetsResponseError = (postAssetPoolsIdTargetSetsResponse400 | postAssetPoolsIdTargetSetsResponse401 | postAssetPoolsIdTargetSetsResponse403) & {
+  headers: Headers;
+};
+
+export type postAssetPoolsIdTargetSetsResponse = (postAssetPoolsIdTargetSetsResponseSuccess | postAssetPoolsIdTargetSetsResponseError)
+
+export const getPostAssetPoolsIdTargetSetsUrl = (id: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/target-sets`
+}
+
+export const postAssetPoolsIdTargetSets = async (id: string,
+    internalHandlerCreateTargetSetRequest: InternalHandlerCreateTargetSetRequest, options?: RequestInit): Promise<postAssetPoolsIdTargetSetsResponse> => {
+  
+  return apiClient<postAssetPoolsIdTargetSetsResponse>(getPostAssetPoolsIdTargetSetsUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerCreateTargetSetRequest,)
+  }
+);}
+  
+
+
+
+export const getPostAssetPoolsIdTargetSetsMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>, TError,{id: string;data: InternalHandlerCreateTargetSetRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>, TError,{id: string;data: InternalHandlerCreateTargetSetRequest}, TContext> => {
+
+const mutationKey = ['postAssetPoolsIdTargetSets'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>, {id: string;data: InternalHandlerCreateTargetSetRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postAssetPoolsIdTargetSets(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAssetPoolsIdTargetSetsMutationResult = NonNullable<Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>>
+    export type PostAssetPoolsIdTargetSetsMutationBody = InternalHandlerCreateTargetSetRequest
+    export type PostAssetPoolsIdTargetSetsMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 创建目标快照
+ */
+export const usePostAssetPoolsIdTargetSets = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>, TError,{id: string;data: InternalHandlerCreateTargetSetRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>,
+        TError,
+        {id: string;data: InternalHandlerCreateTargetSetRequest},
+        TContext
+      > => {
+      return useMutation(getPostAssetPoolsIdTargetSetsMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 从资产池发起任务
+ */
+export type postAssetPoolsIdTasksResponse200 = {
+  data: InternalHandlerAssetPoolTaskCreateResponse
+  status: 200
+}
+
+export type postAssetPoolsIdTasksResponse400 = {
+  data: InternalHandlerErrorResponse
+  status: 400
+}
+
+export type postAssetPoolsIdTasksResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type postAssetPoolsIdTasksResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type postAssetPoolsIdTasksResponseSuccess = (postAssetPoolsIdTasksResponse200) & {
+  headers: Headers;
+};
+export type postAssetPoolsIdTasksResponseError = (postAssetPoolsIdTasksResponse400 | postAssetPoolsIdTasksResponse401 | postAssetPoolsIdTasksResponse403) & {
+  headers: Headers;
+};
+
+export type postAssetPoolsIdTasksResponse = (postAssetPoolsIdTasksResponseSuccess | postAssetPoolsIdTasksResponseError)
+
+export const getPostAssetPoolsIdTasksUrl = (id: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/tasks`
+}
+
+export const postAssetPoolsIdTasks = async (id: string,
+    internalHandlerCreateAssetPoolTaskRequest: InternalHandlerCreateAssetPoolTaskRequest, options?: RequestInit): Promise<postAssetPoolsIdTasksResponse> => {
+  
+  return apiClient<postAssetPoolsIdTasksResponse>(getPostAssetPoolsIdTasksUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalHandlerCreateAssetPoolTaskRequest,)
+  }
+);}
+  
+
+
+
+export const getPostAssetPoolsIdTasksMutationOptions = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdTasks>>, TError,{id: string;data: InternalHandlerCreateAssetPoolTaskRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdTasks>>, TError,{id: string;data: InternalHandlerCreateAssetPoolTaskRequest}, TContext> => {
+
+const mutationKey = ['postAssetPoolsIdTasks'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdTasks>>, {id: string;data: InternalHandlerCreateAssetPoolTaskRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postAssetPoolsIdTasks(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAssetPoolsIdTasksMutationResult = NonNullable<Awaited<ReturnType<typeof postAssetPoolsIdTasks>>>
+    export type PostAssetPoolsIdTasksMutationBody = InternalHandlerCreateAssetPoolTaskRequest
+    export type PostAssetPoolsIdTasksMutationError = ErrorType<InternalHandlerErrorResponse>
+
+    /**
+ * @summary 从资产池发起任务
+ */
+export const usePostAssetPoolsIdTasks = <TError = ErrorType<InternalHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAssetPoolsIdTasks>>, TError,{id: string;data: InternalHandlerCreateAssetPoolTaskRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAssetPoolsIdTasks>>,
+        TError,
+        {id: string;data: InternalHandlerCreateAssetPoolTaskRequest},
+        TContext
+      > => {
+      return useMutation(getPostAssetPoolsIdTasksMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary 查询审计日志
  */
@@ -1034,6 +2454,520 @@ export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemV
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetSystemVersionQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询任务列表
+ */
+export type getTasksResponse200 = {
+  data: InternalHandlerTaskListResponse
+  status: 200
+}
+
+export type getTasksResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getTasksResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getTasksResponseSuccess = (getTasksResponse200) & {
+  headers: Headers;
+};
+export type getTasksResponseError = (getTasksResponse401 | getTasksResponse403) & {
+  headers: Headers;
+};
+
+export type getTasksResponse = (getTasksResponseSuccess | getTasksResponseError)
+
+export const getGetTasksUrl = (params?: GetTasksParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/tasks?${stringifiedParams}` : `/tasks`
+}
+
+export const getTasks = async (params?: GetTasksParams, options?: RequestInit): Promise<getTasksResponse> => {
+  
+  return apiClient<getTasksResponse>(getGetTasksUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTasksQueryKey = (params?: GetTasksParams,) => {
+    return [
+    `/tasks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetTasksQueryOptions = <TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalHandlerErrorResponse>>(params?: GetTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTasksQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasks>>> = ({ signal }) => getTasks(params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTasksQueryResult = NonNullable<Awaited<ReturnType<typeof getTasks>>>
+export type GetTasksQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetTasks<TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params: undefined |  GetTasksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasks>>,
+          TError,
+          Awaited<ReturnType<typeof getTasks>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasks<TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasks>>,
+          TError,
+          Awaited<ReturnType<typeof getTasks>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasks<TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询任务列表
+ */
+
+export function useGetTasks<TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ params?: GetTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTasksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询任务详情
+ */
+export type getTasksIdResponse200 = {
+  data: InternalHandlerTaskDetailResponse
+  status: 200
+}
+
+export type getTasksIdResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getTasksIdResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getTasksIdResponseSuccess = (getTasksIdResponse200) & {
+  headers: Headers;
+};
+export type getTasksIdResponseError = (getTasksIdResponse401 | getTasksIdResponse403) & {
+  headers: Headers;
+};
+
+export type getTasksIdResponse = (getTasksIdResponseSuccess | getTasksIdResponseError)
+
+export const getGetTasksIdUrl = (id: string,) => {
+
+
+  
+
+  return `/tasks/${id}`
+}
+
+export const getTasksId = async (id: string, options?: RequestInit): Promise<getTasksIdResponse> => {
+  
+  return apiClient<getTasksIdResponse>(getGetTasksIdUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTasksIdQueryKey = (id: string,) => {
+    return [
+    `/tasks/${id}`
+    ] as const;
+    }
+
+    
+export const getGetTasksIdQueryOptions = <TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTasksIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksId>>> = ({ signal }) => getTasksId(id, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTasksIdQueryResult = NonNullable<Awaited<ReturnType<typeof getTasksId>>>
+export type GetTasksIdQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetTasksId<TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksId>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksId<TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksId>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksId<TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询任务详情
+ */
+
+export function useGetTasksId<TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTasksIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询任务进度
+ */
+export type getTasksIdProgressResponse200 = {
+  data: InternalHandlerTaskProgressResponse
+  status: 200
+}
+
+export type getTasksIdProgressResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getTasksIdProgressResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getTasksIdProgressResponseSuccess = (getTasksIdProgressResponse200) & {
+  headers: Headers;
+};
+export type getTasksIdProgressResponseError = (getTasksIdProgressResponse401 | getTasksIdProgressResponse403) & {
+  headers: Headers;
+};
+
+export type getTasksIdProgressResponse = (getTasksIdProgressResponseSuccess | getTasksIdProgressResponseError)
+
+export const getGetTasksIdProgressUrl = (id: string,) => {
+
+
+  
+
+  return `/tasks/${id}/progress`
+}
+
+export const getTasksIdProgress = async (id: string, options?: RequestInit): Promise<getTasksIdProgressResponse> => {
+  
+  return apiClient<getTasksIdProgressResponse>(getGetTasksIdProgressUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTasksIdProgressQueryKey = (id: string,) => {
+    return [
+    `/tasks/${id}/progress`
+    ] as const;
+    }
+
+    
+export const getGetTasksIdProgressQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTasksIdProgressQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdProgress>>> = ({ signal }) => getTasksIdProgress(id, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTasksIdProgressQueryResult = NonNullable<Awaited<ReturnType<typeof getTasksIdProgress>>>
+export type GetTasksIdProgressQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetTasksIdProgress<TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdProgress>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdProgress>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdProgress<TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdProgress>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdProgress>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdProgress<TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询任务进度
+ */
+
+export function useGetTasksIdProgress<TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTasksIdProgressQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询任务快照资产
+ */
+export type getTasksIdSnapshotAssetsResponse200 = {
+  data: InternalHandlerTaskSnapshotAssetListResponse
+  status: 200
+}
+
+export type getTasksIdSnapshotAssetsResponse401 = {
+  data: InternalHandlerErrorResponse
+  status: 401
+}
+
+export type getTasksIdSnapshotAssetsResponse403 = {
+  data: InternalHandlerErrorResponse
+  status: 403
+}
+
+export type getTasksIdSnapshotAssetsResponseSuccess = (getTasksIdSnapshotAssetsResponse200) & {
+  headers: Headers;
+};
+export type getTasksIdSnapshotAssetsResponseError = (getTasksIdSnapshotAssetsResponse401 | getTasksIdSnapshotAssetsResponse403) & {
+  headers: Headers;
+};
+
+export type getTasksIdSnapshotAssetsResponse = (getTasksIdSnapshotAssetsResponseSuccess | getTasksIdSnapshotAssetsResponseError)
+
+export const getGetTasksIdSnapshotAssetsUrl = (id: string,
+    params?: GetTasksIdSnapshotAssetsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/tasks/${id}/snapshot-assets?${stringifiedParams}` : `/tasks/${id}/snapshot-assets`
+}
+
+export const getTasksIdSnapshotAssets = async (id: string,
+    params?: GetTasksIdSnapshotAssetsParams, options?: RequestInit): Promise<getTasksIdSnapshotAssetsResponse> => {
+  
+  return apiClient<getTasksIdSnapshotAssetsResponse>(getGetTasksIdSnapshotAssetsUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTasksIdSnapshotAssetsQueryKey = (id: string,
+    params?: GetTasksIdSnapshotAssetsParams,) => {
+    return [
+    `/tasks/${id}/snapshot-assets`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetTasksIdSnapshotAssetsQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(id: string,
+    params?: GetTasksIdSnapshotAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTasksIdSnapshotAssetsQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>> = ({ signal }) => getTasksIdSnapshotAssets(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTasksIdSnapshotAssetsQueryResult = NonNullable<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>>
+export type GetTasksIdSnapshotAssetsQueryError = ErrorType<InternalHandlerErrorResponse>
+
+
+export function useGetTasksIdSnapshotAssets<TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params: undefined |  GetTasksIdSnapshotAssetsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdSnapshotAssets<TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetTasksIdSnapshotAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdSnapshotAssets<TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetTasksIdSnapshotAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询任务快照资产
+ */
+
+export function useGetTasksIdSnapshotAssets<TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalHandlerErrorResponse>>(
+ id: string,
+    params?: GetTasksIdSnapshotAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTasksIdSnapshotAssetsQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

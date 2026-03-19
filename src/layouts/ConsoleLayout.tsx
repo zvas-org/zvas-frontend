@@ -1,33 +1,97 @@
 import { Avatar, Button } from '@heroui/react'
 import {
-  CodeBracketIcon,
-  HomeIcon,
-  ClockIcon,
-  PowerIcon,
-  Cog6ToothIcon,
-  UserIcon,
   UsersIcon,
+  UserIcon,
+  ChartPieIcon,
+  CubeTransparentIcon,
+  RocketLaunchIcon,
+  ShieldExclamationIcon,
+  WrenchScrewdriverIcon,
   SunIcon,
   MoonIcon,
+  PowerIcon,
+  ChevronDownIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { useTheme } from '@heroui/use-theme'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { logout } from '@/api/adapters/auth'
 import { useAuthStore } from '@/store/auth'
 
-const routeMetaMap = {
-  'system-health': { title: '系统健康', kicker: 'SYSTEM HEALTH' },
-  'system-version': { title: '系统版本', kicker: 'BUILD METADATA' },
-  'system-settings': { title: '系统设置', kicker: 'PLATFORM SETTINGS' },
-  'iam-users': { title: '用户管理', kicker: 'IDENTITY & ACCESS' },
-  'iam-audits': { title: '审计日志', kicker: 'AUDIT TRAIL' },
-} as const
+type SubMenu = {
+  key: string
+  path: string
+  label: string
+  kicker: string
+  permission?: string
+}
 
-/**
- * ConsoleLayout 提供 ZVAS 控制台的基础导航壳。
- */
+type MainMenu = {
+  key: string
+  label: string
+  icon: React.ReactNode
+  permission?: string
+  children: SubMenu[]
+}
+
+const MENU_CONFIG: MainMenu[] = [
+  {
+     key: 'overview', label: 'Overview', icon: <ChartPieIcon className="w-[18px] h-[18px]" />,
+     children: [
+       { key: 'overview-main', path: '/overview', label: '仪表盘', kicker: 'GLOBAL VIEW' }
+     ]
+  },
+  {
+     key: 'assets', label: 'Assets', icon: <CubeTransparentIcon className="w-[18px] h-[18px]" />,
+     children: [
+       { key: 'asset-pools', path: '/assets', label: '资产池', kicker: 'ASSET POOLS' },
+       { key: 'asset-inventory', path: '/assets/inventory', label: '资产清单', kicker: 'INVENTORY' }
+     ]
+  },
+  {
+     key: 'tasks', label: 'Tasks', icon: <RocketLaunchIcon className="w-[18px] h-[18px]" />,
+     children: [
+       { key: 'tasks-list', path: '/tasks', label: '任务列表', kicker: 'TASKS & OPS' },
+       { key: 'tasks-templates', path: '/tasks/templates', label: '任务模板', kicker: 'TEMPLATES' },
+       { key: 'tasks-workers', path: '/tasks/workers', label: 'Worker / 引擎', kicker: 'WORKERS' }
+     ]
+  },
+  {
+     key: 'findings', label: 'Findings', icon: <ShieldExclamationIcon className="w-[18px] h-[18px]" />,
+     children: [
+       { key: 'findings-list', path: '/findings', label: '漏洞结果', kicker: 'THREAT INTELLIGENCE' },
+       { key: 'findings-evidences', path: '/findings/evidences', label: '证据管理', kicker: 'EVIDENCES' },
+       { key: 'findings-reports', path: '/findings/reports', label: '报告中心', kicker: 'REPORTS' }
+     ]
+  },
+  {
+     key: 'iam', label: 'IAM', icon: <UsersIcon className="w-[18px] h-[18px]" />,
+     children: [
+       { key: 'iam-users', path: '/iam/users', label: '用户管理', kicker: 'USERS' },
+       { key: 'iam-roles', path: '/iam/roles', label: '角色与权限', kicker: 'ROLES' },
+       { key: 'iam-audits', path: '/iam/audits', label: '审计日志', kicker: 'AUDIT TRAIL' }
+     ]
+  },
+  {
+     key: 'system', label: 'System', icon: <WrenchScrewdriverIcon className="w-[18px] h-[18px]" />,
+     children: [
+       { key: 'system-health', path: '/system/health', label: '系统健康', kicker: 'HEALTH' },
+       { key: 'system-version', path: '/system/version', label: '系统版本', kicker: 'VERSION' },
+       { key: 'system-settings', path: '/system/settings', label: '系统设置', kicker: 'SETTINGS', permission: 'settings:manage' }
+     ]
+  }
+]
+
+export interface SubMenuSection {
+  key: string
+  label: string
+  icon?: React.ReactNode
+  permission?: string
+  items: SubMenu[]
+}
+
 export function ConsoleLayout() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -35,42 +99,60 @@ export function ConsoleLayout() {
   const clearSession = useAuthStore((state) => state.clearSession)
   const [logoutPending, setLogoutPending] = useState(false)
   const { theme, setTheme } = useTheme()
+  const [expandedKey, setExpandedKey] = useState<string | null>(null)
 
-  const systemItems = useMemo(
-    () => [
-      { key: 'system-health', path: '/system/health', label: '系统健康', icon: <HomeIcon className="w-[18px] h-[18px]" /> },
-      { key: 'system-version', path: '/system/version', label: '系统版本', icon: <CodeBracketIcon className="w-[18px] h-[18px]" /> },
-      { key: 'system-settings', path: '/system/settings', label: '系统设置', icon: <Cog6ToothIcon className="w-[18px] h-[18px]" />, permission: 'settings:manage' },
-    ],
-    [],
-  )
+  const toggleGroup = (key: string) => {
+    setExpandedKey(prev => prev === key ? null : key)
+  }
 
-  const iamItems = useMemo(
-    () => [
-      { key: 'iam-users', path: '/iam/users', label: '用户管理', icon: <UsersIcon className="w-[18px] h-[18px]" />, permission: 'user:read' },
-      { key: 'iam-audits', path: '/iam/audits', label: '审计日志', icon: <ClockIcon className="w-[18px] h-[18px]" />, permission: 'audit:read' },
-    ],
-    [],
-  )
+  const permissions = useMemo(() => {
+    return currentUser?.permissions || []
+  }, [currentUser])
 
-  const permissions = currentUser?.permissions || []
-  const visibleSystemItems = systemItems.filter((item) => !item.permission || permissions.includes(item.permission))
-  const visibleIAMItems = iamItems.filter((item) => !item.permission || permissions.includes(item.permission))
-  const allItems = [...visibleSystemItems, ...visibleIAMItems]
+  // 展开哪些带子菜单模块（当前策略：默认全部呈开，如果空间过小才折叠。由于只有6大项，直接展开显示更好）
+  
+  // 计算过滤后的菜单项
+  const filteredMenu: SubMenuSection[] = useMemo(() => {
+    return MENU_CONFIG.map(section => {
+      // 检测父权限
+      if (section.permission && !permissions.includes(section.permission)) return null
 
-  const selectedKey = useMemo(() => {
-    if (location.pathname.includes('/iam/users')) return 'iam-users'
-    if (location.pathname.includes('/iam/audits')) return 'iam-audits'
-    if (location.pathname.includes('/system/version')) return 'system-version'
-    if (location.pathname.includes('/system/settings')) return 'system-settings'
-    return 'system-health'
-  }, [location.pathname])
+      // 过滤子项权限
+      const visibleChildren = section.children.filter(c => !c.permission || permissions.includes(c.permission))
 
-  const routeMeta = routeMetaMap[selectedKey as keyof typeof routeMetaMap] || routeMetaMap['system-health']
+      if (visibleChildren.length === 0) return null
 
-  const handleMenuClick = (key: string) => {
-    const target = allItems.find((item) => item.key === key)
-    if (target) navigate(target.path)
+      return {
+        ...section,
+        items: visibleChildren
+      }
+    })
+    .filter(section => section !== null) as SubMenuSection[]
+  }, [permissions])
+
+  // 计算扁平路由的当前高亮项
+  const flatMenus = useMemo(() => {
+    return filteredMenu.flatMap(m => m.items.map(c => ({
+      ...c, parentKey: m.key, parentLabel: m.label
+    })))
+  }, [filteredMenu])
+
+  const selectedSub = useMemo(() => {
+    // Exact or partial match logic
+    const path = location.pathname
+    // 如果是带 ID 的详情页如 /assets/123，仍然高亮 /assets，采用倒序长度匹配等
+    const matches = flatMenus.filter(m => path.startsWith(m.path)).sort((a, b) => b.path.length - a.path.length)
+    return matches.length > 0 ? matches[0] : flatMenus[0]
+  }, [location.pathname, flatMenus])
+
+  useEffect(() => {
+    if (selectedSub?.parentKey) {
+      setExpandedKey(selectedSub.parentKey)
+    }
+  }, [selectedSub?.parentKey])
+
+  const handleMenuClick = (path: string) => {
+    navigate(path)
   }
 
   const handleLogout = async () => {
@@ -78,7 +160,7 @@ export function ConsoleLayout() {
     try {
       await logout()
     } catch {
-      // 后端当前为无状态 JWT，退出接口失败不影响本地清理。
+      // ignore
     } finally {
       clearSession()
       setLogoutPending(false)
@@ -86,47 +168,14 @@ export function ConsoleLayout() {
     }
   }
 
-  const renderMenuItem = (item: typeof allItems[0]) => {
-    const isSelected = selectedKey === item.key
-    return (
-      <button
-        key={item.key}
-        onClick={() => handleMenuClick(item.key)}
-        className={`
-          w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all duration-300 text-left group relative
-          ${isSelected
-            ? 'bg-white/10 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
-            : 'text-apple-text-tertiary hover:bg-white/5 hover:text-apple-text-primary'
-          }
-        `}
-      >
-        {/* 选中指示器 */}
-        {isSelected && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-apple-blue-light rounded-full" />
-        )}
-        <span className={`flex-shrink-0 transition-colors duration-200 ${isSelected ? 'text-apple-blue-light' : 'text-apple-text-tertiary group-hover:text-apple-text-secondary'}`}>
-          {item.icon}
-        </span>
-        <span className={`text-[14px] font-medium tracking-tight transition-colors duration-200 ${isSelected ? 'font-semibold' : ''}`}>
-          {item.label}
-        </span>
-      </button>
-    )
-  }
-
   return (
     <div className="flex h-screen w-full bg-apple-black overflow-hidden">
-      {/* ===== 侧边栏 ===== */}
-      <aside className="w-[260px] flex-shrink-0 flex flex-col relative z-20 border-r border-apple-border">
-        {/* 磨砂玻璃背景层 */}
+      <aside className="w-[260px] flex-shrink-0 flex flex-col relative z-20 border-r border-apple-border custom-scrollbar">
         <div className="absolute inset-0 bg-apple-bg/90 backdrop-blur-2xl pointer-events-none" />
-        {/* 顶部微光渐变 */}
         <div className="absolute top-0 left-0 right-0 h-[200px] bg-gradient-to-b from-apple-blue/5 to-transparent pointer-events-none" />
 
         <div className="relative flex flex-col h-full">
-          {/* 品牌区 */}
           <div className="px-6 pt-8 pb-6 flex flex-col gap-3">
-            {/* Logo Mark */}
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-apple-blue to-apple-blue-light flex items-center justify-center shadow-lg shadow-apple-blue/30 flex-shrink-0">
                 <div className="grid grid-cols-2 gap-0.5 w-4 h-4">
@@ -143,32 +192,57 @@ export function ConsoleLayout() {
             </div>
           </div>
 
-          {/* 分割线 */}
           <div className="mx-6 mb-4 h-px bg-apple-border" />
 
-          {/* 导航区 */}
-          <div className="flex-1 overflow-y-auto px-4 flex flex-col gap-5">
-            {/* SYSTEM 组 */}
-            <div>
-              <div className="text-[10px] font-black text-apple-text-tertiary tracking-[0.25em] uppercase mb-2 px-3">System</div>
-              <nav className="flex flex-col gap-1">
-                {visibleSystemItems.map(renderMenuItem)}
-              </nav>
-            </div>
-
-            {/* IAM 组 */}
-            {visibleIAMItems.length > 0 && (
-              <div>
-                <div className="text-[10px] font-black text-apple-text-tertiary tracking-[0.25em] uppercase mb-2 px-3">Identity</div>
-                <nav className="flex flex-col gap-1">
-                  {visibleIAMItems.map(renderMenuItem)}
-                </nav>
-              </div>
-            )}
+          <div className="flex-1 overflow-y-auto px-4 flex flex-col gap-2 pb-8 mt-2">
+            {filteredMenu.map(group => {
+              const isExpanded = expandedKey === group.key
+              return (
+                <div key={group.key} className="flex flex-col">
+                  <button 
+                    onClick={() => toggleGroup(group.key)}
+                    className={`flex items-center justify-between gap-2 mb-1 px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-full text-left ${isExpanded ? 'text-apple-text-primary' : 'text-apple-text-tertiary hover:bg-white/5 hover:text-apple-text-secondary'}`}
+                  >
+                     <div className="flex items-center gap-2">
+                       <span className={`w-4 h-4 ${isExpanded ? 'text-apple-blue-light' : ''}`}>{group.icon}</span>
+                       <span className="text-[11px] font-black tracking-[0.2em] uppercase">{group.label}</span>
+                     </div>
+                     <span className="w-3.5 h-3.5 opacity-40">
+                       {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                     </span>
+                  </button>
+                  <div className={`grid transition-all duration-300 ease-in-out ${!isExpanded ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100 mb-2'}`}>
+                    <div className="overflow-hidden">
+                      <nav className="flex flex-col gap-1 pl-4 border-l border-white/5 ml-4 mt-1">
+                    {group.items.map(child => {
+                      const isSelected = selectedSub?.key === child.key
+                      return (
+                        <button
+                          key={child.key}
+                          onClick={() => handleMenuClick(child.path)}
+                          className={`
+                            w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 text-left group relative
+                            ${isSelected
+                              ? 'bg-apple-blue/10 text-apple-blue-light border border-apple-blue/20 shadow-inner'
+                              : 'text-apple-text-secondary hover:bg-white/5 hover:text-apple-text-primary border border-transparent'
+                            }
+                          `}
+                        >
+                          <span className={`text-[13px] font-medium tracking-tight transition-colors duration-200 ${isSelected ? 'font-bold' : ''}`}>
+                            {child.label}
+                          </span>
+                        </button>
+                      )
+                    })}
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
 
-          {/* 底部用户信息区 */}
-          <div className="px-4 pt-4 pb-6 flex flex-col gap-3">
+          <div className="px-4 pt-4 pb-6 flex flex-col gap-3 shrink-0">
             <div className="h-px bg-apple-border" />
             <div className="flex items-center gap-3 px-3 py-3 rounded-2xl bg-white/[0.04] border border-white/5">
               <Avatar
@@ -178,9 +252,9 @@ export function ConsoleLayout() {
               />
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="text-[13px] font-semibold text-apple-text-primary tracking-tight truncate leading-tight">
-                  {currentUser?.name || '未知用户'}
+                  {currentUser?.name || '未知身份'}
                 </span>
-                <span className="text-[11px] text-apple-text-tertiary truncate leading-tight">
+                <span className="text-[11px] text-apple-text-tertiary truncate leading-tight opacity-80 uppercase tracking-wider">
                   {currentUser?.role || '-'}
                 </span>
               </div>
@@ -189,38 +263,25 @@ export function ConsoleLayout() {
         </div>
       </aside>
 
-      {/* ===== 主体内容 ===== */}
       <main className="flex-1 flex flex-col min-w-0 bg-apple-black relative">
-        {/* 顶部状态栏 */}
         <header className="h-[60px] flex-shrink-0 flex items-center justify-between px-8 border-b border-apple-border bg-apple-bg/60 backdrop-blur-xl sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div>
-              <div className="text-[10px] font-black tracking-[0.25em] text-apple-text-tertiary uppercase leading-none mb-0.5">
-                {routeMeta.kicker}
+              <div className="text-[10px] font-black tracking-[0.25em] text-apple-text-tertiary uppercase leading-none mb-1">
+                {selectedSub?.parentLabel} / {selectedSub?.kicker}
               </div>
-              <h1 className="text-[16px] font-semibold text-apple-text-primary tracking-tight leading-tight">
-                {routeMeta.title}
+              <h1 className="text-[16px] font-bold text-apple-text-primary tracking-tight leading-tight">
+                {selectedSub?.label ?? 'ZVAS Console'}
               </h1>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 border border-apple-blue-light/30 text-apple-blue-light bg-apple-blue-light/8 text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full uppercase">
-                center
-              </span>
-              <span className="inline-flex items-center gap-1 border border-apple-green-light/30 text-apple-green-light bg-apple-green-light/8 text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-apple-green-light shadow-[0_0_4px_rgba(50,215,75,0.8)]" />
-                online
-              </span>
             </div>
           </div>
 
-          {/* 右侧操作区 */}
           <div className="flex items-center gap-2">
-            {/* 明暗主题切换按钮 */}
             <Button
               isIconOnly
               variant="flat"
               size="sm"
-              title={theme === 'dark' ? '切换至明亮模式' : '切换至深色模式'}
+              title={theme === 'dark' ? '切至明亮模式' : '切至深色模式'}
               onPress={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="bg-white/5 text-apple-text-tertiary hover:text-apple-text-primary rounded-xl border border-apple-border w-9 h-9 min-w-0"
             >
@@ -228,8 +289,6 @@ export function ConsoleLayout() {
                 ? <SunIcon className="w-4 h-4" />
                 : <MoonIcon className="w-4 h-4" />}
             </Button>
-
-            {/* 退出按钮 */}
             <Button
               isIconOnly
               variant="flat"
@@ -243,8 +302,7 @@ export function ConsoleLayout() {
           </div>
         </header>
 
-        {/* 页面内容注入点 */}
-        <div className="flex-1 overflow-y-auto p-8 relative">
+        <div className="flex-1 overflow-y-auto relative custom-scrollbar">
           <Outlet />
         </div>
       </main>

@@ -139,111 +139,115 @@ export function LoginPage() {
         </header>
 
         <form onSubmit={submit} className="flex flex-col gap-4 w-full" noValidate>
-          <Input
-            label="用户名"
-            name="username"
-            placeholder="管理员账户"
-            defaultValue="admin"
-            autoComplete="username"
-            size="lg"
-            variant="flat"
-            labelPlacement="outside"
-            startContent={<UserIcon className="w-5 h-5 text-apple-text-secondary flex-shrink-0" />}
-            classNames={{
-              base: "max-w-full group",
-              mainWrapper: "h-14 min-h-[56px]",
-              inputWrapper: [
-                "h-14 min-h-[56px]",
-                "bg-apple-bg/60",
-                "backdrop-blur-2xl",
-                "border border-white/[0.08]",
-                "rounded-[22px]",
-                "px-5",
-                "flex flex-row items-center",
-                "transition-all duration-300",
-                "hover:bg-apple-bg/80",
-                "hover:border-white/[0.12]",
-                "group-data-[focus=true]:bg-black",
-                "group-data-[focus=true]:border-apple-blue-light/50",
-                "group-data-[focus=true]:shadow-[0_0_0_1px_rgba(41,151,255,0.2)]",
-                "!cursor-text",
-              ].join(" "),
-              innerWrapper: "flex flex-row items-center gap-3 w-full h-full",
-              input: [
-                "text-[17px]",
-                "placeholder:text-apple-text-secondary",
-                "caret-apple-blue-light",
-                "bg-transparent",
-                "outline-none",
-                "border-none",
-                "focus:ring-0",
-                "p-0",
-                "m-0",
-                "h-full",
-                "w-full",
-                "flex-1",
-                "leading-relaxed",
-              ].join(" "),
-            }}
-          />
+          <div className="flex flex-col gap-2">
+            <label className="text-apple-text-secondary text-sm font-bold px-1">用户名</label>
+            <Input
+              name="username"
+              aria-label="用户名"
+              placeholder="管理员账户"
+              defaultValue="admin"
+              autoComplete="username"
+              size="lg"
+              variant="flat"
+              startContent={<UserIcon className="w-5 h-5 text-apple-text-secondary flex-shrink-0" />}
+              classNames={{
+                base: "max-w-full group",
+                mainWrapper: "h-14 min-h-[56px]",
+                inputWrapper: [
+                  "h-14 min-h-[56px]",
+                  "bg-apple-bg/60",
+                  "backdrop-blur-2xl",
+                  "border border-white/[0.08]",
+                  "rounded-[22px]",
+                  "px-5",
+                  "flex flex-row items-center",
+                  "transition-all duration-300",
+                  "hover:bg-apple-bg/80",
+                  "hover:border-white/[0.12]",
+                  "group-data-[focus=true]:bg-black",
+                  "group-data-[focus=true]:border-apple-blue-light/50",
+                  "group-data-[focus=true]:shadow-[0_0_0_1px_rgba(41,151,255,0.2)]",
+                  "!cursor-text",
+                ].join(" "),
+                innerWrapper: "flex flex-row items-center gap-3 w-full h-full",
+                input: [
+                  "text-[17px]",
+                  "placeholder:text-apple-text-secondary",
+                  "caret-apple-blue-light",
+                  "bg-transparent",
+                  "outline-none",
+                  "border-none",
+                  "focus:ring-0",
+                  "p-0",
+                  "m-0",
+                  "h-full",
+                  "w-full",
+                  "flex-1",
+                  "leading-relaxed",
+                ].join(" "),
+              }}
+            />
+          </div>
 
-          <Input
-            label="密码"
-            name="password"
-            type={isVisible ? "text" : "password"}
-            placeholder="安全口令"
-            defaultValue="Admin@123456"
-            autoComplete="current-password"
-            size="lg"
-            variant="flat"
-            labelPlacement="outside"
-            startContent={<LockClosedIcon className="w-5 h-5 text-apple-text-secondary flex-shrink-0" />}
-            endContent={
-              <button className="focus:outline-none p-1 -mr-1" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
-                {isVisible ? (
-                  <EyeSlashIcon className="w-5 h-5 text-apple-text-secondary transition-colors hover:text-apple-text-primary" />
-                ) : (
-                  <EyeIcon className="w-5 h-5 text-apple-text-secondary transition-colors hover:text-apple-text-primary" />
-                )}
-              </button>
-            }
-            classNames={{
-              base: "max-w-full group",
-              mainWrapper: "h-14 min-h-[56px]",
-              inputWrapper: [
-                "h-14 min-h-[56px]",
-                "bg-apple-bg/60",
-                "backdrop-blur-2xl",
-                "border border-white/[0.08]",
-                "rounded-[22px]",
-                "px-5",
-                "flex flex-row items-center",
-                "transition-all duration-300",
-                "hover:bg-apple-bg/80",
-                "hover:border-white/[0.12]",
-                "group-data-[focus=true]:bg-black",
-                "group-data-[focus=true]:border-apple-blue-light/50",
-                "group-data-[focus=true]:shadow-[0_0_0_1px_rgba(41,151,255,0.2)]",
-                "!cursor-text",
-              ].join(" "),
-              innerWrapper: "flex flex-row items-center gap-3 w-full h-full",
-              input: [
-                "text-[17px]",
-                "placeholder:text-apple-text-secondary",
-                "caret-apple-blue-light",
-                "bg-transparent",
-                "outline-none",
-                "border-none",
-                "focus:ring-0",
-                "p-0",
-                "m-0",
-                "h-full",
-                "w-full",
-                "flex-1",
-                "leading-relaxed",
-              ].join(" "),
-            }}
-          />
+          <div className="flex flex-col gap-2">
+            <label className="text-apple-text-secondary text-sm font-bold px-1">密码</label>
+            <Input
+              name="password"
+              aria-label="密码"
+              type={isVisible ? "text" : "password"}
+              placeholder="安全口令"
+              defaultValue="Admin@123456"
+              autoComplete="current-password"
+              size="lg"
+              variant="flat"
+              startContent={<LockClosedIcon className="w-5 h-5 text-apple-text-secondary flex-shrink-0" />}
+              endContent={
+                <button className="focus:outline-none p-1 -mr-1" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
+                  {isVisible ? (
+                    <EyeSlashIcon className="w-5 h-5 text-apple-text-secondary transition-colors hover:text-apple-text-primary" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5 text-apple-text-secondary transition-colors hover:text-apple-text-primary" />
+                  )}
+                </button>
+              }
+              classNames={{
+                base: "max-w-full group",
+                mainWrapper: "h-14 min-h-[56px]",
+                inputWrapper: [
+                  "h-14 min-h-[56px]",
+                  "bg-apple-bg/60",
+                  "backdrop-blur-2xl",
+                  "border border-white/[0.08]",
+                  "rounded-[22px]",
+                  "px-5",
+                  "flex flex-row items-center",
+                  "transition-all duration-300",
+                  "hover:bg-apple-bg/80",
+                  "hover:border-white/[0.12]",
+                  "group-data-[focus=true]:bg-black",
+                  "group-data-[focus=true]:border-apple-blue-light/50",
+                  "group-data-[focus=true]:shadow-[0_0_0_1px_rgba(41,151,255,0.2)]",
+                  "!cursor-text",
+                ].join(" "),
+                innerWrapper: "flex flex-row items-center gap-3 w-full h-full",
+                input: [
+                  "text-[17px]",
+                  "placeholder:text-apple-text-secondary",
+                  "caret-apple-blue-light",
+                  "bg-transparent",
+                  "outline-none",
+                  "border-none",
+                  "focus:ring-0",
+                  "p-0",
+                  "m-0",
+                  "h-full",
+                  "w-full",
+                  "flex-1",
+                  "leading-relaxed",
+                ].join(" "),
+              }}
+            />
+          </div>
 
           <Button
             type="submit"
