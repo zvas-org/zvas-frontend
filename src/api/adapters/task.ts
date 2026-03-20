@@ -66,6 +66,21 @@ export interface TaskSnapshotAssetVM {
   updated_at: string
 }
 
+export interface TaskRecordVM {
+  unit_id: string
+  task_id: string
+  stage: string
+  topic: string
+  target_key: string
+  status: string
+  worker_id: string
+  attempt: number
+  started_at?: string
+  finished_at?: string
+  duration_ms: number
+  result_summary: string
+}
+
 function mapToTaskListItemVM(dto: any): TaskListItemVM {
   return {
     id: dto.id || dto.task_id || '',
@@ -136,6 +151,23 @@ function mapToTaskSnapshotAssetVM(dto: any): TaskSnapshotAssetVM {
   }
 }
 
+function mapToTaskRecordVM(dto: any): TaskRecordVM {
+  return {
+    unit_id: dto.unit_id || '',
+    task_id: dto.task_id || '',
+    stage: dto.stage || '',
+    topic: dto.topic || '',
+    target_key: dto.target_key || '',
+    status: dto.status || 'queued',
+    worker_id: dto.worker_id || '',
+    attempt: dto.attempt ?? 0,
+    started_at: dto.started_at || '',
+    finished_at: dto.finished_at || '',
+    duration_ms: dto.duration_ms ?? dto.duration_ms ?? 0,
+    result_summary: dto.result_summary || '',
+  }
+}
+
 export function useTasks(params: { page?: number; page_size?: number; keyword?: string; status?: string; asset_pool_id?: string; template_code?: string; sort?: string; order?: string }) {
   return useQuery({
     queryKey: ['tasks', params],
@@ -197,10 +229,33 @@ export function useTaskSnapshotAssets(
   })
 }
 
-// ─── 统一任务创建 ────────────────────────────────────────────────────────────
+export function useTaskRecords(
+  id?: string,
+  params?: {
+    page?: number
+    page_size?: number
+    stage?: string
+    status?: string
+    keyword?: string
+    sort?: string
+    order?: string
+  },
+) {
+  return useQuery({
+    queryKey: ['tasks', id, 'records', params],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/tasks/${id}/records`, { params })
+      return {
+        ...res.data,
+        data: (res.data.data || []).map(mapToTaskRecordVM),
+      }
+    },
+    enabled: Boolean(id),
+    refetchInterval: 5000,
+  })
+}
 
 export interface CreateTaskAssetPoolConfig {
-  /** 'create' = 同时创建新资产池；'existing' = 归并到已有资产池 */
   mode: 'create' | 'existing'
   asset_pool_id?: string
   name?: string
@@ -224,17 +279,14 @@ export interface CreateTaskTargetSetRequest {
 }
 
 export interface CreateTaskRequest {
-  /** 'from_pool' = 基于已有资产池；'ad_hoc' = 直接传入目标 */
   mode: 'from_pool' | 'ad_hoc'
   name: string
   template_code: string
-  /** from_pool 模式 */
   asset_pool_id?: string
   target_set_request?: CreateTaskTargetSetRequest
   manual_append?: string[]
   stage_overrides?: Record<string, boolean>
   params?: Record<string, string>
-  /** ad_hoc 模式 */
   asset_pool?: CreateTaskAssetPoolConfig
   input?: CreateTaskInputConfig
 }
@@ -255,6 +307,14 @@ export function useCreateTask() {
         asset_pool_id: d.asset_pool_id || req.asset_pool_id || '',
         target_set_id: d.target_set_id,
       }
+    },
+  })
+}
+
+export function useRunTask() {
+  return useMutation({
+    mutationFn: async (taskId: string): Promise<void> => {
+      await httpClient.post(`/tasks/${taskId}/run`, {})
     },
   })
 }

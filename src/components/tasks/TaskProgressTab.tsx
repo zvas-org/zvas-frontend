@@ -1,71 +1,82 @@
-import { Skeleton, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/react'
+import { Progress, Skeleton } from '@heroui/react'
 import type { TaskProgressVM } from '@/api/adapters/task'
+
+function percent(done: number, total: number) {
+  if (!total) return 0
+  return Math.min(100, Math.round((done / total) * 100))
+}
+
+function stageLabel(stage: string) {
+  switch (stage) {
+    case 'port_scan':
+      return '端口扫描'
+    case 'http_probe':
+      return '首页识别'
+    case 'asset_expand':
+      return '资产扩展'
+    case 'scope_filter':
+      return '范围过滤'
+    default:
+      return stage || '未知阶段'
+  }
+}
 
 export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
   if (!progress) return <Skeleton className="h-64 rounded-2xl bg-white/5" />
 
+  const finished = (progress.succeeded || 0) + (progress.failed || 0)
+  const overall = percent(finished, progress.total_units || 0)
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500">
-      <div className="bg-white/[0.02] border border-white/5 p-8 rounded-2xl flex flex-col gap-8">
-         <h3 className="text-sm font-bold text-white w-full border-b border-white/5 pb-2">算子流调度指征负荷仪 (Global Flow Dispatch Metrics)</h3>
-         <div className="flex justify-between items-center w-full px-4 gap-6 flex-wrap">
-            <div className="flex flex-col border-r border-white/5 pr-8">
-               <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.2em] uppercase mb-1">总计作业指令批</span>
-               <span className="text-4xl font-mono text-white font-black">{progress.total_units || 0}</span>
-            </div>
-            <div className="flex flex-col border-r border-white/5 pr-8">
-               <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.2em] uppercase mb-1">就绪停放队列层</span>
-               <span className="text-4xl font-mono text-apple-text-tertiary font-black">{progress.queued || 0}</span>
-            </div>
-            <div className="flex flex-col border-r border-white/5 pr-8">
-               <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.2em] uppercase mb-1">出列下沉推测</span>
-               <span className="text-4xl font-mono text-apple-blue font-black drop-shadow-md">{progress.dispatched || 0}</span>
-            </div>
-            <div className="flex flex-col border-r border-white/5 pr-8">
-               <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.2em] uppercase mb-1">引擎处理消耗态</span>
-               <span className="text-4xl font-mono text-apple-amber font-black drop-shadow-md">{progress.running || 0}</span>
-            </div>
-            <div className="flex flex-col border-r border-white/5 pr-8">
-               <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.2em] uppercase mb-1">顺利归档收口签</span>
-               <span className="text-4xl font-mono text-apple-green font-black drop-shadow-md">{progress.succeeded || 0}</span>
-            </div>
-            <div className="flex flex-col pr-8">
-               <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.2em] uppercase mb-1">失败退回或阻截</span>
-               <span className="text-4xl font-mono text-apple-red font-black drop-shadow-md">{progress.failed || 0}</span>
-            </div>
-         </div>
+    <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {[
+          { label: '总单元数', value: progress.total_units || 0 },
+          { label: '已完成', value: finished },
+          { label: '运行中', value: progress.running || 0 },
+          { label: '失败', value: progress.failed || 0 },
+          { label: '总体进度', value: `${overall}%` },
+        ].map((card) => (
+          <div key={card.label} className="bg-white/[0.02] border border-white/10 p-5 rounded-[24px] backdrop-blur-3xl">
+            <div className="text-[10px] text-apple-text-tertiary uppercase tracking-[0.2em] font-black mb-2">{card.label}</div>
+            <div className="text-3xl font-black text-white">{card.value}</div>
+          </div>
+        ))}
       </div>
 
-      <div className="border border-white/10 rounded-2xl bg-white/[0.01] overflow-hidden">
-         <div className="p-5 border-b border-white/5 text-sm font-bold text-white bg-white/5">解析管道运行流状态跟踪列表 (Execution Pipeline)</div>
-         <Table removeWrapper aria-label="Stages Table" classNames={{ th: "bg-white/5 text-[10px] font-black tracking-widest text-apple-text-secondary border-b border-white/10 lowercase", td: "border-b border-white/5 py-4 text-sm" }}>
-           <TableHeader>
-             <TableColumn width={280}>算子阶段级阶 (Stage Code)</TableColumn>
-             <TableColumn width={100} align="center">解析域计</TableColumn>
-             <TableColumn width={100} align="center">挂起数待</TableColumn>
-             <TableColumn width={100} align="center">队列占仓</TableColumn>
-             <TableColumn width={100} align="center">指令出射</TableColumn>
-             <TableColumn width={100} align="center">引擎灼烧</TableColumn>
-             <TableColumn width={100} align="center">平滑退离</TableColumn>
-             <TableColumn width={100} align="center">事故阻截</TableColumn>
-           </TableHeader>
-           <TableBody emptyContent={<div className="py-20 text-apple-text-tertiary uppercase font-black text-xs tracking-widest">目前管线尚未启动或截获任何算子单元。</div>}>
-              {(progress.stages || []).map((st, i: number) => (
-                 <TableRow key={i}>
-                   <TableCell><span className="font-mono font-bold text-apple-blue-light">{st.stage}</span></TableCell>
-                   <TableCell><span className="font-mono text-white text-center block w-full">{st.total_units ?? 0}</span></TableCell>
-                   <TableCell><span className="font-mono text-apple-text-tertiary text-center block w-full opacity-60">{st.pending ? 1 : 0}</span></TableCell>
-                   <TableCell><span className="font-mono text-apple-text-tertiary text-center block w-full opacity-80">{st.queued ?? 0}</span></TableCell>
-                   <TableCell><span className="font-mono text-apple-blue text-center block w-full">{st.dispatched ?? 0}</span></TableCell>
-                   <TableCell><span className="font-mono text-apple-amber text-center block w-full font-bold">{st.running ?? 0}</span></TableCell>
-                   <TableCell><span className="font-mono text-apple-green text-center block w-full">{st.succeeded ?? 0}</span></TableCell>
-                   <TableCell><span className="font-mono text-apple-red text-center block w-full">{st.failed ?? 0}</span></TableCell>
-                 </TableRow>
-              ))}
-           </TableBody>
-         </Table>
-       </div>
+      <div className="bg-white/[0.02] border border-white/10 p-6 rounded-[24px] backdrop-blur-3xl">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-black text-white">总体进度</h3>
+          <span className="text-sm font-bold text-apple-text-secondary">{finished} / {progress.total_units || 0}</span>
+        </div>
+        <Progress value={overall} color={progress.failed > 0 ? 'warning' : 'primary'} classNames={{ track: 'bg-white/5', indicator: progress.failed > 0 ? 'bg-apple-amber' : 'bg-apple-blue', label: 'text-white' }} />
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/10 p-6 rounded-[24px] backdrop-blur-3xl flex flex-col gap-5">
+        <h3 className="text-lg font-black text-white">阶段进度</h3>
+        {(progress.stages || []).map((stage) => {
+          const stageDone = (stage.succeeded || 0) + (stage.failed || 0)
+          const stageTotal = stage.total_units || 0
+          const stageProgress = percent(stageDone, stageTotal)
+          return (
+            <div key={stage.stage} className="flex flex-col gap-2 border border-white/5 rounded-2xl px-4 py-4 bg-white/[0.01]">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-black text-white">{stageLabel(stage.stage)}</div>
+                  <div className="text-xs text-apple-text-tertiary">
+                    {stage.pending && stageTotal === 0 ? '等待生成扫描单元' : `完成 ${stageDone} / ${stageTotal}`}
+                  </div>
+                </div>
+                <div className="text-xs text-apple-text-secondary text-right">
+                  <div>运行中 {stage.running || 0}</div>
+                  <div>失败 {stage.failed || 0}</div>
+                </div>
+              </div>
+              <Progress value={stage.pending && stageTotal === 0 ? 0 : stageProgress} color={stage.failed > 0 ? 'warning' : 'success'} classNames={{ track: 'bg-white/5', indicator: stage.failed > 0 ? 'bg-apple-amber' : 'bg-apple-green' }} />
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

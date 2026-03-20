@@ -3,16 +3,27 @@ import {
   Tabs,
   Tab,
   Skeleton,
+  Chip,
 } from '@heroui/react'
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
 
-import { useTaskDetail, useTaskProgress } from '@/api/adapters/task'
+import { useTaskDetail, useTaskProgress, useRunTask } from '@/api/adapters/task'
 import { TaskOverviewTab } from '@/components/tasks/TaskOverviewTab'
 import { TaskSnapshotInputTab } from '@/components/tasks/TaskSnapshotInputTab'
 import { TaskSnapshotExpandedTab } from '@/components/tasks/TaskSnapshotExpandedTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
+import { TaskRecordsTab } from '@/components/tasks/TaskRecordsTab'
+
+const STATUS_CONFIG: Record<string, { label: string; color: 'default' | 'primary' | 'success' | 'danger' | 'warning' }> = {
+  draft: { label: '草稿', color: 'default' },
+  queued: { label: '排队中', color: 'primary' },
+  running: { label: '执行中', color: 'warning' },
+  succeeded: { label: '已完成', color: 'success' },
+  failed: { label: '已失败', color: 'danger' },
+  stopped: { label: '已终止', color: 'danger' },
+}
 
 export function TaskDetailPage() {
   const { id } = useParams()
@@ -20,8 +31,10 @@ export function TaskDetailPage() {
 
   const detailQuery = useTaskDetail(id)
   const progressQuery = useTaskProgress(id)
+  const runTask = useRunTask()
 
   const [activeTab, setActiveTab] = useState('overview')
+  const [runError, setRunError] = useState<string | null>(null)
 
   if (detailQuery.isPending) {
     return (
@@ -38,22 +51,33 @@ export function TaskDetailPage() {
   if (detailQuery.isError || !task) {
     return (
       <div className="flex flex-col items-center justify-center p-20 gap-4 text-apple-red text-sm h-[50vh]">
-        <span className="font-bold tracking-widest text-lg">当前任务调度栈记录丢失或凭证无效</span>
-        <Button variant="flat" onPress={() => navigate('/tasks')} className="bg-white/5 text-white border border-white/10 rounded-xl px-8 font-bold mt-4">放弃监听并返回</Button>
+        <span className="font-bold tracking-widest text-lg">当前任务记录不存在或无法访问</span>
+        <Button variant="flat" onPress={() => navigate('/tasks')} className="bg-white/5 text-white border border-white/10 rounded-xl px-8 font-bold mt-4">返回任务列表</Button>
       </div>
     )
+  }
+
+  const statusCfg = STATUS_CONFIG[task.status] ?? { label: task.status, color: 'default' as const }
+
+  const handleRunTask = () => {
+    if (!id) return
+    setRunError(null)
+    runTask.mutate(id, {
+      onSuccess: () => {
+        detailQuery.refetch()
+        progressQuery.refetch()
+      },
+      onError: () => {
+        setRunError('任务启动失败，请稍后重试')
+      },
+    })
   }
 
   return (
     <div className="flex flex-col gap-6 w-full text-apple-text-primary animate-in fade-in duration-1000 max-w-[1600px] mx-auto pb-20 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            isIconOnly
-            variant="flat"
-            className="rounded-full bg-white/5 border border-white/5 text-apple-text-secondary h-12 w-12 hover:scale-105 hover:bg-white/10 transition-transform"
-            onPress={() => navigate('/tasks')}
-          >
+          <Button isIconOnly variant="flat" className="rounded-full bg-white/5 border border-white/5 text-apple-text-secondary h-12 w-12 hover:scale-105 hover:bg-white/10 transition-transform" onPress={() => navigate('/tasks')}>
             <ChevronLeftIcon className="w-5 h-5 ml-[-2px]" />
           </Button>
           <div className="flex flex-col">
@@ -61,33 +85,36 @@ export function TaskDetailPage() {
             <div className="flex items-center gap-2">
               <span className="text-xs text-apple-text-tertiary font-mono">{task.id}</span>
               <span className="w-1 h-1 rounded-full bg-apple-text-tertiary"></span>
-              <span className="text-[10px] uppercase font-black text-apple-border tracking-wider">执行记录轴</span>
+              <span className="text-[10px] uppercase font-black text-apple-border tracking-wider">运行视图</span>
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
-          <div className="px-4 py-2 rounded-lg border border-white/10 bg-white/[0.03] text-right">
-            <div className="text-[10px] uppercase tracking-[0.2em] font-black text-apple-text-tertiary">Task Status</div>
-            <div className="text-sm font-black text-white mt-1">{task.status}</div>
-          </div>
+
+        <div className="flex items-center gap-3">
+          <Chip color={statusCfg.color} variant="flat" classNames={{ base: 'h-9 px-3', content: 'font-black text-[11px] uppercase tracking-wider' }}>
+            {statusCfg.label}
+          </Chip>
+          {task.status === 'draft' && (
+            <Button color="primary" className="h-10 rounded-xl font-black px-6 shadow-lg shadow-apple-blue/20 flex items-center gap-2" isLoading={runTask.isPending} isDisabled={runTask.isPending} onPress={handleRunTask} startContent={!runTask.isPending ? <PlayIcon className="w-4 h-4" /> : undefined}>
+              启动任务
+            </Button>
+          )}
         </div>
       </div>
 
+      {runError && (
+        <div className="flex items-center gap-3 px-5 py-3 rounded-[16px] bg-apple-red/10 border border-apple-red/30 text-apple-red-light text-[13px] font-bold animate-in fade-in duration-300">
+          <span>{runError}</span>
+          <button onClick={() => setRunError(null)} className="ml-auto text-apple-text-tertiary hover:text-white transition-colors text-lg">×</button>
+        </div>
+      )}
+
       <div className="border-b border-white/5 mt-2">
-        <Tabs
-          aria-label="Task Options"
-          selectedKey={activeTab}
-          onSelectionChange={(k) => setActiveTab(k as string)}
-          variant="underlined"
-          classNames={{
-            tabList: 'gap-6 p-0',
-            cursor: 'bg-apple-blue h-[2px] w-full',
-            tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors',
-          }}
-        >
+        <Tabs aria-label="Task Options" selectedKey={activeTab} onSelectionChange={(k) => setActiveTab(k as string)} variant="underlined" classNames={{ tabList: 'gap-6 p-0', cursor: 'bg-apple-blue h-[2px] w-full', tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors' }}>
           <Tab key="overview" title="概览" />
           <Tab key="target" title="扫描目标" />
           <Tab key="expanded" title="本次发现资产" />
+          <Tab key="records" title="扫描记录" />
           <Tab key="progress" title="执行进度" />
           <Tab key="findings" title="扫描结果" />
           <Tab key="reports" title="报告" />
@@ -98,6 +125,7 @@ export function TaskDetailPage() {
         {activeTab === 'overview' && <TaskOverviewTab task={task} />}
         {activeTab === 'target' && <TaskSnapshotInputTab task={task} />}
         {activeTab === 'expanded' && <TaskSnapshotExpandedTab task={task} />}
+        {activeTab === 'records' && <TaskRecordsTab taskId={task.id} />}
         {activeTab === 'progress' && <TaskProgressTab progress={progress} />}
         {activeTab === 'findings' && <PlaceholderTab title="待模块接入" desc="此页面保留为以后开放扫描结果的专门呈现。当前暂无真实业务数据。" />}
         {activeTab === 'reports' && <PlaceholderTab title="待模块接入" desc="系统将在扫描结束后统一生成分析报表，当前模块暂未开放。" />}
