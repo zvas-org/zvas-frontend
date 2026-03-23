@@ -28,7 +28,7 @@ import {
   ServerStackIcon 
 } from '@heroicons/react/24/outline'
 
-import { useAssetPools, useDeleteAssetPool, getAssetPoolStatusInfo } from '@/api/adapters/asset'
+import { useAssetPools, useDeleteAssetPool } from '@/api/adapters/asset'
 import { CreateAssetPoolModal } from '@/components/assets/CreateAssetPoolModal'
 import { ManualInputModal } from '@/components/assets/ManualInputModal'
 import { FileImportModal } from '@/components/assets/FileImportModal'
@@ -81,7 +81,7 @@ export function AssetPoolsPage() {
     <div className="flex flex-col gap-14 w-full text-apple-text-primary animate-in fade-in duration-1000 max-w-[1600px] mx-auto pb-20 p-4 md:p-8">
       
       {/* 紧凑型指标概览区 (iPhone 风格) */}
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[130px]">
+      {/* <section className="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[130px]">
         <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
             <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Pools_Vault</span>
@@ -117,7 +117,7 @@ export function AssetPoolsPage() {
             )}
           </CardBody>
         </Card>
-      </section>
+      </section> */}
 
       {/* 操作与搜索胶囊栏 */}
       <section className="flex flex-col md:flex-row items-center gap-4 w-full">
@@ -259,19 +259,12 @@ export function AssetPoolsPage() {
               loadingContent={<Skeleton className="rounded-xl w-full h-40 bg-white/5" />}
             >
               {items.map((pool) => {
-                const statusInfo = getAssetPoolStatusInfo(pool.status)
-                const isDeleting = statusInfo.isDeleting
                 return (
-                  <TableRow key={pool.id} className={isDeleting ? 'opacity-60 grayscale' : 'cursor-pointer'} onClick={() => !isDeleting && navigate(`/assets/${pool.id}`)}>
+                  <TableRow key={pool.id} className="cursor-pointer" onClick={() => navigate(`/assets/${pool.id}`)}>
                     <TableCell>
                       <div className="flex flex-col gap-0.5 max-w-[200px]">
                         <div className="flex items-center gap-2">
                           <span className="text-base font-bold text-white tracking-tight leading-tight truncate">{pool.name}</span>
-                          {isDeleting && (
-                            <span className="text-[9px] bg-apple-red/10 border border-apple-red/20 text-apple-red-light px-1.5 py-0.5 rounded uppercase font-black animate-pulse">
-                              {statusInfo.label}
-                            </span>
-                          )}
                         </div>
                         <span className="text-[11px] text-apple-text-tertiary font-mono tracking-tighter uppercase opacity-60">ID:{pool.id.substring(0,8)}</span>
                       </div>
@@ -320,7 +313,6 @@ export function AssetPoolsPage() {
                           variant="bordered"
                           className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
                           onPress={() => navigate(`/assets/${pool.id}`)}
-                          isDisabled={isDeleting}
                         >
                           详情
                         </Button>
@@ -330,7 +322,6 @@ export function AssetPoolsPage() {
                           color="danger"
                           className="rounded-full bg-apple-red/10 text-apple-red-light border border-apple-red/20 font-bold h-8 px-4"
                           onPress={() => { setTargetPool(pool); setDeleteVisible(true) }}
-                          isDisabled={isDeleting}
                         >
                           删除
                         </Button>
@@ -399,9 +390,9 @@ export function AssetPoolsPage() {
       <ConfirmModal
         isOpen={deleteVisible}
         onClose={() => { setDeleteVisible(false); setTargetPool(null) }}
-        title="确认受理资产池删除？"
-        message={`您确定要受理资产池 "${targetPool?.name}" 的删除请求吗？此操作将立即停止该池下的所有关联任务。后台异步清理完成前，该池将保持“删除中”状态且不可操作。此过程不可恢复。`}
-        confirmText="受理删除"
+        title="确认释放资产池？"
+        message={`您确定要删除资产池 "${targetPool?.name}" 吗？删除后相关联的任务将自动废置。确认后该项将立即从列表中移除，相关数据将在后台异步清理。`}
+        confirmText="确认删除"
         confirmColor="danger"
         isLoading={deleteMutation.isPending}
         onConfirm={async () => {

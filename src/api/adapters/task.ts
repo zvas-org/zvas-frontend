@@ -184,8 +184,13 @@ export function getTaskStatusInfo(status: string, desiredState: string): TaskSta
   if (desiredState === 'paused') {
     return { label: '已暂停', color: 'warning', isRunning: false, canPause: false, canResume: true, canStop: true }
   }
-  if (desiredState === 'stopped') {
+  if (desiredState === 'stopped' || status === 'stopped') {
     return { label: '已停止', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
+  }
+
+  // 状态机补充
+  if (status === 'deleted') {
+    return { label: '已废弃', color: 'danger', isRunning: false, canPause: false, canResume: false, canStop: false }
   }
 
   // 运行状态逻辑
@@ -198,8 +203,6 @@ export function getTaskStatusInfo(status: string, desiredState: string): TaskSta
       return { label: '已完成', color: 'success', isRunning: false, canPause: false, canResume: false, canStop: false }
     case 'failed':
       return { label: '已失败', color: 'danger', isRunning: false, canPause: false, canResume: false, canStop: false }
-    case 'stopped':
-      return { label: '已停止', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
     default:
       return { label: status || '未知', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
   }

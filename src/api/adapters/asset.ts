@@ -155,10 +155,10 @@ export interface AssetPoolStatusInfo {
 
 export function getAssetPoolStatusInfo(status: string): AssetPoolStatusInfo {
   switch (status) {
-    case 'deleting':
-      return { label: '删除中', color: 'danger', isDeleting: true }
     case 'active':
       return { label: '活跃', color: 'success', isDeleting: false }
+    case 'deleted':
+      return { label: '已删除', color: 'danger', isDeleting: false }
     default:
       return { label: status || '正常', color: 'default', isDeleting: false }
   }
