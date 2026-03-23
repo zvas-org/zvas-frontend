@@ -16,7 +16,7 @@ import {
   Card,
   CardBody,
 } from '@heroui/react'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   MagnifyingGlassIcon, 
@@ -67,15 +67,15 @@ export function AssetPoolsPage() {
   const total = poolsQuery.data?.pagination?.total || 0
   const totalPages = Math.ceil(total / pageSize)
   
-  const metrics = useMemo(() => {
-    const dataItems = poolsQuery.data?.data || []
-    return {
-      totalPools: total,
-      totalAssets: dataItems.reduce((sum, item) => sum + (item.asset_count || 0), 0),
-      totalTasks: dataItems.reduce((sum, item) => sum + (item.task_count || 0), 0),
-      totalFindings: dataItems.reduce((sum, item) => sum + (item.finding_count || 0), 0),
-    }
-  }, [poolsQuery.data?.data, total])
+  // const metrics = useMemo(() => {
+  //   const dataItems = poolsQuery.data?.data || []
+  //   return {
+  //     totalPools: total,
+  //     totalAssets: dataItems.reduce((sum, item) => sum + (item.asset_count || 0), 0),
+  //     totalTasks: dataItems.reduce((sum, item) => sum + (item.task_count || 0), 0),
+  //     totalFindings: dataItems.reduce((sum, item) => sum + (item.finding_count || 0), 0),
+  //   }
+  // }, [poolsQuery.data?.data, total])
 
   return (
     <div className="flex flex-col gap-14 w-full text-apple-text-primary animate-in fade-in duration-1000 max-w-[1600px] mx-auto pb-20 p-4 md:p-8">
