@@ -9,20 +9,13 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
 
-import { useTaskDetail, useTaskProgress, useRunTask } from '@/api/adapters/task'
+import { useTaskDetail, useTaskProgress, useRunTask, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
 import { TaskOverviewTab } from '@/components/tasks/TaskOverviewTab'
 import { TaskAssetViewTab } from '@/components/tasks/TaskAssetViewTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
 import { TaskRecordsTab } from '@/components/tasks/TaskRecordsTab'
+import { PauseIcon, PlayIcon as PlayIconSolid, StopIcon } from '@heroicons/react/24/solid'
 
-const STATUS_CONFIG: Record<string, { label: string; color: 'default' | 'primary' | 'success' | 'danger' | 'warning' }> = {
-  draft: { label: '草稿', color: 'default' },
-  queued: { label: '排队中', color: 'primary' },
-  running: { label: '执行中', color: 'warning' },
-  succeeded: { label: '已完成', color: 'success' },
-  failed: { label: '已失败', color: 'danger' },
-  stopped: { label: '已终止', color: 'danger' },
-}
 
 export function TaskDetailPage() {
   const { id } = useParams()
@@ -31,6 +24,9 @@ export function TaskDetailPage() {
   const detailQuery = useTaskDetail(id)
   const progressQuery = useTaskProgress(id)
   const runTask = useRunTask()
+  const pauseTask = usePauseTask()
+  const resumeTask = useResumeTask()
+  const stopTask = useStopTask()
 
   const [activeTab, setActiveTab] = useState('overview')
   const [runError, setRunError] = useState<string | null>(null)
@@ -56,7 +52,7 @@ export function TaskDetailPage() {
     )
   }
 
-  const statusCfg = STATUS_CONFIG[task.status] ?? { label: task.status, color: 'default' as const }
+  const statusInfo = getTaskStatusInfo(task.status, task.desired_state)
 
   const handleRunTask = () => {
     if (!id) return
@@ -89,15 +85,36 @@ export function TaskDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Chip color={statusCfg.color} variant="flat" classNames={{ base: 'h-9 px-3', content: 'font-black text-[11px] uppercase tracking-wider' }}>
-            {statusCfg.label}
+        <div className="flex items-center gap-4">
+          <Chip color={statusInfo.color} variant="flat" classNames={{ base: 'h-10 px-4 rounded-xl', content: 'font-black text-[12px] uppercase tracking-wider' }}>
+            {statusInfo.label}
           </Chip>
-          {task.status === 'draft' && (
-            <Button color="primary" className="h-10 rounded-xl font-black px-6 shadow-lg shadow-apple-blue/20 flex items-center gap-2" isLoading={runTask.isPending} isDisabled={runTask.isPending} onPress={handleRunTask} startContent={!runTask.isPending ? <PlayIcon className="w-4 h-4" /> : undefined}>
-              启动任务
-            </Button>
-          )}
+          
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-[18px] p-1 shadow-inner">
+             {statusInfo.canPause && (
+               <Button variant="flat" size="sm" className="h-10 rounded-xl bg-apple-warning/20 text-apple-warning-light font-black px-4 flex items-center gap-2" onPress={() => pauseTask.mutate(id!)}>
+                 <PauseIcon className="w-4 h-4" />
+                 <span>暂停</span>
+               </Button>
+             )}
+             {statusInfo.canResume && (
+               <Button variant="flat" size="sm" className="h-10 rounded-xl bg-apple-green/20 text-apple-green-light font-black px-4 flex items-center gap-2" onPress={() => resumeTask.mutate(id!)}>
+                 <PlayIconSolid className="w-4 h-4" />
+                 <span>恢复</span>
+               </Button>
+             )}
+             {statusInfo.canStop && (
+               <Button variant="flat" size="sm" className="h-10 rounded-xl bg-apple-red/20 text-apple-red-light font-black px-4 flex items-center gap-2" onPress={() => stopTask.mutate(id!)}>
+                 <StopIcon className="w-4 h-4" />
+                 <span>终止</span>
+               </Button>
+             )}
+             {task.status === 'draft' && (
+               <Button color="primary" className="h-10 rounded-[14px] font-black px-6 shadow-xl shadow-apple-blue/20 flex items-center gap-2" isLoading={runTask.isPending} isDisabled={runTask.isPending} onPress={handleRunTask} startContent={!runTask.isPending ? <PlayIcon className="w-4 h-4" /> : undefined}>
+                 启动任务
+               </Button>
+             )}
+          </div>
         </div>
       </div>
 

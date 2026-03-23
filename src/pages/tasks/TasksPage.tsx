@@ -11,13 +11,15 @@ import {
   TableRow,
   TableCell,
   Pagination,
+  Chip,
 } from '@heroui/react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
-import { useTasks } from '@/api/adapters/task'
+import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
 import { useAssetPools } from '@/api/adapters/asset'
+import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
 
 function formatDateTime(isoStr?: string) {
   if (!isoStr) return '-'
@@ -45,6 +47,10 @@ export function TasksPage() {
     template_code: templateFilter === 'all' ? undefined : templateFilter,
     status: statusFilter === 'all' ? undefined : statusFilter
   })
+
+  const pauseTask = usePauseTask()
+  const resumeTask = useResumeTask()
+  const stopTask = useStopTask()
 
   // To map pool id to names in dropdown
   const poolsQuery = useAssetPools({ page: 1, page_size: 100 })
@@ -134,9 +140,8 @@ export function TasksPage() {
             table: "table-fixed",
             th: "bg-white/5 text-apple-text-secondary uppercase text-xs tracking-wider font-semibold border-b border-white/10 py-3",
             td: "py-4 border-b border-white/5 last:border-0",
-            tr: "hover:bg-white/[0.04] transition-colors cursor-pointer"
+            tr: "hover:bg-white/[0.04] transition-colors"
           }}
-          onRowAction={(key) => navigate(`/tasks/${key}`)}
         >
           <TableHeader>
             <TableColumn width={220}>任务名</TableColumn>
@@ -155,50 +160,72 @@ export function TasksPage() {
           >
             {items.map((task, index) => {
               const rowKey = task.id || `task-${index}`;
+              const statusInfo = getTaskStatusInfo(task.status, task.desired_state)
+
               return (
               <TableRow key={rowKey}>
                 <TableCell>
-                  <span className="text-sm font-semibold text-white whitespace-nowrap overflow-hidden text-ellipsis block">{task.name || 'Untitled Task'}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-[10px] bg-white/10 border border-white/10 text-apple-text-secondary px-2 py-0.5 rounded font-mono uppercase tracking-widest">{task.template_code || '-'}</span>
-                </TableCell>
-                <TableCell>
-                  <div className="text-xs text-apple-text-secondary flex flex-col gap-0.5">
-                     <span className="text-white truncate" title={task.asset_pool_name}>{task.asset_pool_name || '-'}</span>
-                     <span className="font-mono text-[9px] opacity-60 truncate">TargetSet: {task.target_set_id ? task.target_set_id.substring(0,8) : '-'}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-bold text-white whitespace-nowrap overflow-hidden text-ellipsis block tracking-tight">{task.name || 'Untitled Task'}</span>
+                    <span className="text-[10px] font-mono text-apple-text-tertiary uppercase opacity-50">ID:{task.id.substring(0,8)}</span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase border ${
-                      task.status === 'running' ? 'border-apple-blue/40 text-apple-blue-light bg-apple-blue/10' :
-                      task.status === 'succeeded' ? 'border-apple-green/40 text-apple-green-light bg-apple-green/10' :
-                      task.status === 'failed' ? 'border-apple-red/40 text-apple-red bg-apple-red/10' :
-                      'border-white/20 text-apple-text-secondary bg-white/5'
-                    }`}>
-                    {task.status || 'DRAFT'}
-                  </span>
+                  <span className="text-[10px] bg-white/10 border border-white/10 text-apple-text-secondary px-2 py-0.5 rounded font-black font-mono uppercase tracking-widest leading-none">{task.template_code || '-'}</span>
                 </TableCell>
                 <TableCell>
-                  <span className="text-[10px] truncate block w-full bg-white/5 border border-white/10 px-2 py-0.5 rounded uppercase tracking-wider text-apple-text-tertiary font-black">
+                  <div className="text-xs text-apple-text-secondary flex flex-col gap-1">
+                     <span className="text-white font-bold truncate tracking-tight" title={task.asset_pool_name}>{task.asset_pool_name || '-'}</span>
+                     <span className="font-mono text-[9px] opacity-40 truncate">REF_{task.target_set_id?.substring(0,8)}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Chip size="sm" variant="flat" color={statusInfo.color} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-md" }}>
+                    {statusInfo.label}
+                  </Chip>
+                </TableCell>
+                <TableCell>
+                  <span className="text-[10px] truncate block w-full bg-white/5 border border-white/10 px-2 py-0.5 rounded uppercase tracking-wider text-apple-text-tertiary font-black opacity-80">
                      {Object.keys(task.stage_overrides || {}).length > 0 ? "CUSTOM DRY-RUN" : "DEFAULT ENGINE"}
                   </span>
                 </TableCell>
                 <TableCell>
-                   <span className="text-xs text-apple-text-tertiary truncate block">{task.created_by || 'SYSTEM_DAEMON'}</span>
+                   <span className="text-xs text-apple-text-tertiary truncate block font-medium underline underline-offset-4 decoration-white/10">{task.created_by || 'SYSTEM_DAEMON'}</span>
                 </TableCell>
                 <TableCell>
-                  <span className="text-xs text-apple-text-secondary">{formatDateTime(task.updated_at || task.created_at)}</span>
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-[11px] font-semibold text-apple-text-secondary font-mono tracking-tighter uppercase">{formatDateTime(task.updated_at || task.created_at).split(',')[0]}</span>
+                    <span className="text-[11px] font-semibold text-apple-text-tertiary font-mono tracking-tighter opacity-60 uppercase">{formatDateTime(task.updated_at || task.created_at).split(',')[1]}</span>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-2 pr-2">
+                    {/* Control Group */}
+                    <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 mr-2">
+                      {statusInfo.canPause && (
+                        <Button isIconOnly size="sm" variant="light" className="h-7 w-7 min-w-0 text-apple-warning hover:bg-apple-warning/20" onPress={() => pauseTask.mutate(task.id)}>
+                          <PauseIcon className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {statusInfo.canResume && (
+                        <Button isIconOnly size="sm" variant="light" className="h-7 w-7 min-w-0 text-apple-green hover:bg-apple-green/20" onPress={() => resumeTask.mutate(task.id)}>
+                          <PlayIcon className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {statusInfo.canStop && (
+                        <Button isIconOnly size="sm" variant="light" className="h-7 w-7 min-w-0 text-apple-red hover:bg-apple-red/20" onPress={() => stopTask.mutate(task.id)}>
+                          <StopIcon className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
                     <Button
                       size="sm"
-                      variant="flat"
-                      className="rounded text-apple-blue font-semibold bg-apple-blue/10 hover:bg-apple-blue/20"
+                      variant="bordered"
+                      className="rounded-lg border-white/10 text-white font-bold h-7 min-w-0 px-3 text-[11px] hover:border-white/30 transition-all"
                       onPress={() => navigate(`/tasks/${rowKey}`)}
                     >
-                      详情监控
+                      监控
                     </Button>
                   </div>
                 </TableCell>

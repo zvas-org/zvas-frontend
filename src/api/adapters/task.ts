@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { httpClient } from '@/api/client'
 import type { PaginationMeta } from './asset'
 
@@ -19,6 +19,7 @@ export interface TaskListItemVM {
   started_at: string
   finished_at: string
   stage_overrides: Record<string, boolean>
+  desired_state: string
 }
 
 export interface TaskDetailVM extends TaskListItemVM {
@@ -98,6 +99,7 @@ function mapToTaskListItemVM(dto: any): TaskListItemVM {
     started_at: dto.started_at || '',
     finished_at: dto.finished_at || '',
     stage_overrides: dto.stage_overrides || {},
+    desired_state: dto.desired_state || 'running',
   }
 }
 
@@ -165,6 +167,41 @@ function mapToTaskRecordVM(dto: any): TaskRecordVM {
     finished_at: dto.finished_at || '',
     duration_ms: dto.duration_ms ?? dto.duration_ms ?? 0,
     result_summary: dto.result_summary || '',
+  }
+}
+
+export interface TaskStatusInfo {
+  label: string
+  color: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
+  isRunning: boolean
+  canPause: boolean
+  canResume: boolean
+  canStop: boolean
+}
+
+export function getTaskStatusInfo(status: string, desiredState: string): TaskStatusInfo {
+  // 意图优先原则
+  if (desiredState === 'paused') {
+    return { label: '已暂停', color: 'warning', isRunning: false, canPause: false, canResume: true, canStop: true }
+  }
+  if (desiredState === 'stopped') {
+    return { label: '已停止', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
+  }
+
+  // 运行状态逻辑
+  switch (status) {
+    case 'queued':
+      return { label: '队列中', color: 'primary', isRunning: true, canPause: true, canResume: false, canStop: true }
+    case 'running':
+      return { label: '运行中', color: 'primary', isRunning: true, canPause: true, canResume: false, canStop: true }
+    case 'succeeded':
+      return { label: '已完成', color: 'success', isRunning: false, canPause: false, canResume: false, canStop: false }
+    case 'failed':
+      return { label: '已失败', color: 'danger', isRunning: false, canPause: false, canResume: false, canStop: false }
+    case 'stopped':
+      return { label: '已停止', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
+    default:
+      return { label: status || '未知', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
   }
 }
 
@@ -315,6 +352,45 @@ export function useRunTask() {
   return useMutation({
     mutationFn: async (taskId: string): Promise<void> => {
       await httpClient.post(`/tasks/${taskId}/run`, {})
+    },
+  })
+}
+
+export function usePauseTask() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string): Promise<void> => {
+      await httpClient.post(`/tasks/${taskId}/pause`, {})
+    },
+    onSuccess: (_, taskId) => {
+      qc.invalidateQueries({ queryKey: ['tasks', taskId] })
+      qc.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+}
+
+export function useResumeTask() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string): Promise<void> => {
+      await httpClient.post(`/tasks/${taskId}/resume`, {})
+    },
+    onSuccess: (_, taskId) => {
+      qc.invalidateQueries({ queryKey: ['tasks', taskId] })
+      qc.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+}
+
+export function useStopTask() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (taskId: string): Promise<void> => {
+      await httpClient.post(`/tasks/${taskId}/stop`, {})
+    },
+    onSuccess: (_, taskId) => {
+      qc.invalidateQueries({ queryKey: ['tasks', taskId] })
+      qc.invalidateQueries({ queryKey: ['tasks'] })
     },
   })
 }

@@ -28,6 +28,7 @@ export interface AssetPoolListItemVM {
   finding_count: number
   created_at: string
   updated_at: string
+  status: string
 }
 
 export interface AssetPoolDetailVM extends AssetPoolListItemVM {
@@ -100,6 +101,7 @@ function mapToAssetPoolListItemVM(dto: any): AssetPoolListItemVM {
     finding_count: dto.summary?.finding_count ?? dto.finding_count ?? 0,
     created_at: dto.created_at || '',
     updated_at: dto.updated_at || dto.created_at || '',
+    status: dto.status || 'active',
   }
 }
 
@@ -142,6 +144,23 @@ function mapToPoolAssetVM(dto: any): PoolAssetVM {
     detail: dto.detail || {},
     created_at: dto.created_at || '',
     updated_at: dto.updated_at || dto.created_at || '',
+  }
+}
+
+export interface AssetPoolStatusInfo {
+  label: string
+  color: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
+  isDeleting: boolean
+}
+
+export function getAssetPoolStatusInfo(status: string): AssetPoolStatusInfo {
+  switch (status) {
+    case 'deleting':
+      return { label: '删除中', color: 'danger', isDeleting: true }
+    case 'active':
+      return { label: '活跃', color: 'success', isDeleting: false }
+    default:
+      return { label: status || '正常', color: 'default', isDeleting: false }
   }
 }
 
@@ -191,6 +210,18 @@ export function useUpdateAssetPool() {
     },
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ['asset-pools', variables.id] })
+      qc.invalidateQueries({ queryKey: ['asset-pools'] })
+    },
+  })
+}
+
+export function useDeleteAssetPool() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await httpClient.delete(`/asset-pools/${id}`)
+    },
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['asset-pools'] })
     },
   })
@@ -290,6 +321,7 @@ export interface TaskSummaryView {
   updated_at: string
   started_at?: string
   finished_at?: string
+  desired_state: string
 }
 
 export interface FindingSummaryView {
@@ -318,6 +350,7 @@ function mapToTaskSummaryView(dto: any): TaskSummaryView {
     updated_at: dto.updated_at || dto.created_at || '',
     started_at: dto.started_at || '',
     finished_at: dto.finished_at || '',
+    desired_state: dto.desired_state || 'running',
   }
 }
 

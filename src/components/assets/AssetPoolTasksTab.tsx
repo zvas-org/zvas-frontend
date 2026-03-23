@@ -1,41 +1,16 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Chip, Pagination, Skeleton } from '@heroui/react'
-import { RocketLaunchIcon, BoltIcon, ArrowTopRightOnSquareIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { 
+  RocketLaunchIcon, 
+  BoltIcon, 
+  ArrowPathIcon
+} from '@heroicons/react/24/outline'
+import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
 
 import { CreateTaskFromPoolModal } from '@/components/assets/CreateTaskFromPoolModal'
 import { useAssetPoolTasks } from '@/api/adapters/asset'
-
-function statusColor(status: string): 'default' | 'primary' | 'success' | 'warning' | 'danger' {
-  switch (status) {
-    case 'running':
-      return 'primary'
-    case 'succeeded':
-      return 'success'
-    case 'queued':
-    case 'draft':
-      return 'warning'
-    case 'failed':
-    case 'stopped':
-      return 'danger'
-    default:
-      return 'default'
-  }
-}
-
-function statusLabel(status: string): string {
-  switch (status) {
-    case 'draft': return '草稿'
-    case 'queued': return '待执行'
-    case 'running': return '执行中'
-    case 'paused': return '已暂停'
-    case 'stopping': return '停止中'
-    case 'succeeded': return '已成功'
-    case 'failed': return '已失败'
-    case 'stopped': return '已停止'
-    default: return status || '未知'
-  }
-}
+import { usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
 
 function formatTime(value?: string): string {
   if (!value) return '-'
@@ -55,6 +30,10 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
     sort: 'updated_at',
     order: 'desc',
   })
+
+  const pauseTask = usePauseTask()
+  const resumeTask = useResumeTask()
+  const stopTask = useStopTask()
 
   const items = data?.data || []
   const pagination = data?.pagination
@@ -103,7 +82,7 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
 
       <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto scrollbar-hide md:scrollbar-default custom-scrollbar">
         <div className="min-w-[1000px]">
-          <div className="grid grid-cols-[2fr_1.5fr_1fr_1.2fr_1.2fr_120px] gap-4 px-6 h-14 items-center text-[10px] font-black tracking-[0.2em] uppercase text-apple-text-tertiary border-b border-white/5">
+          <div className="grid grid-cols-[2fr_1.5fr_1fr_1.2fr_1.2fr_130px] gap-4 px-6 h-14 items-center text-[10px] font-black tracking-[0.2em] uppercase text-apple-text-tertiary border-b border-white/5">
             <span>任务标识</span>
             <span>挂载模板序列</span>
             <span>流状态</span>
@@ -139,52 +118,66 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
 
           {!isLoading && !isError && items.length > 0 && (
             <div className="flex flex-col">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-[2fr_1.5fr_1fr_1.2fr_1.2fr_120px] gap-4 px-6 py-5 items-center border-b border-white/5 hover:bg-white/[0.03] transition-colors leading-tight"
-                >
-                  <div className="flex flex-col gap-1 overflow-hidden">
-                    <span className="font-bold text-[14px] text-white truncate tracking-tight">{item.name || item.id}</span>
-                    <span className="text-[11px] font-mono text-apple-text-secondary truncate">{item.id}</span>
+              {items.map((item) => {
+                const statusInfo = getTaskStatusInfo(item.status, item.desired_state)
+                
+                return (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-[2fr_1.5fr_1fr_1.2fr_1.2fr_130px] gap-4 px-6 py-5 items-center border-b border-white/5 hover:bg-white/[0.03] transition-colors leading-tight"
+                  >
+                    <div className="flex flex-col gap-1 overflow-hidden font-medium">
+                      <span className="font-bold text-[14px] text-white truncate tracking-tight">{item.name || item.id}</span>
+                      <span className="text-[11px] font-mono text-apple-text-secondary truncate">{item.id}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 overflow-hidden font-medium">
+                      <span className="text-[13px] font-bold text-white truncate">{item.template_name || item.template_code}</span>
+                      <span className="text-[11px] font-mono text-apple-text-secondary truncate">TPL_{item.template_code}</span>
+                    </div>
+                    <div>
+                      <Chip size="sm" variant="flat" color={statusInfo.color} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-md" }}>
+                        {statusInfo.label}
+                      </Chip>
+                    </div>
+                    <div className="text-[11px] font-bold tracking-widest text-apple-text-secondary uppercase truncate">
+                      {item.stage_plan?.join(' • ') || '—'}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-semibold text-apple-text-secondary font-mono tracking-tighter uppercase">{formatTime(item.updated_at).split(' ')[0]}</span>
+                      <span className="text-[11px] font-semibold text-apple-text-tertiary font-mono tracking-tighter opacity-60">{formatTime(item.updated_at).split(' ')[1]}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-1.5">
+                       {/* 交互控制组 */}
+                       <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5">
+                          {statusInfo.canPause && (
+                            <Button isIconOnly size="sm" variant="light" className="h-7 w-7 min-w-0 text-apple-warning hover:bg-apple-warning/20" onPress={() => pauseTask.mutate(item.id)}>
+                              <PauseIcon className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {statusInfo.canResume && (
+                            <Button isIconOnly size="sm" variant="light" className="h-7 w-7 min-w-0 text-apple-green hover:bg-apple-green/20" onPress={() => resumeTask.mutate(item.id)}>
+                              <PlayIcon className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {statusInfo.canStop && (
+                            <Button isIconOnly size="sm" variant="light" className="h-7 w-7 min-w-0 text-apple-red hover:bg-apple-red/20" onPress={() => stopTask.mutate(item.id)}>
+                              <StopIcon className="w-4 h-4" />
+                            </Button>
+                          )}
+                       </div>
+                      
+                      <Button
+                        size="sm"
+                        variant="bordered"
+                        onPress={() => navigate(`/tasks/${item.id}`)}
+                        className="border-white/10 text-white font-bold rounded-lg h-7 min-w-0 px-2.5 text-[11px]"
+                      >
+                        详情
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-1 overflow-hidden">
-                    <span className="text-[13px] font-bold text-white truncate">{item.template_name || item.template_code}</span>
-                    <span className="text-[11px] font-mono text-apple-text-secondary truncate">TPL_{item.template_code}</span>
-                  </div>
-                  <div>
-                    <Chip size="sm" variant="flat" color={statusColor(item.status)} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1" }}>
-                      {statusLabel(item.status)}
-                    </Chip>
-                  </div>
-                  <div className="text-[11px] font-bold tracking-widest text-apple-text-secondary uppercase truncate">
-                    {item.stage_plan?.join(' • ') || '—'}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-semibold text-apple-text-secondary font-mono tracking-tighter uppercase">{formatTime(item.updated_at).split(' ')[0]}</span>
-                    <span className="text-[11px] font-semibold text-apple-text-tertiary font-mono tracking-tighter opacity-60">{formatTime(item.updated_at).split(' ')[1]}</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="flat"
-                      onPress={() => navigate(`/tasks/${item.id}`)}
-                      className="bg-white/5 border border-white/10 text-white font-bold rounded-xl"
-                    >
-                      详情
-                    </Button>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      variant="light"
-                      onPress={() => navigate(`/tasks?asset_pool_id=${poolId}`)}
-                      className="rounded-xl text-apple-text-secondary hover:text-white"
-                    >
-                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 

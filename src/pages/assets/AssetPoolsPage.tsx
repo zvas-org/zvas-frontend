@@ -18,12 +18,21 @@ import {
 } from '@heroui/react'
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MagnifyingGlassIcon, PlusIcon, ArrowPathIcon, CloudArrowDownIcon, DocumentPlusIcon, ArrowDownTrayIcon, ServerStackIcon } from '@heroicons/react/24/outline'
+import { 
+  MagnifyingGlassIcon, 
+  PlusIcon, 
+  ArrowPathIcon, 
+  CloudArrowDownIcon, 
+  DocumentPlusIcon, 
+  ArrowDownTrayIcon, 
+  ServerStackIcon 
+} from '@heroicons/react/24/outline'
 
-import { useAssetPools } from '@/api/adapters/asset'
+import { useAssetPools, useDeleteAssetPool, getAssetPoolStatusInfo } from '@/api/adapters/asset'
 import { CreateAssetPoolModal } from '@/components/assets/CreateAssetPoolModal'
 import { ManualInputModal } from '@/components/assets/ManualInputModal'
 import { FileImportModal } from '@/components/assets/FileImportModal'
+import { ConfirmModal } from '@/components/common/ConfirmModal'
 
 function formatDateTime(isoStr?: string) {
   if (!isoStr) return '-'
@@ -42,6 +51,10 @@ export function AssetPoolsPage() {
   const [createVisible, setCreateVisible] = useState(false)
   const [manualVisible, setManualVisible] = useState(false)
   const [fileImportVisible, setFileImportVisible] = useState(false)
+  const [deleteVisible, setDeleteVisible] = useState(false)
+  const [targetPool, setTargetPool] = useState<{ id: string; name: string } | null>(null)
+
+  const deleteMutation = useDeleteAssetPool()
 
   const poolsQuery = useAssetPools({
     page,
@@ -69,8 +82,7 @@ export function AssetPoolsPage() {
       
       {/* 紧凑型指标概览区 (iPhone 风格) */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[130px]">
-        {/* 指标卡：Total Pools */}
-        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
             <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Pools_Vault</span>
             {poolsQuery.isPending ? <Skeleton className="h-8 w-12 rounded-lg bg-white/10 mt-1" /> : (
@@ -79,8 +91,7 @@ export function AssetPoolsPage() {
           </CardBody>
         </Card>
 
-        {/* 指标卡：Assets */}
-        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
             <span className="text-[10px] text-apple-green-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Global_Assets</span>
             {poolsQuery.isPending ? <Skeleton className="h-8 w-12 rounded-lg bg-white/10" /> : (
@@ -89,8 +100,7 @@ export function AssetPoolsPage() {
           </CardBody>
         </Card>
 
-        {/* 指标卡：Tasks */}
-        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
             <span className="text-[10px] text-apple-blue-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Linked_Tasks</span>
             {poolsQuery.isPending ? <Skeleton className="h-8 w-12 rounded-lg bg-white/10" /> : (
@@ -99,8 +109,7 @@ export function AssetPoolsPage() {
           </CardBody>
         </Card>
 
-        {/* 指标卡：Findings */}
-        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none apple-spotlight rounded-[32px]">
+        <Card className="bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl h-full shadow-none rounded-[32px]">
           <CardBody className="p-6 flex flex-col justify-center">
             <span className="text-[10px] text-apple-red-light uppercase tracking-[0.3em] font-black opacity-80 mb-1">Risk_Findings</span>
             {poolsQuery.isPending ? <Skeleton className="h-8 w-12 rounded-lg bg-white/10" /> : (
@@ -110,7 +119,7 @@ export function AssetPoolsPage() {
         </Card>
       </section>
 
-      {/* 操作与搜索胶囊栏：始终渲染，确保护航功能可用 */}
+      {/* 操作与搜索胶囊栏 */}
       <section className="flex flex-col md:flex-row items-center gap-4 w-full">
         <div className="flex flex-col md:flex-row flex-1 w-full gap-4 relative">
           <Input
@@ -198,7 +207,7 @@ export function AssetPoolsPage() {
         </div>
       </section>
 
-      {/* 磨砂玻璃用户列表表格容器 */}
+      {/* 资产池列表表格容器 */}
       {poolsQuery.isError ? (
         <div className="flex flex-col items-center justify-center h-64 gap-4 text-apple-text-tertiary bg-apple-tertiary-bg/5 border border-white/5 backdrop-blur-3xl rounded-[32px]">
           <p className="text-base font-medium">数据源拉取中断</p>
@@ -218,7 +227,7 @@ export function AssetPoolsPage() {
           <p className="font-bold">库表游标已探底 (NULL_PAYLOAD)</p>
         </div>
       ) : (
-        <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto scrollbar-hide md:scrollbar-default custom-scrollbar">
+        <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto">
           <Table
             aria-label="Asset pools advanced table"
             layout="fixed"
@@ -229,9 +238,8 @@ export function AssetPoolsPage() {
               thead: "[&>tr]:first:rounded-xl",
               th: "bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2 text-left",
               td: "py-5 border-b border-white/5 last:border-0 text-left",
-              tr: "hover:bg-white/[0.03] transition-colors cursor-pointer"
+              tr: "hover:bg-white/[0.03] transition-colors"
             }}
-            onRowAction={(key) => navigate(`/assets/${key}`)}
           >
             <TableHeader>
               <TableColumn width={220} align="start">资产池单元</TableColumn>
@@ -243,72 +251,94 @@ export function AssetPoolsPage() {
               <TableColumn width={80} align="end">派发任务</TableColumn>
               <TableColumn width={80} align="end">脆弱点</TableColumn>
               <TableColumn width={140} align="end">上次编目</TableColumn>
-              <TableColumn width={120} align="end">流操作</TableColumn>
+              <TableColumn width={160} align="end">流操作</TableColumn>
             </TableHeader>
             <TableBody
               emptyContent={<div className="h-40 flex items-center justify-center text-apple-text-tertiary font-bold">空图纸。核心系统需介入新建资产对象。</div>}
               isLoading={poolsQuery.isPending}
               loadingContent={<Skeleton className="rounded-xl w-full h-40 bg-white/5" />}
             >
-              {items.map((pool) => (
-                <TableRow key={pool.id}>
-                  <TableCell>
-                    <div className="flex flex-col gap-0.5 max-w-[200px]">
-                      <span className="text-base font-bold text-white tracking-tight leading-tight truncate">{pool.name}</span>
-                      <span className="text-[11px] text-apple-text-tertiary font-mono tracking-tighter uppercase opacity-60">ID:{pool.id.substring(0,8)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs text-apple-text-secondary whitespace-normal overflow-hidden line-clamp-2 max-w-[140px] font-medium leading-relaxed">
-                      {pool.description || '-'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(!pool.tags || pool.tags.length === 0) ? <span className="text-[10px] text-apple-text-tertiary italic">-</span> : pool.tags.map(t => (
-                        <span key={t} className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-apple-text-secondary text-[10px] font-black uppercase tracking-wider">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-apple-blue-light text-[14px] font-black drop-shadow-[0_0_8px_rgba(0,113,227,0.3)]">{pool.asset_count ?? '-'}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-apple-blue-light/50 text-[14px] font-bold">—</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-apple-blue-light/50 text-[14px] font-bold">—</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-mono text-apple-text-secondary text-[14px] font-black">{pool.task_count ?? 0}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`font-mono text-[14px] font-black ${pool.finding_count && pool.finding_count > 0 ? 'text-apple-red-light drop-shadow-[0_0_8px_rgba(255,59,48,0.5)]' : 'text-apple-text-tertiary opacity-40'}`}>
-                      {pool.finding_count ?? 0}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[11px] font-semibold text-apple-text-secondary font-mono tracking-tighter uppercase">{formatDateTime(pool.updated_at || pool.created_at).split(' ')[0]}</span>
-                      <span className="text-[11px] font-semibold text-apple-text-tertiary font-mono tracking-tighter opacity-60">{formatDateTime(pool.updated_at || pool.created_at).split(' ')[1]}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end pr-2">
-                      <Button
-                        size="sm"
-                        variant="bordered"
-                        className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-5"
-                        onPress={() => navigate(`/assets/${pool.id}`)}
-                      >
-                        详情
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {items.map((pool) => {
+                const statusInfo = getAssetPoolStatusInfo(pool.status)
+                const isDeleting = statusInfo.isDeleting
+                return (
+                  <TableRow key={pool.id} className={isDeleting ? 'opacity-60 grayscale' : 'cursor-pointer'} onClick={() => !isDeleting && navigate(`/assets/${pool.id}`)}>
+                    <TableCell>
+                      <div className="flex flex-col gap-0.5 max-w-[200px]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-bold text-white tracking-tight leading-tight truncate">{pool.name}</span>
+                          {isDeleting && (
+                            <span className="text-[9px] bg-apple-red/10 border border-apple-red/20 text-apple-red-light px-1.5 py-0.5 rounded uppercase font-black animate-pulse">
+                              {statusInfo.label}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-apple-text-tertiary font-mono tracking-tighter uppercase opacity-60">ID:{pool.id.substring(0,8)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-apple-text-secondary whitespace-normal overflow-hidden line-clamp-2 max-w-[140px] font-medium leading-relaxed">
+                        {pool.description || '-'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(!pool.tags || pool.tags.length === 0) ? <span className="text-[10px] text-apple-text-tertiary italic">-</span> : pool.tags.map(t => (
+                          <span key={t} className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-apple-text-secondary text-[10px] font-black uppercase tracking-wider">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-apple-blue-light text-[14px] font-black drop-shadow-[0_0_8px_rgba(0,113,227,0.3)]">{pool.asset_count ?? '-'}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-apple-blue-light/50 text-[14px] font-bold">—</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-apple-blue-light/50 text-[14px] font-bold">—</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-apple-text-secondary text-[14px] font-black">{pool.task_count ?? 0}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`font-mono text-[14px] font-black ${pool.finding_count && pool.finding_count > 0 ? 'text-apple-red-light drop-shadow-[0_0_8px_rgba(255,59,48,0.5)]' : 'text-apple-text-tertiary opacity-40'}`}>
+                        {pool.finding_count ?? 0}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[11px] font-semibold text-apple-text-secondary font-mono tracking-tighter uppercase">{formatDateTime(pool.updated_at || pool.created_at).split(' ')[0]}</span>
+                        <span className="text-[11px] font-semibold text-apple-text-tertiary font-mono tracking-tighter opacity-60">{formatDateTime(pool.updated_at || pool.created_at).split(' ')[1]}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end pr-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="sm"
+                          variant="bordered"
+                          className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold h-8 px-4"
+                          onPress={() => navigate(`/assets/${pool.id}`)}
+                          isDisabled={isDeleting}
+                        >
+                          详情
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="danger"
+                          className="rounded-full bg-apple-red/10 text-apple-red-light border border-apple-red/20 font-bold h-8 px-4"
+                          onPress={() => { setTargetPool(pool); setDeleteVisible(true) }}
+                          isDisabled={isDeleting}
+                        >
+                          删除
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
           
@@ -364,6 +394,22 @@ export function AssetPoolsPage() {
       <FileImportModal 
         isOpen={fileImportVisible} 
         onClose={() => setFileImportVisible(false)} 
+      />
+      
+      <ConfirmModal
+        isOpen={deleteVisible}
+        onClose={() => { setDeleteVisible(false); setTargetPool(null) }}
+        title="确认受理资产池删除？"
+        message={`您确定要受理资产池 "${targetPool?.name}" 的删除请求吗？此操作将立即停止该池下的所有关联任务。后台异步清理完成前，该池将保持“删除中”状态且不可操作。此过程不可恢复。`}
+        confirmText="受理删除"
+        confirmColor="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={async () => {
+          if (!targetPool) return
+          await deleteMutation.mutateAsync(targetPool.id)
+          setDeleteVisible(false)
+          setTargetPool(null)
+        }}
       />
     </div>
   )

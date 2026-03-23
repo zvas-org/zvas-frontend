@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, CloudArrowDownIcon, DocumentPlusIcon, ArrowDownTrayIcon, ServerStackIcon, RocketLaunchIcon } from '@heroicons/react/24/outline'
 
-import { useAssetPoolDetail } from '@/api/adapters/asset'
+import { useAssetPoolDetail, useDeleteAssetPool, getAssetPoolStatusInfo } from '@/api/adapters/asset'
 import { AssetPoolOverviewTab } from '@/components/assets/AssetPoolOverviewTab'
 import { AssetPoolInputsTab } from '@/components/assets/AssetPoolInputsTab'
 import { AssetPoolIpTab } from '@/components/assets/AssetPoolIpTab'
@@ -24,6 +24,8 @@ import { AssetPoolReportsTab } from '@/components/assets/AssetPoolReportsTab'
 import { CreateTaskFromPoolModal } from '@/components/assets/CreateTaskFromPoolModal'
 import { ManualInputModal } from '@/components/assets/ManualInputModal'
 import { FileImportModal } from '@/components/assets/FileImportModal'
+import { ConfirmModal } from '@/components/common/ConfirmModal'
+import { TrashIcon } from '@heroicons/react/24/outline'
 
 export function AssetPoolDetailPage() {
   const { id } = useParams()
@@ -36,6 +38,11 @@ export function AssetPoolDetailPage() {
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [manualModeOpen, setManualModeOpen] = useState(false)
   const [fileImportOpen, setFileImportOpen] = useState(false)
+  const [deleteVisible, setDeleteVisible] = useState(false)
+
+  const deleteMutation = useDeleteAssetPool()
+  const statusInfo = pool ? getAssetPoolStatusInfo(pool.status) : { label: '', color: 'default', isDeleting: false }
+  const isDeleting = statusInfo.isDeleting
 
   if (poolQuery.isPending) {
     return (
@@ -73,6 +80,11 @@ export function AssetPoolDetailPage() {
           <div className="flex flex-col">
             <h1 className="text-3xl font-black text-white tracking-tight leading-none mb-2">{pool.name}</h1>
             <div className="flex items-center gap-3">
+               {isDeleting && (
+                 <span className="text-[10px] bg-apple-red/10 border border-apple-red/20 text-apple-red-light px-2 py-0.5 rounded-full uppercase font-black animate-pulse">
+                   {statusInfo.label}
+                 </span>
+               )}
                {pool.description && <p className="text-[13px] text-apple-text-tertiary font-medium">{pool.description}</p>}
                {pool.tags && pool.tags.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-apple-blue-light/50"></span>}
                {pool.tags && pool.tags.map((t: string) => (
@@ -83,7 +95,7 @@ export function AssetPoolDetailPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-           <Dropdown
+            <Dropdown
               classNames={{
                 content: "bg-apple-bg/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden min-w-[200px]"
               }}
@@ -92,6 +104,7 @@ export function AssetPoolDetailPage() {
                 <Button 
                   variant="flat"
                   className="h-14 w-full sm:w-auto rounded-2xl font-black px-6 border border-white/5 bg-apple-tertiary-bg/10 backdrop-blur-md text-white hover:bg-white/10 transition-colors"
+                  isDisabled={isDeleting}
                 >
                   <ArrowDownTrayIcon className="w-5 h-5 text-apple-blue-light" />
                   <span>手动录入</span>
@@ -127,9 +140,21 @@ export function AssetPoolDetailPage() {
               color="primary"
               className="h-14 w-full sm:w-auto rounded-2xl font-black px-8 shadow-2xl shadow-apple-blue/20 flex items-center gap-2"
               onPress={() => setTaskModalOpen(true)}
+              isDisabled={isDeleting}
             >
               <RocketLaunchIcon className="w-5 h-5" />
               <span>下发任务</span>
+            </Button>
+
+            <Button
+              variant="flat"
+              color="danger"
+              className="h-14 w-full sm:w-auto rounded-2xl bg-apple-red/10 border border-apple-red/20 font-black px-6 text-apple-red-light hover:bg-apple-red/20 transition-colors"
+              onPress={() => setDeleteVisible(true)}
+              isDisabled={isDeleting}
+            >
+              <TrashIcon className="w-5 h-5" />
+              <span>删除</span>
             </Button>
         </div>
       </div>
@@ -178,6 +203,20 @@ export function AssetPoolDetailPage() {
       <CreateTaskFromPoolModal isOpen={taskModalOpen} onClose={() => setTaskModalOpen(false)} poolId={id!} poolName={pool?.name} />
       <ManualInputModal isOpen={manualModeOpen} onClose={() => setManualModeOpen(false)} defaultPoolId={id!} />
       <FileImportModal isOpen={fileImportOpen} onClose={() => setFileImportOpen(false)} />
+      
+      <ConfirmModal
+        isOpen={deleteVisible}
+        onClose={() => setDeleteVisible(false)}
+        title="确认释放资产池？"
+        message={`您确定要受理资产池 "${pool?.name}" 的删除请求吗？这将导致关联任务立即中断。清理过程在后台异步执行，期间该池将保持锁定状态。确认后无法逆转。`}
+        confirmText="受理删除"
+        confirmColor="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={async () => {
+          await deleteMutation.mutateAsync(id!)
+          setDeleteVisible(false)
+        }}
+      />
     </div>
   )
 }
