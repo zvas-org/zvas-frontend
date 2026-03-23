@@ -11,8 +11,7 @@ import { ChevronLeftIcon, EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
 
 import { useTaskDetail, useTaskProgress, useRunTask } from '@/api/adapters/task'
 import { TaskOverviewTab } from '@/components/tasks/TaskOverviewTab'
-import { TaskSnapshotInputTab } from '@/components/tasks/TaskSnapshotInputTab'
-import { TaskSnapshotExpandedTab } from '@/components/tasks/TaskSnapshotExpandedTab'
+import { TaskAssetViewTab } from '@/components/tasks/TaskAssetViewTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
 import { TaskRecordsTab } from '@/components/tasks/TaskRecordsTab'
 
@@ -112,8 +111,7 @@ export function TaskDetailPage() {
       <div className="border-b border-white/5 mt-2">
         <Tabs aria-label="Task Options" selectedKey={activeTab} onSelectionChange={(k) => setActiveTab(k as string)} variant="underlined" classNames={{ tabList: 'gap-6 p-0', cursor: 'bg-apple-blue h-[2px] w-full', tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors' }}>
           <Tab key="overview" title="概览" />
-          <Tab key="target" title="扫描目标" />
-          <Tab key="expanded" title="本次发现资产" />
+          <Tab key="assets" title="资产视图" />
           <Tab key="records" title="扫描记录" />
           <Tab key="progress" title="执行进度" />
           <Tab key="findings" title="扫描结果" />
@@ -123,8 +121,7 @@ export function TaskDetailPage() {
 
       <div className="pt-2 min-h-[50vh]">
         {activeTab === 'overview' && <TaskOverviewTab task={task} />}
-        {activeTab === 'target' && <TaskSnapshotInputTab task={task} />}
-        {activeTab === 'expanded' && <TaskSnapshotExpandedTab task={task} />}
+        {activeTab === 'assets' && <TaskAssetViewTab taskId={task.id} />}
         {activeTab === 'records' && <TaskRecordsTab taskId={task.id} />}
         {activeTab === 'progress' && <TaskProgressTab progress={progress} />}
         {activeTab === 'findings' && <PlaceholderTab title="待模块接入" desc="此页面保留为以后开放扫描结果的专门呈现。当前暂无真实业务数据。" />}

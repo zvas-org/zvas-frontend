@@ -370,3 +370,29 @@ export function useAssetPoolReports(id?: string, params?: { page?: number; page_
   })
 }
 
+// ─── 单条资产池资产详情（懒加载，仅展开时触发）──────────────────────────────
+export function useAssetPoolAssetDetail(poolId?: string, assetId?: string) {
+  return useQuery({
+    queryKey: ['asset-pools', poolId, 'assets', assetId],
+    queryFn: async (): Promise<PoolAssetVM> => {
+      const res = await httpClient.get<{ data: any }>(`/asset-pools/${poolId}/assets/${assetId}`)
+      const dto = res.data.data || res.data
+      return {
+        id: dto.id || '',
+        asset_kind: dto.asset_kind || 'unknown',
+        display_name: dto.display_name || '',
+        normalized_key: dto.normalized_key || '',
+        status: dto.status || 'active',
+        confidence_level: dto.confidence_level || 'unknown',
+        system_facets: dto.system_facets || [],
+        custom_tags: dto.custom_tags || [],
+        source_summary: dto.source_summary || {},
+        detail: dto.detail || {},
+        created_at: dto.created_at || '',
+        updated_at: dto.updated_at || dto.created_at || '',
+      }
+    },
+    enabled: Boolean(poolId && assetId),
+    staleTime: 30_000,
+  })
+}

@@ -318,3 +318,32 @@ export function useRunTask() {
     },
   })
 }
+
+// ─── 单条快照资产详情（懒加载，仅展开时触发）────────────────────────────────
+export function useTaskSnapshotAssetDetail(taskId?: string, assetId?: string) {
+  return useQuery({
+    queryKey: ['tasks', taskId, 'snapshot-assets', assetId],
+    queryFn: async (): Promise<TaskSnapshotAssetVM> => {
+      const res = await httpClient.get<{ data: any }>(`/tasks/${taskId}/snapshot-assets/${assetId}`)
+      const dto = res.data.data || res.data
+      return {
+        id: dto.id || '',
+        task_id: dto.task_id || '',
+        snapshot_id: dto.snapshot_id || '',
+        asset_kind: dto.asset_kind || 'unknown',
+        display_name: dto.display_name || '',
+        normalized_key: dto.normalized_key || '',
+        origin_type: dto.origin_type || 'input',
+        source_type: dto.source_type || 'unknown',
+        confidence_level: dto.confidence_level || 'unknown',
+        promoted_to_pool: Boolean(dto.promoted_to_pool),
+        system_facets: dto.system_facets || [],
+        extra_payload: dto.extra_payload || {},
+        created_at: dto.created_at || '',
+        updated_at: dto.updated_at || dto.created_at || '',
+      }
+    },
+    enabled: Boolean(taskId && assetId),
+    staleTime: 30_000,
+  })
+}
