@@ -99,12 +99,20 @@ function ExpandedRow({ taskId, item, assetKind }: { taskId?: string; item: TaskS
         )}
         <div className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-[9px] uppercase font-black tracking-widest text-apple-text-tertiary">关联域名推断</span>
-            <span className="text-[12px] text-apple-text-secondary italic">暂无数据</span>
-          </div>
-          <div className="flex flex-col gap-1">
             <span className="text-[9px] uppercase font-black tracking-widest text-apple-text-tertiary">关联域名数</span>
             <span className="text-[12px] text-apple-text-secondary italic">{payload?.domain_count ?? '-'}</span>
+          </div>
+          <div className="flex flex-col gap-1 col-span-2">
+            <span className="text-[9px] uppercase font-black tracking-widest text-apple-text-tertiary">关联域名</span>
+            {Array.isArray(payload?.related_domains) && payload.related_domains.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {(payload.related_domains as string[]).map((d: string) => (
+                  <span key={d} className="font-mono text-[11px] bg-white/5 border border-white/10 text-apple-text-secondary px-2 py-0.5 rounded-lg">{d}</span>
+                ))}
+              </div>
+            ) : (
+              <span className="text-[12px] text-apple-text-secondary italic">暂无数据</span>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-[9px] uppercase font-black tracking-widest text-apple-text-tertiary">证书主体数</span>
@@ -234,6 +242,7 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
       cells.push(
         <TableCell key="open_port_count">{item.extra_payload?.open_port_count ?? 0}</TableCell>,
         <TableCell key="open_ports"><span className="truncate block max-w-[180px] text-apple-text-secondary">{formatPorts(item.extra_payload?.open_ports)}</span></TableCell>,
+        <TableCell key="domain_count"><span className="text-[12px] text-white font-bold">{item.extra_payload?.domain_count ?? '-'}</span></TableCell>,
       )
     } else if (assetKind === 'domain') {
       const rootDomain = item.extra_payload?.root_domain || item.display_name.split('.').slice(-2).join('.')
@@ -281,6 +290,7 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
       base.push(
         <TableColumn key="open_port_count" width={100}>开放端口数</TableColumn>,
         <TableColumn key="open_ports" width={200}>端口摘要</TableColumn>,
+        <TableColumn key="domain_count" width={110}>关联域名数</TableColumn>,
       )
     } else if (assetKind === 'domain') {
        base.push(

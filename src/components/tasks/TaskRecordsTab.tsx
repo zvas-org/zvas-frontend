@@ -4,6 +4,17 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 import { useTaskRecords } from '@/api/adapters/task'
 
+const RECORD_TYPE_LABEL: Record<string, string> = {
+  'port_scan/ip_service_identify': 'IP 服务识别',
+  'port_scan/domain_service_identify': '域名服务识别',
+  'http_probe/homepage_identify': '首页识别',
+}
+
+function recordTypeLabel(task_type: string, task_subtype: string) {
+  const key = task_subtype ? `${task_type}/${task_subtype}` : task_type
+  return RECORD_TYPE_LABEL[key] || task_type || '-'
+}
+
 function formatDateTime(value?: string) {
   if (!value) return '-'
   return new Date(value).toLocaleString()
@@ -82,7 +93,7 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
           <TableBody emptyContent={<div className="py-20 text-apple-text-tertiary text-[13px] font-bold tracking-widest uppercase">当前筛选条件下暂无扫描记录。</div>} isLoading={query.isPending} loadingContent={<Skeleton className="h-40 w-full rounded-[24px] bg-white/5" />}>
             {items.map((item) => (
               <TableRow key={item.unit_id}>
-                <TableCell>{item.stage}</TableCell>
+                <TableCell>{recordTypeLabel(item.task_type, item.task_subtype)}</TableCell>
                 <TableCell><span className="font-mono text-[12px] break-all">{item.target_key}</span></TableCell>
                 <TableCell>{item.status}</TableCell>
                 <TableCell>{item.worker_id || '-'}</TableCell>

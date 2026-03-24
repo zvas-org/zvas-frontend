@@ -72,6 +72,8 @@ export interface TaskRecordVM {
   task_id: string
   stage: string
   topic: string
+  task_type: string
+  task_subtype: string
   target_key: string
   status: string
   worker_id: string
@@ -159,6 +161,8 @@ function mapToTaskRecordVM(dto: any): TaskRecordVM {
     task_id: dto.task_id || '',
     stage: dto.stage || '',
     topic: dto.topic || '',
+    task_type: dto.task_type || '',
+    task_subtype: dto.task_subtype || '',
     target_key: dto.target_key || '',
     status: dto.status || 'queued',
     worker_id: dto.worker_id || '',
