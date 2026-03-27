@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Input, Pagination, Select, SelectItem, Skeleton, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react'
+import { Chip, Input, Pagination, Select, SelectItem, Skeleton, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 import { useTaskRecords } from '@/api/adapters/task'
 import type { TaskRecordVM } from '@/api/adapters/task'
 import { parseHttpProbeSummary } from '@/api/adapters/asset'
-import { useTaskRoutes, getRecordTypeLabel } from '@/api/adapters/route'
+import { useTaskRoutes, getRecordTypeLabel, getRouteLabel } from '@/api/adapters/route'
 
 function formatDateTime(value?: string) {
   if (!value) return '-'
@@ -18,8 +18,14 @@ function formatDuration(durationMs: number) {
   return `${(durationMs / 1000).toFixed(1)} s`
 }
 
-function renderResultSummary(item: TaskRecordVM) {
-  if (item.task_type === 'http_probe' && item.task_subtype === 'homepage_identify') {
+/**
+ * 注册式结果摘要渲染器。
+ * 按 `task_type/task_subtype` 键注册，新增类型只需追加注册项。
+ */
+type SummaryRenderer = (item: TaskRecordVM) => React.ReactNode | null
+
+const SUMMARY_RENDERERS: Record<string, SummaryRenderer> = {
+  'http_probe/homepage_identify': (item) => {
     let payload = null
     try {
       if (typeof item.result_summary === 'string' && item.result_summary.startsWith('{')) {
@@ -31,21 +37,42 @@ function renderResultSummary(item: TaskRecordVM) {
       // ignore
     }
     const sum = parseHttpProbeSummary(payload)
-    if (sum) {
-      return (
-        <div className="flex flex-col gap-1 w-full overflow-hidden">
-          <div className="flex items-center gap-2 w-full">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${sum.status_code && sum.status_code >= 200 && sum.status_code < 400 ? 'bg-apple-green/20 text-apple-green-light' : 'bg-white/10 text-white/70'}`}>
-              {sum.status_code || '-'}
-            </span>
-            <span className="text-[12px] truncate text-white font-medium" title={sum.title}>{sum.title || '无标题'}</span>
-          </div>
-          <span className="text-[10px] text-apple-text-tertiary truncate font-mono" title={sum.site_url}>{sum.site_url}</span>
+    if (!sum) return null
+    return (
+      <div className="flex flex-col gap-1 w-full overflow-hidden">
+        <div className="flex items-center gap-2 w-full">
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${sum.status_code && sum.status_code >= 200 && sum.status_code < 400 ? 'bg-apple-green/20 text-apple-green-light' : 'bg-white/10 text-white/70'}`}>
+            {sum.status_code || '-'}
+          </span>
+          <span className="text-[12px] truncate text-white font-medium" title={sum.title}>{sum.title || '无标题'}</span>
         </div>
-      )
-    }
+        <span className="text-[10px] text-apple-text-tertiary truncate font-mono" title={sum.site_url}>{sum.site_url}</span>
+      </div>
+    )
+  },
+}
+
+function renderResultSummary(item: TaskRecordVM) {
+  // 按 task_type/task_subtype 查找注册的渲染器
+  const key = item.task_subtype ? `${item.task_type}/${item.task_subtype}` : item.task_type
+  const renderer = SUMMARY_RENDERERS[key]
+  if (renderer) {
+    const result = renderer(item)
+    if (result) return result
   }
   return <span className="truncate block w-full">{item.result_summary || '-'}</span>
+}
+
+/** desired_state 标签样式 */
+function desiredStateBadge(state: string) {
+  if (!state) return null
+  const map: Record<string, { label: string; color: 'default' | 'warning' | 'danger' }> = {
+    running: { label: '运行', color: 'default' },
+    paused: { label: '已暂停', color: 'warning' },
+    stopped: { label: '已停止', color: 'danger' },
+  }
+  const info = map[state] || { label: state, color: 'default' as const }
+  return <Chip size="sm" variant="flat" color={info.color} classNames={{ base: 'border-0 text-[9px] font-bold px-1' }}>{info.label}</Chip>
 }
 
 export function TaskRecordsTab({ taskId }: { taskId?: string }) {
@@ -69,7 +96,6 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
     const opts = [{ key: '', label: '全部阶段' }]
     if (routes) {
       routes.forEach(r => {
-        // 避免重复：按 stage 去重
         if (r.stage && !opts.some(o => o.key === r.stage)) {
           opts.push({ key: r.stage, label: r.label })
         }
@@ -112,23 +138,27 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
       </div>
 
       <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto">
-        <Table removeWrapper aria-label="Task Records" layout="fixed" classNames={{ base: 'p-4 min-w-[1200px]', table: 'table-fixed', th: 'bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2 text-left', td: 'border-b border-white/5 py-4 text-left last:border-0', tr: 'hover:bg-white/[0.03] transition-colors' }}>
+        <Table removeWrapper aria-label="Task Records" layout="fixed" classNames={{ base: 'p-4 min-w-[1400px]', table: 'table-fixed', th: 'bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2 text-left', td: 'border-b border-white/5 py-4 text-left last:border-0', tr: 'hover:bg-white/[0.03] transition-colors' }}>
           <TableHeader>
-            <TableColumn width={140}>阶段</TableColumn>
-            <TableColumn width={180}>目标</TableColumn>
-            <TableColumn width={120}>状态</TableColumn>
-            <TableColumn width={180}>执行节点</TableColumn>
-            <TableColumn width={100}>尝试次数</TableColumn>
-            <TableColumn width={120}>耗时</TableColumn>
-            <TableColumn width={200}>开始时间</TableColumn>
-            <TableColumn width={320}>结果摘要</TableColumn>
+            <TableColumn width={130}>阶段</TableColumn>
+            <TableColumn width={110}>路由编码</TableColumn>
+            <TableColumn width={170}>目标</TableColumn>
+            <TableColumn width={90}>状态</TableColumn>
+            <TableColumn width={70}>控制态</TableColumn>
+            <TableColumn width={160}>执行节点</TableColumn>
+            <TableColumn width={80}>尝试次数</TableColumn>
+            <TableColumn width={100}>耗时</TableColumn>
+            <TableColumn width={160}>开始时间</TableColumn>
+            <TableColumn width={280}>结果摘要</TableColumn>
           </TableHeader>
           <TableBody emptyContent={<div className="py-20 text-apple-text-tertiary text-[13px] font-bold tracking-widest uppercase">当前筛选条件下暂无扫描记录。</div>} isLoading={query.isPending} loadingContent={<Skeleton className="h-40 w-full rounded-[24px] bg-white/5" />}>
             {items.map((item) => (
               <TableRow key={item.unit_id}>
                 <TableCell>{getRecordTypeLabel(routes, item.task_type, item.task_subtype)}</TableCell>
+                <TableCell><span className="font-mono text-[10px] text-apple-text-tertiary" title={item.route_code}>{item.route_code ? getRouteLabel(routes, item.route_code) : '-'}</span></TableCell>
                 <TableCell><span className="font-mono text-[12px] break-all">{item.target_key}</span></TableCell>
                 <TableCell>{item.status}</TableCell>
+                <TableCell>{desiredStateBadge(item.desired_state)}</TableCell>
                 <TableCell>{item.worker_id || '-'}</TableCell>
                 <TableCell>{item.attempt}</TableCell>
                 <TableCell>{formatDuration(item.duration_ms)}</TableCell>

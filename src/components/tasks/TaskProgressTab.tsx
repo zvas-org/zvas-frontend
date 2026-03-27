@@ -1,5 +1,6 @@
 import { Progress, Skeleton } from '@heroui/react'
 import type { TaskProgressVM } from '@/api/adapters/task'
+import { getActiveGroupLabel, getBlockedReasonLabel, getGroupStateInfo } from '@/api/adapters/task'
 import { useTaskRoutes, getRouteLabel } from '@/api/adapters/route'
 
 function percent(done: number, total: number) {
@@ -18,6 +19,57 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
+      {/* ── 阶段组执行状态条 (Group Progress) ── */}
+      {progress.group_progress.length > 0 && (
+        <div className="bg-apple-blue/[0.03] border border-apple-blue/10 p-6 rounded-[24px] backdrop-blur-3xl">
+          <div className="flex items-center gap-3 mb-4">
+            <h3 className="text-sm font-black text-apple-blue-light">阶段组编排</h3>
+            {progress.active_group && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-apple-blue/10 border border-apple-blue/20 text-apple-blue-light font-bold">
+                {getActiveGroupLabel(progress.active_group)}
+              </span>
+            )}
+            {progress.blocked_reason && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-apple-amber/10 border border-apple-amber/20 text-apple-amber font-bold">
+                {getBlockedReasonLabel(progress.blocked_reason)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-0 overflow-x-auto">
+            {progress.group_progress.map((gp, idx) => {
+              const stateInfo = getGroupStateInfo(gp.state)
+              return (
+                <div key={gp.group_code} className="flex items-center">
+                  <div className={`flex flex-col items-center gap-1 px-5 py-3 rounded-xl border min-w-[100px] transition-all ${
+                    gp.state === 'active' ? 'bg-apple-blue/10 border-apple-blue/30 shadow-md shadow-apple-blue/10' :
+                    gp.state === 'completed' ? 'bg-apple-green/10 border-apple-green/20' :
+                    gp.state === 'blocked' ? 'bg-apple-amber/10 border-apple-amber/20' :
+                    'bg-white/[0.02] border-white/5'
+                  }`}>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-apple-text-tertiary">{gp.group_code}</span>
+                    <span className={`text-[11px] font-bold ${
+                      stateInfo.color === 'primary' ? 'text-apple-blue-light' :
+                      stateInfo.color === 'success' ? 'text-apple-green-light' :
+                      stateInfo.color === 'warning' ? 'text-apple-amber' :
+                      'text-apple-text-secondary'
+                    }`}>{stateInfo.label}</span>
+                  </div>
+                  {idx < progress.group_progress.length - 1 && (
+                    <div className="w-5 h-[2px] bg-white/10 shrink-0" />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          {progress.active_attack_route && (
+            <div className="mt-3 text-[10px] text-apple-text-tertiary">
+              当前攻击路由：<span className="text-apple-text-secondary font-mono">{progress.active_attack_route}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 统计卡片 ── */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {[
           { label: '总单元数', value: progress.total_units || 0 },
@@ -33,6 +85,7 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
         ))}
       </div>
 
+      {/* ── 总体进度条 ── */}
       <div className="bg-white/[0.02] border border-white/10 p-6 rounded-[24px] backdrop-blur-3xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-black text-white">总体进度</h3>
@@ -41,6 +94,7 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
         <Progress value={overall} color={progress.failed > 0 ? 'warning' : 'primary'} classNames={{ track: 'bg-white/5', indicator: progress.failed > 0 ? 'bg-apple-amber' : 'bg-apple-blue', label: 'text-white' }} />
       </div>
 
+      {/* ── 阶段级进度 ── */}
       <div className="bg-white/[0.02] border border-white/10 p-6 rounded-[24px] backdrop-blur-3xl flex flex-col gap-5">
         <h3 className="text-lg font-black text-white">阶段进度</h3>
         {(progress.stages || []).map((stage) => {

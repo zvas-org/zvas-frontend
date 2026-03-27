@@ -10,7 +10,7 @@ import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
 
 import { CreateTaskFromPoolModal } from '@/components/assets/CreateTaskFromPoolModal'
 import { useAssetPoolTasks } from '@/api/adapters/asset'
-import { usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
+import { usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel } from '@/api/adapters/task'
 import { useTaskRoutes, mapStageLabels } from '@/api/adapters/route'
 
 function formatTime(value?: string): string {
@@ -138,10 +138,13 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
                       <span className="text-[13px] font-bold text-white truncate">{item.template_name || item.template_code}</span>
                       <span className="text-[11px] font-mono text-apple-text-secondary truncate">TPL_{item.template_code}</span>
                     </div>
-                    <div>
+                    <div className="flex flex-col gap-0.5">
                       <Chip size="sm" variant="flat" color={statusInfo.color} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-md" }}>
                         {statusInfo.label}
                       </Chip>
+                      {item.active_group && (
+                        <span className="text-[9px] text-apple-blue-light font-bold pl-0.5">{getActiveGroupLabel(item.active_group)}</span>
+                      )}
                     </div>
                     <div className="text-[11px] font-bold tracking-widest text-apple-text-secondary uppercase truncate">
                       {item.stage_plan ? mapStageLabels(routes, item.stage_plan).join(' • ') : '—'}

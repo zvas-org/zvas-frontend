@@ -25,6 +25,15 @@ export interface TaskRouteMeta {
   stage: string
   defaultTopic: string
   siteLike: boolean
+  // Task-025 新增：编排调度字段
+  routeCode: string
+  taskSubtype: string
+  groupCode: string
+  groupOrder: number
+  dispatchOrder: number
+  seedSource: string
+  downstreamRoutes: string[]
+  budgetBucket: string
 }
 
 /** 索引化目录：O(1) 按维度取值 */
@@ -33,6 +42,7 @@ export interface TaskRouteCatalog {
   byKey: Record<string, TaskRouteMeta>
   byStage: Record<string, TaskRouteMeta>
   byTaskType: Record<string, TaskRouteMeta>
+  byRouteCode: Record<string, TaskRouteMeta>
 }
 
 // ── DTO → Meta 映射 ──
@@ -45,6 +55,14 @@ function mapToMeta(dto: any): TaskRouteMeta {
     stage: dto.stage || '',
     defaultTopic: dto.default_topic || '',
     siteLike: Boolean(dto.site_like),
+    routeCode: dto.route_code || dto.key || '',
+    taskSubtype: dto.task_subtype || '',
+    groupCode: dto.group_code || '',
+    groupOrder: dto.group_order ?? 0,
+    dispatchOrder: dto.dispatch_order ?? 0,
+    seedSource: dto.seed_source || '',
+    downstreamRoutes: dto.downstream_routes || [],
+    budgetBucket: dto.budget_bucket || '',
   }
 }
 
@@ -53,12 +71,14 @@ function buildCatalog(list: TaskRouteMeta[]): TaskRouteCatalog {
   const byKey: Record<string, TaskRouteMeta> = {}
   const byStage: Record<string, TaskRouteMeta> = {}
   const byTaskType: Record<string, TaskRouteMeta> = {}
+  const byRouteCode: Record<string, TaskRouteMeta> = {}
   for (const item of list) {
     if (item.key) byKey[item.key] = item
     if (item.stage && !byStage[item.stage]) byStage[item.stage] = item
     if (item.taskType && !byTaskType[item.taskType]) byTaskType[item.taskType] = item
+    if (item.routeCode) byRouteCode[item.routeCode] = item
   }
-  return { list, byKey, byStage, byTaskType }
+  return { list, byKey, byStage, byTaskType, byRouteCode }
 }
 
 // ── 全局 query hook：长缓存避免多页面重复请求 ──

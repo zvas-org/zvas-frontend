@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
-import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
+import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel } from '@/api/adapters/task'
 import { useAssetPools } from '@/api/adapters/asset'
 import { useTaskRoutes } from '@/api/adapters/route'
 import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
@@ -180,9 +180,20 @@ export function TasksPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Chip size="sm" variant="flat" color={statusInfo.color} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-md" }}>
-                    {statusInfo.label}
-                  </Chip>
+                  <div className="flex flex-col gap-1">
+                    <Chip size="sm" variant="flat" color={statusInfo.color} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-md" }}>
+                      {statusInfo.label}
+                    </Chip>
+                    {task.active_group && !task.blocked_reason && (
+                      <span className="text-[10px] text-apple-blue-light font-bold">{getActiveGroupLabel(task.active_group)}</span>
+                    )}
+                    {task.blocked_reason && (
+                      <span className="text-[10px] text-apple-amber font-bold">{getBlockedReasonLabel(task.blocked_reason)}</span>
+                    )}
+                    {task.active_attack_route && (
+                      <span className="text-[9px] text-apple-text-tertiary font-mono truncate" title={task.active_attack_route}>→ {task.active_attack_route}</span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <span className="text-[10px] truncate block w-full bg-white/5 border border-white/10 px-2 py-0.5 rounded uppercase tracking-wider text-apple-text-tertiary font-black opacity-80">

@@ -20,6 +20,21 @@ export interface TaskListItemVM {
   finished_at: string
   stage_overrides: Record<string, boolean>
   desired_state: string
+  // Task-025 新增：编排调度字段
+  route_plan: string[]
+  active_group: string
+  blocked_reason: string
+  active_attack_route: string
+  group_progress: GroupProgressVM[]
+}
+
+/** 阶段组执行进度 */
+export interface GroupProgressVM {
+  group_code: string
+  state: string   // pending | active | completed | blocked
+  seeded_at: string
+  completed_at: string
+  blocked_reason: string
 }
 
 export interface TaskDetailVM extends TaskListItemVM {
@@ -48,6 +63,11 @@ export interface TaskProgressVM {
   failed: number
   updated_at: string
   stages: TaskProgressStageVM[]
+  // Task-025 新增
+  active_group: string
+  blocked_reason: string
+  active_attack_route: string
+  group_progress: GroupProgressVM[]
 }
 
 export interface TaskSnapshotAssetVM {
@@ -82,6 +102,19 @@ export interface TaskRecordVM {
   finished_at?: string
   duration_ms: number
   result_summary: string
+  // Task-025 新增
+  route_code: string
+  desired_state: string
+}
+
+function mapGroupProgress(arr: any[]): GroupProgressVM[] {
+  return (arr || []).map((g: any) => ({
+    group_code: g.group_code || '',
+    state: g.state || 'pending',
+    seeded_at: g.seeded_at || '',
+    completed_at: g.completed_at || '',
+    blocked_reason: g.blocked_reason || '',
+  }))
 }
 
 function mapToTaskListItemVM(dto: any): TaskListItemVM {
@@ -102,6 +135,11 @@ function mapToTaskListItemVM(dto: any): TaskListItemVM {
     finished_at: dto.finished_at || '',
     stage_overrides: dto.stage_overrides || {},
     desired_state: dto.desired_state || 'running',
+    route_plan: dto.route_plan || [],
+    active_group: dto.active_group || '',
+    blocked_reason: dto.blocked_reason || '',
+    active_attack_route: dto.active_attack_route || '',
+    group_progress: mapGroupProgress(dto.group_progress),
   }
 }
 
@@ -133,6 +171,10 @@ function mapToTaskProgressVM(dto: any): TaskProgressVM {
       failed: stage.failed ?? 0,
       pending: Boolean(stage.pending),
     })),
+    active_group: dto.active_group || '',
+    blocked_reason: dto.blocked_reason || '',
+    active_attack_route: dto.active_attack_route || '',
+    group_progress: mapGroupProgress(dto.group_progress),
   }
 }
 
@@ -171,6 +213,8 @@ function mapToTaskRecordVM(dto: any): TaskRecordVM {
     finished_at: dto.finished_at || '',
     duration_ms: dto.duration_ms ?? dto.duration_ms ?? 0,
     result_summary: dto.result_summary || '',
+    route_code: dto.route_code || '',
+    desired_state: dto.desired_state || '',
   }
 }
 
@@ -209,6 +253,41 @@ export function getTaskStatusInfo(status: string, desiredState: string): TaskSta
       return { label: '已失败', color: 'danger', isRunning: false, canPause: false, canResume: false, canStop: false }
     default:
       return { label: status || '未知', color: 'default', isRunning: false, canPause: false, canResume: false, canStop: false }
+  }
+}
+
+// ── Task-025: 编排状态 Helper ──
+
+const GROUP_LABELS: Record<string, string> = {
+  discovery: '资产探测中',
+  attack: '漏洞扫描中',
+  report: '报告生成中',
+}
+
+const BLOCKED_LABELS: Record<string, string> = {
+  task_paused: '已暂停',
+  task_stopped: '已停止',
+  budget_exhausted: '预算耗尽',
+}
+
+/** 获取当前活动阶段组的中文标签 */
+export function getActiveGroupLabel(activeGroup: string): string {
+  return GROUP_LABELS[activeGroup] || activeGroup || ''
+}
+
+/** 获取阻塞原因的中文标签 */
+export function getBlockedReasonLabel(reason: string): string {
+  return BLOCKED_LABELS[reason] || reason || ''
+}
+
+/** 获取阶段组状态的显示信息 */
+export function getGroupStateInfo(state: string): { label: string; color: string } {
+  switch (state) {
+    case 'active': return { label: '执行中', color: 'primary' }
+    case 'completed': return { label: '已完成', color: 'success' }
+    case 'blocked': return { label: '已阻塞', color: 'warning' }
+    case 'pending': return { label: '等待中', color: 'default' }
+    default: return { label: state || '未知', color: 'default' }
   }
 }
 
@@ -343,6 +422,10 @@ export interface CreateTaskResponseVM {
   task_id: string
   asset_pool_id: string
   target_set_id?: string
+  // Task-025: 编排字段透传
+  route_plan: string[]
+  active_group: string
+  group_progress: GroupProgressVM[]
 }
 
 export function useCreateTask() {
@@ -350,10 +433,14 @@ export function useCreateTask() {
     mutationFn: async (req: CreateTaskRequest): Promise<CreateTaskResponseVM> => {
       const res = await httpClient.post<{ data: any }>('/tasks', req)
       const d = res.data.data || res.data // 根据通用约定展开
+      const task = d.task || d
       return {
-        task_id: d.task?.id || d.id || '',
+        task_id: task.id || d.id || '',
         asset_pool_id: d.asset_pool?.id || d.asset_pool_id || req.asset_pool_id || '',
         target_set_id: d.target_set?.id || d.target_set_id,
+        route_plan: task.route_plan || [],
+        active_group: task.active_group || '',
+        group_progress: mapGroupProgress(task.group_progress),
       }
     },
   })

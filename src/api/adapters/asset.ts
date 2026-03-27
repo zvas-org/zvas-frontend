@@ -352,6 +352,9 @@ export interface TaskSummaryView {
   started_at?: string
   finished_at?: string
   desired_state: string
+  // Task-025 新增
+  active_group: string
+  blocked_reason: string
 }
 
 export interface FindingSummaryView {
@@ -381,6 +384,8 @@ function mapToTaskSummaryView(dto: any): TaskSummaryView {
     started_at: dto.started_at || '',
     finished_at: dto.finished_at || '',
     desired_state: dto.desired_state || 'running',
+    active_group: dto.active_group || '',
+    blocked_reason: dto.blocked_reason || '',
   }
 }
 
