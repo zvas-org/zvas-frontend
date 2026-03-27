@@ -1,27 +1,16 @@
 import { Progress, Skeleton } from '@heroui/react'
 import type { TaskProgressVM } from '@/api/adapters/task'
+import { useTaskRoutes, getRouteLabel } from '@/api/adapters/route'
 
 function percent(done: number, total: number) {
   if (!total) return 0
   return Math.min(100, Math.round((done / total) * 100))
 }
 
-function stageLabel(stage: string) {
-  switch (stage) {
-    case 'port_scan':
-      return '端口扫描'
-    case 'http_probe':
-      return '首页识别'
-    case 'asset_expand':
-      return '资产扩展'
-    case 'scope_filter':
-      return '范围过滤'
-    default:
-      return stage || '未知阶段'
-  }
-}
-
 export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
+  // 统一路由配置
+  const { data: routes } = useTaskRoutes()
+
   if (!progress) return <Skeleton className="h-64 rounded-2xl bg-white/5" />
 
   const finished = (progress.succeeded || 0) + (progress.failed || 0)
@@ -62,7 +51,7 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
             <div key={stage.stage} className="flex flex-col gap-2 border border-white/5 rounded-2xl px-4 py-4 bg-white/[0.01]">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-black text-white">{stageLabel(stage.stage)}</div>
+                  <div className="text-sm font-black text-white">{getRouteLabel(routes, stage.stage)}</div>
                   <div className="text-xs text-apple-text-tertiary">
                     {stage.pending && stageTotal === 0 ? '等待生成扫描单元' : `完成 ${stageDone} / ${stageTotal}`}
                   </div>

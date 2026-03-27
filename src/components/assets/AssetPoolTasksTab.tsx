@@ -11,6 +11,7 @@ import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
 import { CreateTaskFromPoolModal } from '@/components/assets/CreateTaskFromPoolModal'
 import { useAssetPoolTasks } from '@/api/adapters/asset'
 import { usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
+import { useTaskRoutes, mapStageLabels } from '@/api/adapters/route'
 
 function formatTime(value?: string): string {
   if (!value) return '-'
@@ -34,6 +35,9 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
   const pauseTask = usePauseTask()
   const resumeTask = useResumeTask()
   const stopTask = useStopTask()
+
+  // 统一路由配置（stage 翻译）
+  const { data: routes } = useTaskRoutes()
 
   const items = data?.data || []
   const pagination = data?.pagination
@@ -140,7 +144,7 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
                       </Chip>
                     </div>
                     <div className="text-[11px] font-bold tracking-widest text-apple-text-secondary uppercase truncate">
-                      {item.stage_plan?.join(' • ') || '—'}
+                      {item.stage_plan ? mapStageLabels(routes, item.stage_plan).join(' • ') : '—'}
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[11px] font-semibold text-apple-text-secondary font-mono tracking-tighter uppercase">{formatTime(item.updated_at).split(' ')[0]}</span>

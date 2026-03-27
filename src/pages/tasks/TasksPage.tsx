@@ -19,6 +19,7 @@ import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
 import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
 import { useAssetPools } from '@/api/adapters/asset'
+import { useTaskRoutes } from '@/api/adapters/route'
 import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
 
 function formatDateTime(isoStr?: string) {
@@ -51,6 +52,9 @@ export function TasksPage() {
   const pauseTask = usePauseTask()
   const resumeTask = useResumeTask()
   const stopTask = useStopTask()
+
+  // 统一路由配置（模板筛选下拉）
+  const { data: routesData } = useTaskRoutes()
 
   // To map pool id to names in dropdown
   const poolsQuery = useAssetPools({ page: 1, page_size: 100 })
@@ -96,13 +100,9 @@ export function TasksPage() {
             selectedKeys={new Set([templateFilter])}
             onChange={(e) => { setTemplateFilter(e.target.value || 'all'); setPage(1) }}
             classNames={{ trigger: "bg-white/5 border border-white/10 h-10 pr-10", value: "truncate text-ellipsis" }}
+            items={[{ key: 'all', label: '所有执行模板' }, ...(routesData || []).map(r => ({ key: r.key, label: r.label }))]}
           >
-            <SelectItem key="all" textValue="所有执行模板">所有执行模板</SelectItem>
-            <SelectItem key="asset_expand" textValue="asset_expand">asset_expand</SelectItem>
-            <SelectItem key="port_scan" textValue="port_scan">port_scan</SelectItem>
-            <SelectItem key="web_identify" textValue="web_identify">web_identify</SelectItem>
-            <SelectItem key="vuln_scan" textValue="vuln_scan">vuln_scan</SelectItem>
-            <SelectItem key="full_scan" textValue="full_scan">full_scan</SelectItem>
+            {(item) => <SelectItem key={item.key} textValue={item.label}>{item.label}</SelectItem>}
           </Select>
           <Select
             aria-label="状态筛选"

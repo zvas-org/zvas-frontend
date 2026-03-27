@@ -3,11 +3,13 @@ import { Button, Spinner, Chip } from '@heroui/react'
 import { ArrowLeftIcon, RocketLaunchIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 
 import { useTaskTemplateDetail } from '@/api/adapters/template'
+import { useTaskRoutes, getRouteLabel } from '@/api/adapters/route'
 
 export function TaskTemplateDetailPage() {
   const { code } = useParams()
   const navigate = useNavigate()
   const { data: detail, isPending, isError } = useTaskTemplateDetail(code)
+  const { data: routes } = useTaskRoutes()
 
   if (isPending) {
     return (
@@ -132,8 +134,8 @@ export function TaskTemplateDetailPage() {
                 <div className="text-[12px] text-apple-text-secondary mb-2">调度阶段执行流 (默认计划)</div>
                 <div className="flex flex-wrap gap-2">
                   {detail.default_stage_plan.map(stage => (
-                    <span key={stage} className="bg-white/5 px-3 py-1 rounded text-[12px] font-mono tracking-tight text-apple-text-secondary border border-white/5">
-                      {stage}
+                    <span key={stage} className="bg-white/5 px-3 py-1 rounded text-[12px] font-mono tracking-tight text-apple-text-secondary border border-white/5" title={stage}>
+                      {getRouteLabel(routes, stage)}
                     </span>
                   ))}
                 </div>

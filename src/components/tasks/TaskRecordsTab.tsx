@@ -5,17 +5,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { useTaskRecords } from '@/api/adapters/task'
 import type { TaskRecordVM } from '@/api/adapters/task'
 import { parseHttpProbeSummary } from '@/api/adapters/asset'
-
-const RECORD_TYPE_LABEL: Record<string, string> = {
-  'port_scan/ip_service_identify': 'IP 服务识别',
-  'port_scan/domain_service_identify': '域名服务识别',
-  'http_probe/homepage_identify': '首页识别',
-}
-
-function recordTypeLabel(task_type: string, task_subtype: string) {
-  const key = task_subtype ? `${task_type}/${task_subtype}` : task_type
-  return RECORD_TYPE_LABEL[key] || task_type || '-'
-}
+import { useTaskRoutes, getRecordTypeLabel } from '@/api/adapters/route'
 
 function formatDateTime(value?: string) {
   if (!value) return '-'
@@ -65,17 +55,28 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
   const [keyword, setKeyword] = useState('')
   const pageSize = 20
 
+  // 统一路由配置
+  const { data: routes } = useTaskRoutes()
+
   const query = useTaskRecords(taskId, { page, page_size: pageSize, stage: stage || undefined, status: status || undefined, keyword: keyword || undefined, sort: 'updated_at', order: 'desc' })
 
   const items = query.data?.data || []
   const total = query.data?.pagination?.total || 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  const stageOptions = useMemo(() => [
-    { key: '', label: '全部阶段' },
-    { key: 'port_scan', label: '端口扫描' },
-    { key: 'http_probe', label: '首页识别' },
-  ], [])
+  // 从路由配置动态生成阶段筛选项
+  const stageOptions = useMemo(() => {
+    const opts = [{ key: '', label: '全部阶段' }]
+    if (routes) {
+      routes.forEach(r => {
+        // 避免重复：按 stage 去重
+        if (r.stage && !opts.some(o => o.key === r.stage)) {
+          opts.push({ key: r.stage, label: r.label })
+        }
+      })
+    }
+    return opts
+  }, [routes])
 
   const statusOptions = useMemo(() => [
     { key: '', label: '全部状态' },
@@ -125,7 +126,7 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
           <TableBody emptyContent={<div className="py-20 text-apple-text-tertiary text-[13px] font-bold tracking-widest uppercase">当前筛选条件下暂无扫描记录。</div>} isLoading={query.isPending} loadingContent={<Skeleton className="h-40 w-full rounded-[24px] bg-white/5" />}>
             {items.map((item) => (
               <TableRow key={item.unit_id}>
-                <TableCell>{recordTypeLabel(item.task_type, item.task_subtype)}</TableCell>
+                <TableCell>{getRecordTypeLabel(routes, item.task_type, item.task_subtype)}</TableCell>
                 <TableCell><span className="font-mono text-[12px] break-all">{item.target_key}</span></TableCell>
                 <TableCell>{item.status}</TableCell>
                 <TableCell>{item.worker_id || '-'}</TableCell>
