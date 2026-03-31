@@ -1,6 +1,7 @@
 import type { TaskDetailVM } from '@/api/adapters/task'
-import { getActiveGroupLabel, getBlockedReasonLabel, getGroupStateInfo } from '@/api/adapters/task'
+import { getActiveGroupLabel, getBlockedReasonLabel, getGroupStateInfo, isTerminalTaskStatus } from '@/api/adapters/task'
 import { useTaskRoutes, getRouteLabel } from '@/api/adapters/route'
+import { getPortModeLabel } from '@/api/adapters/template'
 
 function formatDateTime(isoStr?: string) {
   if (!isoStr) return '-'
@@ -10,33 +11,37 @@ function formatDateTime(isoStr?: string) {
 export function TaskOverviewTab({ task }: { task: TaskDetailVM }) {
   const { data: routes } = useTaskRoutes()
 
+  const isTerminal = isTerminalTaskStatus(task.status)
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500">
       {/* ── 编排状态总览 ── */}
       {(task.active_group || task.group_progress.length > 0) && (
-        <div className="bg-apple-blue/[0.03] border border-apple-blue/10 p-6 rounded-2xl flex flex-col gap-5 animate-in fade-in duration-500">
-          <h3 className="text-sm font-bold text-apple-blue-light border-b border-apple-blue/10 pb-2 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-apple-blue animate-pulse" />
+        <div className={`${isTerminal ? 'bg-white/[0.02] border-white/5' : 'bg-apple-blue/[0.03] border-apple-blue/10'} border p-6 rounded-2xl flex flex-col gap-5 animate-in fade-in duration-500`}>
+          <h3 className={`text-sm font-bold ${isTerminal ? 'text-white border-white/10' : 'text-apple-blue-light border-apple-blue/10'} border-b pb-2 flex items-center gap-2`}>
+            {!isTerminal && <span className="w-2 h-2 rounded-full bg-apple-blue animate-pulse" />}
             阶段编排状态 (Orchestration State)
           </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-8 text-sm">
-            <div>
-              <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">当前活动阶段组</span>
-              <span className="text-apple-blue-light font-bold text-base">{getActiveGroupLabel(task.active_group) || '-'}</span>
+          {!isTerminal && (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-8 text-sm">
+              <div>
+                <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">当前活动阶段组</span>
+                <span className="text-apple-blue-light font-bold text-base">{getActiveGroupLabel(task.active_group) || '-'}</span>
+              </div>
+              {task.blocked_reason && (
+                <div>
+                  <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">阻塞原因</span>
+                  <span className="text-apple-amber font-bold">{getBlockedReasonLabel(task.blocked_reason)}</span>
+                </div>
+              )}
+              {task.active_attack_route && (
+                <div>
+                  <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">当前攻击路由</span>
+                  <span className="text-apple-text-secondary font-mono text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10">{task.active_attack_route}</span>
+                </div>
+              )}
             </div>
-            {task.blocked_reason && (
-              <div>
-                <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">阻塞原因</span>
-                <span className="text-apple-amber font-bold">{getBlockedReasonLabel(task.blocked_reason)}</span>
-              </div>
-            )}
-            {task.active_attack_route && (
-              <div>
-                <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">当前攻击路由</span>
-                <span className="text-apple-text-secondary font-mono text-xs bg-white/5 px-2 py-0.5 rounded border border-white/10">{task.active_attack_route}</span>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* 阶段组执行状态时间线 */}
           {task.group_progress.length > 0 && (
@@ -44,13 +49,14 @@ export function TaskOverviewTab({ task }: { task: TaskDetailVM }) {
               <span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-3">阶段组执行进度 (Group Progress)</span>
               <div className="flex items-center gap-0 overflow-x-auto">
                 {task.group_progress.map((gp, idx) => {
-                  const stateInfo = getGroupStateInfo(gp.state)
+                  const displayState = isTerminal && (gp.state === 'active' || gp.state === 'blocked' || gp.state === 'pending') ? 'completed' : gp.state
+                  const stateInfo = getGroupStateInfo(displayState)
                   return (
                     <div key={gp.group_code} className="flex items-center">
                       <div className={`flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl border transition-all min-w-[120px] ${
-                        gp.state === 'active' ? 'bg-apple-blue/10 border-apple-blue/30 shadow-md shadow-apple-blue/10' :
-                        gp.state === 'completed' ? 'bg-apple-green/10 border-apple-green/20' :
-                        gp.state === 'blocked' ? 'bg-apple-amber/10 border-apple-amber/20' :
+                        displayState === 'active' ? 'bg-apple-blue/10 border-apple-blue/30 shadow-md shadow-apple-blue/10' :
+                        displayState === 'completed' ? 'bg-apple-green/10 border-apple-green/20' :
+                        displayState === 'blocked' ? 'bg-apple-amber/10 border-apple-amber/20' :
                         'bg-white/[0.02] border-white/5'
                       }`}>
                         <span className="text-[10px] font-black uppercase tracking-widest text-apple-text-tertiary">{gp.group_code}</span>
@@ -116,8 +122,9 @@ export function TaskOverviewTab({ task }: { task: TaskDetailVM }) {
         <h3 className="text-sm font-bold text-white border-b border-white/5 pb-2">核心执行参数 (Runtime Configuration)</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-8 text-sm pt-4">
            <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">执行器并发数</span> <span className="text-apple-text-secondary font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10">{task.params?.concurrency || '-'}</span></div>
+           <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">发包速率</span> <span className="text-apple-text-secondary font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10">{task.params?.rate || '-'}</span></div>
            <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">端口扫描超时</span> <span className="text-apple-text-secondary">{task.params?.timeout_ms ? `${task.params.timeout_ms} ms` : '-'}</span></div>
-           <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">端口配置偏好</span> <span className="text-apple-text-secondary">{task.params?.port_scan_mode || task.params?.port_profile || '-'}</span></div>
+           <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">端口配置偏好</span> <span className="text-apple-text-secondary">{getPortModeLabel(task.params?.port_profile || task.params?.port_scan_mode || '')}</span></div>
            <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">首页识别探针</span> <span className="text-[12px]">{task.params?.http_probe_enabled ? <span className="text-apple-green-light font-bold">开启 (ON)</span> : <span className="text-apple-text-tertiary">关闭 (OFF)</span>}</span></div>
            {task.params?.http_probe_enabled && task.params?.http_timeout_sec && (
              <div><span className="text-[10px] text-apple-text-tertiary uppercase tracking-widest font-black block mb-1">HTTP 探针超时</span> <span className="text-apple-text-secondary font-mono">{task.params.http_timeout_sec} sec</span></div>

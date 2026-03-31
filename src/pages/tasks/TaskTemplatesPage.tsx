@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Card, CardBody, CardHeader, Chip, Input, Spinner } from '@heroui/react'
 import { DocumentDuplicateIcon, MagnifyingGlassIcon, RocketLaunchIcon } from '@heroicons/react/24/outline'
 
-import { useTaskTemplates } from '@/api/adapters/template'
+import { useTaskTemplates, getPortModeLabel, isHighCostPortTemplate, getTemplatePresetBadge } from '@/api/adapters/template'
 import { useState } from 'react'
 
 export function TaskTemplatesPage() {
@@ -58,23 +58,31 @@ export function TaskTemplatesPage() {
                   <CardHeader className="flex flex-col items-start gap-2 p-6 pb-2">
                     <div className="flex justify-between w-full items-start">
                        <h3 className="text-lg font-black tracking-tight group-hover:text-apple-blue-light transition-colors">{tpl.name}</h3>
-                       {tpl.is_builtin && <Chip size="sm" variant="flat" className="bg-white/5 text-[10px] font-black tracking-widest uppercase">默认预置</Chip>}
+                       <div className="flex items-center gap-1.5">
+                         {(() => { const badge = getTemplatePresetBadge(tpl.code); return badge ? <Chip size="sm" variant="flat" color={badge.color as 'default' | 'warning'} classNames={{ base: 'text-[9px] font-black tracking-widest uppercase border-0' }}>{badge.label}</Chip> : null })()}
+                         {tpl.is_builtin && <Chip size="sm" variant="flat" className="bg-white/5 text-[10px] font-black tracking-widest uppercase">默认预置</Chip>}
+                       </div>
                     </div>
                     <div className="font-mono text-[11px] text-apple-text-tertiary">{tpl.code}</div>
                   </CardHeader>
                   <CardBody className="p-6 pt-2 flex flex-col justify-between flex-grow">
                      <div>
-                       <p className="text-[13px] text-apple-text-secondary leading-relaxed line-clamp-3 mb-6">
+                       <p className="text-[13px] text-apple-text-secondary leading-relaxed line-clamp-3 mb-4">
                          {tpl.description || '暂无描述信息'}
                        </p>
+                       {isHighCostPortTemplate(tpl.code) && (
+                         <div className="mb-4 px-3 py-2 rounded-xl bg-apple-amber/10 border border-apple-amber/20 text-[11px] text-apple-amber font-bold flex items-center gap-1.5">
+                           <span>⚠</span> 全端口 · 耗时高 · 资源占用高
+                         </div>
+                       )}
                        <div className="flex flex-col gap-2 bg-black/20 rounded-xl p-4 border border-white/5">
                           <div className="flex justify-between items-center">
                             <span className="text-[11px] text-apple-text-tertiary">端口模式</span>
-                            <span className="text-[12px] font-bold text-apple-text-primary">{tpl.default_port_scan_mode}</span>
+                            <span className="text-[12px] font-bold text-apple-text-primary">{getPortModeLabel(tpl.default_port_scan_mode)}</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-[11px] text-apple-text-tertiary">首页识别</span>
-                            <span className="text-[12px] font-bold text-apple-text-primary">{tpl.default_http_probe_enabled ? '启用' : '关闭'}</span>
+                            <span className="text-[11px] text-apple-text-tertiary">并发/速率/超时</span>
+                            <span className="text-[12px] font-bold text-apple-text-primary">{tpl.default_concurrency} / {tpl.default_rate} / {tpl.default_timeout_ms}ms</span>
                           </div>
                        </div>
                      </div>

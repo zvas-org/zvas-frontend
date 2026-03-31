@@ -63,13 +63,15 @@ export interface HTTPProbeSummaryVM {
   html_hash: string
   favicon_hash: string
   icp: string
+  probe_status?: 'alive' | 'unreachable' | string
+  probe_error?: string
 }
 
 export function parseHttpProbeSummary(extraPayload: unknown): HTTPProbeSummaryVM | null {
   if (!extraPayload) return null
   const root = extraPayload as any
   const payload = root.http_probe || root
-  if (!payload.site_url && !payload.status_code && !payload.title) {
+  if (!payload.site_url && !payload.status_code && !payload.title && !payload.probe_status) {
     if (Object.keys(payload).length === 0) return null
   }
   return {
@@ -81,7 +83,15 @@ export function parseHttpProbeSummary(extraPayload: unknown): HTTPProbeSummaryVM
     html_hash: payload.html_hash || '',
     favicon_hash: payload.favicon_hash || '',
     icp: payload.icp || '',
+    probe_status: payload.probe_status || undefined,
+    probe_error: payload.probe_error || undefined,
   }
+}
+
+export function getProbeStatusLabel(status: string | undefined): string {
+  if (status === 'alive') return '站点存活'
+  if (status === 'unreachable') return '站点不存活'
+  return status ? `未知 (${status})` : '未知状态'
 }
 
 export interface PoolAssetVM {

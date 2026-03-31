@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Tabs, Tab, Skeleton, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Button, ButtonGroup } from '@heroui/react'
+import { Tabs, Tab, Skeleton, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Button, ButtonGroup, Tooltip } from '@heroui/react'
 import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 
 import { useTaskSnapshotAssets, useTaskSnapshotAssetDetail, type TaskSnapshotAssetVM } from '@/api/adapters/task'
@@ -175,6 +175,14 @@ function ExpandedRow({ taskId, item, assetKind }: { taskId?: string; item: TaskS
       <div className="px-10 py-5 bg-white/[0.01] border-l-2 border-l-apple-blue flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">存活状态</span>
+            <div className="flex items-center gap-2">
+              {sum?.probe_status === 'alive' ? <span className="text-[10px] font-bold tracking-widest bg-apple-green/10 text-apple-green-light border border-apple-green/30 px-2 py-0.5 rounded uppercase">站点存活</span> :
+               sum?.probe_status === 'unreachable' ? <Tooltip content={sum?.probe_error || '无法确认细节'}><span className="text-[10px] font-bold tracking-widest bg-white/5 text-apple-text-secondary border border-white/20 px-2 py-0.5 rounded uppercase cursor-help">站点不存活</span></Tooltip> :
+               <span className="text-[10px] font-bold tracking-widest bg-white/5 text-white/50 border border-white/10 px-2 py-0.5 rounded uppercase">-</span>}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">标题 (Title)</span>
             <span className="text-[12px] text-white font-medium break-all">{sum?.title || '-'}</span>
           </div>
@@ -274,9 +282,16 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
         <TableCell key="site_count"><span className="text-[12px] text-white font-bold">{siteCount}</span></TableCell>,
       )
     } else if (assetKind === 'site') {
+      const sum = parseHttpProbeSummary(item.extra_payload)
       cells.push(
-        <TableCell key="title"><span className="text-apple-text-secondary truncate block max-w-[180px]">-</span></TableCell>,
-        <TableCell key="status_code"><span className="text-apple-text-secondary">-</span></TableCell>,
+        <TableCell key="title">
+          <div className="flex items-center gap-2">
+            {sum?.probe_status === 'alive' ? <span className="w-2 h-2 rounded-full bg-apple-green shrink-0" title="站点存活"></span> :
+             sum?.probe_status === 'unreachable' ? <span className="w-2 h-2 rounded-full bg-apple-text-secondary shrink-0" title={`站点不存活: ${sum?.probe_error || '未知'}`}></span> : null}
+            <span className="text-apple-text-secondary truncate block max-w-[180px]">{sum?.title || '-'}</span>
+          </div>
+        </TableCell>,
+        <TableCell key="status_code"><span className="text-apple-text-secondary">{sum?.status_code || '-'}</span></TableCell>,
         <TableCell key="cert"><span className="text-apple-text-secondary">-</span></TableCell>,
       )
     }

@@ -2,6 +2,45 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { httpClient } from '@/api/client'
 import type { PaginationMeta } from './asset'
+import { parseHttpProbeSummary } from './asset'
+
+export const TERMINAL_TASK_STATUSES = ['succeeded', 'failed', 'stopped', 'deleted']
+
+export function isTerminalTaskStatus(status: string): boolean {
+  return TERMINAL_TASK_STATUSES.includes(status)
+}
+
+export interface HttpProbeObservation {
+  state: 'alive' | 'unreachable' | 'failed' | 'unknown'
+  label: string
+  error?: string
+}
+
+export function getHttpProbeObservation(record: TaskRecordVM): HttpProbeObservation {
+  if (record.status === 'failed') {
+    return { state: 'failed', label: '执行失败' }
+  }
+  if (record.status === 'succeeded') {
+    let payload = null
+    try {
+      if (typeof record.result_summary === 'string' && record.result_summary.startsWith('{')) {
+        payload = JSON.parse(record.result_summary)
+      } else {
+        payload = record.result_summary
+      }
+    } catch {
+      // ignore
+    }
+    const sum = parseHttpProbeSummary(payload)
+    if (sum) {
+      if (sum.probe_status === 'alive') return { state: 'alive', label: '站点存活' }
+      if (sum.probe_status === 'unreachable') return { state: 'unreachable', label: '站点不存活', error: sum.probe_error }
+      if (sum.status_code && sum.status_code > 0) return { state: 'alive', label: '站点存活' }
+    }
+    return { state: 'unknown', label: '未知状态' }
+  }
+  return { state: 'unknown', label: record.status || '异常' }
+}
 
 export interface TaskListItemVM {
   id: string

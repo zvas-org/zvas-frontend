@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
-import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel } from '@/api/adapters/task'
+import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel, isTerminalTaskStatus } from '@/api/adapters/task'
 import { useAssetPools } from '@/api/adapters/asset'
 import { useTaskRoutes } from '@/api/adapters/route'
 import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
@@ -184,14 +184,18 @@ export function TasksPage() {
                     <Chip size="sm" variant="flat" color={statusInfo.color} classNames={{ base: "border-0 font-black tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-md" }}>
                       {statusInfo.label}
                     </Chip>
-                    {task.active_group && !task.blocked_reason && (
-                      <span className="text-[10px] text-apple-blue-light font-bold">{getActiveGroupLabel(task.active_group)}</span>
-                    )}
-                    {task.blocked_reason && (
-                      <span className="text-[10px] text-apple-amber font-bold">{getBlockedReasonLabel(task.blocked_reason)}</span>
-                    )}
-                    {task.active_attack_route && (
-                      <span className="text-[9px] text-apple-text-tertiary font-mono truncate" title={task.active_attack_route}>→ {task.active_attack_route}</span>
+                    {!isTerminalTaskStatus(task.status) && (
+                      <>
+                        {task.active_group && !task.blocked_reason && (
+                          <span className="text-[10px] text-apple-blue-light font-bold">{getActiveGroupLabel(task.active_group)}</span>
+                        )}
+                        {task.blocked_reason && (
+                          <span className="text-[10px] text-apple-amber font-bold">{getBlockedReasonLabel(task.blocked_reason)}</span>
+                        )}
+                        {task.active_attack_route && (
+                          <span className="text-[9px] text-apple-text-tertiary font-mono truncate" title={task.active_attack_route}>→ {task.active_attack_route}</span>
+                        )}
+                      </>
                     )}
                   </div>
                 </TableCell>

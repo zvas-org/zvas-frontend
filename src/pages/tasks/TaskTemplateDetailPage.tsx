@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button, Spinner, Chip } from '@heroui/react'
 import { ArrowLeftIcon, RocketLaunchIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 
-import { useTaskTemplateDetail } from '@/api/adapters/template'
+import { useTaskTemplateDetail, getPortModeLabel, isHighCostPortTemplate, getTemplatePresetBadge, FULL_PORT_WARNING } from '@/api/adapters/template'
 import { useTaskRoutes, getRouteLabel } from '@/api/adapters/route'
 
 export function TaskTemplateDetailPage() {
@@ -30,13 +30,8 @@ export function TaskTemplateDetailPage() {
     )
   }
 
-  const portModeMap: Record<string, string> = {
-    web_common: 'Web 常用端口',
-    top_100: 'Top 100',
-    common: '常见端口',
-    full: '全端口扫描',
-    custom: '自定义',
-  }
+  const presetBadge = getTemplatePresetBadge(detail.code)
+  const isHighCost = isHighCostPortTemplate(detail.code)
 
   return (
     <div className="flex flex-col gap-6 w-full text-apple-text-primary animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-[1280px] mx-auto pb-20 px-8 pt-8">
@@ -57,7 +52,10 @@ export function TaskTemplateDetailPage() {
         {/* 标题 & 操作 */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-black tracking-tight mb-2">{detail.name}</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-4xl font-black tracking-tight">{detail.name}</h1>
+              {presetBadge && <Chip size="sm" variant="flat" color={presetBadge.color as 'default' | 'warning'} classNames={{ base: 'text-[9px] font-black tracking-widest uppercase border-0' }}>{presetBadge.label}</Chip>}
+            </div>
             <p className="text-apple-text-secondary max-w-2xl">{detail.description || '暂无描述'}</p>
           </div>
           <div className="flex gap-4">
@@ -75,6 +73,11 @@ export function TaskTemplateDetailPage() {
       </div>
 
       {/* ─── Bento Grid 布局 ─── */}
+      {isHighCost && (
+        <div className="mt-4 px-5 py-3 rounded-2xl bg-apple-amber/10 border border-apple-amber/20 text-[13px] text-apple-amber font-bold flex items-center gap-2">
+          <span>⚠️</span> {FULL_PORT_WARNING}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
         {/* 左侧主要信息 */}
         <div className="md:col-span-2 flex flex-col gap-6">
@@ -106,7 +109,7 @@ export function TaskTemplateDetailPage() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               <div>
                 <div className="text-[12px] text-apple-text-secondary mb-1">默认端口模式</div>
-                <div className="text-[14px] font-bold text-apple-text-primary">{portModeMap[detail.default_port_scan_mode] || detail.default_port_scan_mode}</div>
+                <div className="text-[14px] font-bold text-apple-text-primary">{getPortModeLabel(detail.default_port_scan_mode)}</div>
               </div>
               <div>
                 <div className="text-[12px] text-apple-text-secondary mb-1">默认首页识别</div>
@@ -123,11 +126,15 @@ export function TaskTemplateDetailPage() {
                 <div className="text-[14px] font-bold text-apple-text-primary">{detail.default_concurrency}</div>
               </div>
               <div>
+                <div className="text-[12px] text-apple-text-secondary mb-1">默认速率</div>
+                <div className="text-[14px] font-bold text-apple-text-primary">{detail.default_rate}</div>
+              </div>
+              <div>
                 <div className="text-[12px] text-apple-text-secondary mb-1">默认超时</div>
                 <div className="text-[14px] font-bold text-apple-text-primary">
-                  {detail.default_timeout_minutes >= 60000 
-                    ? `${detail.default_timeout_minutes / 1000} 秒` 
-                    : `${detail.default_timeout_minutes} ms`}
+                  {detail.default_timeout_ms >= 60000 
+                    ? `${detail.default_timeout_ms / 1000} 秒` 
+                    : `${detail.default_timeout_ms} ms`}
                 </div>
               </div>
               <div className="col-span-2">

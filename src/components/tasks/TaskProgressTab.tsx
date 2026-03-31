@@ -1,6 +1,6 @@
 import { Progress, Skeleton } from '@heroui/react'
 import type { TaskProgressVM } from '@/api/adapters/task'
-import { getActiveGroupLabel, getBlockedReasonLabel, getGroupStateInfo } from '@/api/adapters/task'
+import { getActiveGroupLabel, getBlockedReasonLabel, getGroupStateInfo, isTerminalTaskStatus } from '@/api/adapters/task'
 import { useTaskRoutes, getRouteLabel } from '@/api/adapters/route'
 
 function percent(done: number, total: number) {
@@ -17,19 +17,21 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
   const finished = (progress.succeeded || 0) + (progress.failed || 0)
   const overall = percent(finished, progress.total_units || 0)
 
+  const isTerminal = isTerminalTaskStatus(progress.task_status || '')
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
       {/* ── 阶段组执行状态条 (Group Progress) ── */}
       {progress.group_progress.length > 0 && (
-        <div className="bg-apple-blue/[0.03] border border-apple-blue/10 p-6 rounded-[24px] backdrop-blur-3xl">
+        <div className={`${isTerminal ? 'bg-white/[0.02] border-white/5' : 'bg-apple-blue/[0.03] border-apple-blue/10'} border p-6 rounded-[24px] backdrop-blur-3xl`}>
           <div className="flex items-center gap-3 mb-4">
-            <h3 className="text-sm font-black text-apple-blue-light">阶段组编排</h3>
-            {progress.active_group && (
+            <h3 className={`text-sm font-black ${isTerminal ? 'text-white' : 'text-apple-blue-light'}`}>阶段组编排</h3>
+            {!isTerminal && progress.active_group && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-apple-blue/10 border border-apple-blue/20 text-apple-blue-light font-bold">
                 {getActiveGroupLabel(progress.active_group)}
               </span>
             )}
-            {progress.blocked_reason && (
+            {!isTerminal && progress.blocked_reason && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-apple-amber/10 border border-apple-amber/20 text-apple-amber font-bold">
                 {getBlockedReasonLabel(progress.blocked_reason)}
               </span>
@@ -37,13 +39,14 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
           </div>
           <div className="flex items-center gap-0 overflow-x-auto">
             {progress.group_progress.map((gp, idx) => {
-              const stateInfo = getGroupStateInfo(gp.state)
+              const displayState = isTerminal && (gp.state === 'active' || gp.state === 'blocked' || gp.state === 'pending') ? 'completed' : gp.state
+              const stateInfo = getGroupStateInfo(displayState)
               return (
                 <div key={gp.group_code} className="flex items-center">
                   <div className={`flex flex-col items-center gap-1 px-5 py-3 rounded-xl border min-w-[100px] transition-all ${
-                    gp.state === 'active' ? 'bg-apple-blue/10 border-apple-blue/30 shadow-md shadow-apple-blue/10' :
-                    gp.state === 'completed' ? 'bg-apple-green/10 border-apple-green/20' :
-                    gp.state === 'blocked' ? 'bg-apple-amber/10 border-apple-amber/20' :
+                    displayState === 'active' ? 'bg-apple-blue/10 border-apple-blue/30 shadow-md shadow-apple-blue/10' :
+                    displayState === 'completed' ? 'bg-apple-green/10 border-apple-green/20' :
+                    displayState === 'blocked' ? 'bg-apple-amber/10 border-apple-amber/20' :
                     'bg-white/[0.02] border-white/5'
                   }`}>
                     <span className="text-[10px] font-black uppercase tracking-widest text-apple-text-tertiary">{gp.group_code}</span>
@@ -61,7 +64,7 @@ export function TaskProgressTab({ progress }: { progress?: TaskProgressVM }) {
               )
             })}
           </div>
-          {progress.active_attack_route && (
+          {!isTerminal && progress.active_attack_route && (
             <div className="mt-3 text-[10px] text-apple-text-tertiary">
               当前攻击路由：<span className="text-apple-text-secondary font-mono">{progress.active_attack_route}</span>
             </div>

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Chip, Input, Pagination, Select, SelectItem, Skeleton, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
-import { useTaskRecords } from '@/api/adapters/task'
+import { useTaskRecords, getHttpProbeObservation } from '@/api/adapters/task'
 import type { TaskRecordVM } from '@/api/adapters/task'
 import { parseHttpProbeSummary } from '@/api/adapters/asset'
 import { useTaskRoutes, getRecordTypeLabel, getRouteLabel } from '@/api/adapters/route'
@@ -73,6 +73,45 @@ function desiredStateBadge(state: string) {
   }
   const info = map[state] || { label: state, color: 'default' as const }
   return <Chip size="sm" variant="flat" color={info.color} classNames={{ base: 'border-0 text-[9px] font-bold px-1' }}>{info.label}</Chip>
+}
+
+/** 状态列渲染器：分离执行态与站点存活态 */
+function renderStatus(item: TaskRecordVM) {
+  const statusColorMap: Record<string, string> = {
+    succeeded: 'bg-apple-green/20 text-apple-green-light',
+    failed: 'bg-apple-red/20 text-apple-red',
+    running: 'bg-apple-blue/20 text-apple-blue-light',
+    pending: 'bg-apple-amber/20 text-apple-amber',
+    canceled: 'bg-white/20 text-apple-text-secondary',
+  }
+  const colorClass = statusColorMap[item.status] || 'bg-white/10 text-white/70'
+
+  if (item.task_type === 'http_probe') {
+    const obs = getHttpProbeObservation(item)
+    return (
+      <div className="flex flex-col gap-1.5 items-start">
+        <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${colorClass}`}>
+          {item.status}
+        </span>
+        {obs.state !== 'unknown' && obs.state !== 'failed' && (
+          <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest ${
+            obs.state === 'alive' ? 'border border-apple-green/40 text-apple-green-light bg-apple-green/10' :
+            obs.state === 'unreachable' ? 'border border-white/20 text-apple-text-secondary bg-white/5' :
+            'border border-white/20 text-apple-text-secondary bg-white/5'
+          }`}>
+            {obs.label}
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  // 其他任务走普通渲染
+  return (
+    <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${colorClass}`}>
+      {item.status}
+    </span>
+  )
 }
 
 export function TaskRecordsTab({ taskId }: { taskId?: string }) {
@@ -157,7 +196,7 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
                 <TableCell>{getRecordTypeLabel(routes, item.task_type, item.task_subtype)}</TableCell>
                 <TableCell><span className="font-mono text-[10px] text-apple-text-tertiary" title={item.route_code}>{item.route_code ? getRouteLabel(routes, item.route_code) : '-'}</span></TableCell>
                 <TableCell><span className="font-mono text-[12px] break-all">{item.target_key}</span></TableCell>
-                <TableCell>{item.status}</TableCell>
+                <TableCell>{renderStatus(item)}</TableCell>
                 <TableCell>{desiredStateBadge(item.desired_state)}</TableCell>
                 <TableCell>{item.worker_id || '-'}</TableCell>
                 <TableCell>{item.attempt}</TableCell>

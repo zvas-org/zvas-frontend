@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Skeleton, Input, Button } from '@heroui/react'
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Skeleton, Input, Button, Tooltip } from '@heroui/react'
 import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
 import { useAssetPoolAssets, parseHttpProbeSummary } from '@/api/adapters/asset'
@@ -21,6 +21,14 @@ function ExpandedSiteRow({ item }: { item: PoolAssetVM }) {
   return (
     <div className="px-10 py-5 bg-white/[0.01] border-l-2 border-l-apple-blue flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">存活状态</span>
+          <div className="flex items-center gap-2">
+            {probe?.probe_status === 'alive' ? <span className="text-[10px] font-bold tracking-widest bg-apple-green/10 text-apple-green-light border border-apple-green/30 px-2 py-0.5 rounded uppercase">站点存活</span> :
+             probe?.probe_status === 'unreachable' ? <Tooltip content={probe?.probe_error || '无法确认细节'}><span className="text-[10px] font-bold tracking-widest bg-white/5 text-apple-text-secondary border border-white/20 px-2 py-0.5 rounded uppercase cursor-help">站点不存活</span></Tooltip> :
+             <span className="text-[10px] font-bold tracking-widest bg-white/5 text-white/50 border border-white/10 px-2 py-0.5 rounded uppercase">-</span>}
+          </div>
+        </div>
         <div className="flex flex-col gap-1">
           <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">标题 (Title)</span>
           <span className="text-[12px] text-white font-medium break-all">{probe?.title || '-'}</span>
@@ -140,6 +148,12 @@ export function AssetPoolSiteTab({ poolId }: { poolId: string }) {
                         <Button isIconOnly size="sm" variant="light" className="text-apple-text-tertiary w-6 h-6 min-w-6" onPress={() => setExpandedRowId(isExpanded ? null : it.id)}>
                           {isExpanded ? <ChevronDownIcon className="w-4 h-4" /> : <ChevronRightIcon className="w-4 h-4" />}
                         </Button>
+                        {(() => {
+                           const sum = parseHttpProbeSummary(it.detail?.extra_payload || it.detail);
+                           if (sum?.probe_status === 'alive') return <span className="w-2 h-2 rounded-full bg-apple-green shrink-0" title="站点存活"></span>;
+                           if (sum?.probe_status === 'unreachable') return <span className="w-2 h-2 rounded-full bg-apple-text-secondary shrink-0" title={`站点不存活: ${sum?.probe_error || '未知'}`}></span>;
+                           return null;
+                        })()}
                         <span className="font-mono text-[14px] text-apple-blue-light font-black tracking-tight break-all drop-shadow-[0_0_8px_rgba(0,113,227,0.3)] cursor-pointer" onClick={() => setExpandedRowId(isExpanded ? null : it.id)}>{it.display_name}</span>
                       </div>
                     </TableCell>
