@@ -1,11 +1,35 @@
 import { useMemo, useState } from 'react'
-import { Chip, Input, Pagination, Select, SelectItem, Skeleton, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@heroui/react'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import {
+  Button,
+  Chip,
+  Input,
+  Pagination,
+  Select,
+  SelectItem,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from '@heroui/react'
+import { EyeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
-import { useTaskRecords, getHttpProbeObservation } from '@/api/adapters/task'
-import type { TaskRecordVM } from '@/api/adapters/task'
 import { parseHttpProbeSummary } from '@/api/adapters/asset'
-import { useTaskRoutes, getRecordTypeLabel, getRouteLabel } from '@/api/adapters/route'
+import { getHttpProbeObservation, useTaskRecords } from '@/api/adapters/task'
+import type { TaskRecordVM } from '@/api/adapters/task'
+import { getRecordTypeLabel, getRouteLabel, useTaskRoutes } from '@/api/adapters/route'
+import { TaskRecordDetailDrawer } from '@/components/tasks/TaskRecordDetailDrawer'
+
+type RecordTabKey = 'all' | 'port_scan' | 'http_probe' | 'vuln_scan'
+
+const RECORD_TABS: Array<{ key: RecordTabKey; label: string; description: string }> = [
+  { key: 'all', label: '全部记录', description: '统一查看所有扫描单元' },
+  { key: 'port_scan', label: '端口扫描', description: '查看端口开放和服务识别' },
+  { key: 'http_probe', label: '站点识别', description: '查看请求与响应报文' },
+  { key: 'vuln_scan', label: '漏洞扫描', description: '查看漏洞命中与摘要' },
+]
 
 function formatDateTime(value?: string) {
   if (!value) return '-'
@@ -18,10 +42,6 @@ function formatDuration(durationMs: number) {
   return `${(durationMs / 1000).toFixed(1)} s`
 }
 
-/**
- * 注册式结果摘要渲染器。
- * 按 `task_type/task_subtype` 键注册，新增类型只需追加注册项。
- */
 type SummaryRenderer = (item: TaskRecordVM) => React.ReactNode | null
 
 const SUMMARY_RENDERERS: Record<string, SummaryRenderer> = {
@@ -39,56 +59,71 @@ const SUMMARY_RENDERERS: Record<string, SummaryRenderer> = {
     const sum = parseHttpProbeSummary(payload)
     if (!sum) return null
     return (
-      <div className="flex flex-col gap-1 w-full overflow-hidden">
-        <div className="flex items-center gap-2 w-full">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${sum.status_code && sum.status_code >= 200 && sum.status_code < 400 ? 'bg-apple-green/20 text-apple-green-light' : 'bg-white/10 text-white/70'}`}>
+      <div className='flex flex-col gap-1 w-full overflow-hidden'>
+        <div className='flex items-center gap-2 w-full'>
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${sum.status_code && sum.status_code >= 200 && sum.status_code < 400
+                ? 'bg-apple-green/20 text-apple-green-light'
+                : 'bg-white/10 text-white/70'
+              }`}
+          >
             {sum.status_code || '-'}
           </span>
-          <span className="text-[12px] truncate text-white font-medium" title={sum.title}>{sum.title || '无标题'}</span>
+          <span className='text-[12px] truncate text-white font-medium' title={sum.title}>
+            {sum.title || '无标题'}
+          </span>
         </div>
-        <span className="text-[10px] text-apple-text-tertiary truncate font-mono" title={sum.site_url}>{sum.site_url}</span>
+        <span className='text-[10px] text-apple-text-tertiary truncate font-mono' title={sum.site_url}>
+          {sum.site_url}
+        </span>
       </div>
     )
   },
-  // Task-030: vuln_scan 漏洞扫描记录专属摘要渲染器
-  'vuln_scan': (item) => {
+  vul_scan: (item) => {
     const summary = item.result_summary
     if (!summary) return null
-    // 后端已整理为可直接展示的文字摘要，无需二次拼接
     const isFound = typeof summary === 'string' && summary.includes('发现')
     const isSkipped = typeof summary === 'string' && summary.includes('跳过')
     const isClean = typeof summary === 'string' && summary.includes('未发现')
     return (
-      <div className="flex items-center gap-2 w-full overflow-hidden">
-        <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${
-          isFound ? 'bg-apple-red' :
-          isSkipped ? 'bg-apple-amber' :
-          isClean ? 'bg-apple-green' :
-          'bg-white/30'
-        }`} />
-        <span className={`text-[12px] truncate font-medium ${
-          isFound ? 'text-apple-red-light' :
-          isSkipped ? 'text-apple-amber' :
-          isClean ? 'text-apple-green-light' :
-          'text-apple-text-secondary'
-        }`}>{String(summary)}</span>
+      <div className='flex items-center gap-2 w-full overflow-hidden'>
+        <span
+          className={`shrink-0 w-1.5 h-1.5 rounded-full ${isFound
+              ? 'bg-apple-red'
+              : isSkipped
+                ? 'bg-apple-amber'
+                : isClean
+                  ? 'bg-apple-green'
+                  : 'bg-white/30'
+            }`}
+        />
+        <span
+          className={`text-[12px] truncate font-medium ${isFound
+              ? 'text-apple-red-light'
+              : isSkipped
+                ? 'text-apple-amber'
+                : isClean
+                  ? 'text-apple-green-light'
+                  : 'text-apple-text-secondary'
+            }`}
+        >
+          {String(summary)}
+        </span>
       </div>
     )
   },
 }
 
 function renderResultSummary(item: TaskRecordVM) {
-  // 按 task_type/task_subtype 查找注册的渲染器
   const key = item.task_subtype ? `${item.task_type}/${item.task_subtype}` : item.task_type
   const renderer = SUMMARY_RENDERERS[key]
   if (renderer) {
     const result = renderer(item)
     if (result) return result
   }
-  return <span className="truncate block w-full">{item.result_summary || '-'}</span>
+  return <span className='truncate block w-full'>{item.result_summary || '-'}</span>
 }
 
-/** desired_state 标签样式 */
 function desiredStateBadge(state: string) {
   if (!state) return null
   const map: Record<string, { label: string; color: 'default' | 'warning' | 'danger' }> = {
@@ -97,10 +132,13 @@ function desiredStateBadge(state: string) {
     stopped: { label: '已停止', color: 'danger' },
   }
   const info = map[state] || { label: state, color: 'default' as const }
-  return <Chip size="sm" variant="flat" color={info.color} classNames={{ base: 'border-0 text-[9px] font-bold px-1' }}>{info.label}</Chip>
+  return (
+    <Chip size='sm' variant='flat' color={info.color} classNames={{ base: 'border-0 text-[9px] font-bold px-1' }}>
+      {info.label}
+    </Chip>
+  )
 }
 
-/** 状态列渲染器：分离执行态与站点存活态 */
 function renderStatus(item: TaskRecordVM) {
   const statusColorMap: Record<string, string> = {
     succeeded: 'bg-apple-green/20 text-apple-green-light',
@@ -114,16 +152,17 @@ function renderStatus(item: TaskRecordVM) {
   if (item.task_type === 'http_probe') {
     const obs = getHttpProbeObservation(item)
     return (
-      <div className="flex flex-col gap-1.5 items-start">
+      <div className='flex flex-col gap-1.5 items-start'>
         <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${colorClass}`}>
           {item.status}
         </span>
         {obs.state !== 'unknown' && obs.state !== 'failed' && (
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest ${
-            obs.state === 'alive' ? 'border border-apple-green/40 text-apple-green-light bg-apple-green/10' :
-            obs.state === 'unreachable' ? 'border border-white/20 text-apple-text-secondary bg-white/5' :
-            'border border-white/20 text-apple-text-secondary bg-white/5'
-          }`}>
+          <span
+            className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest ${obs.state === 'alive'
+                ? 'border border-apple-green/40 text-apple-green-light bg-apple-green/10'
+                : 'border border-white/20 text-apple-text-secondary bg-white/5'
+              }`}
+          >
             {obs.label}
           </span>
         )}
@@ -131,90 +170,119 @@ function renderStatus(item: TaskRecordVM) {
     )
   }
 
-  // 其他任务走普通渲染
-  return (
-    <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${colorClass}`}>
-      {item.status}
-    </span>
-  )
+  return <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${colorClass}`}>{item.status}</span>
 }
 
 export function TaskRecordsTab({ taskId }: { taskId?: string }) {
   const [page, setPage] = useState(1)
-  const [stage, setStage] = useState('')
+  const [recordTab, setRecordTab] = useState<RecordTabKey>('all')
   const [status, setStatus] = useState('')
   const [keyword, setKeyword] = useState('')
+  const [selectedRecord, setSelectedRecord] = useState<TaskRecordVM | null>(null)
   const pageSize = 20
 
-  // 统一路由配置
   const { data: routes } = useTaskRoutes()
 
-  const query = useTaskRecords(taskId, { page, page_size: pageSize, stage: stage || undefined, status: status || undefined, keyword: keyword || undefined, sort: 'updated_at', order: 'desc' })
+  const query = useTaskRecords(taskId, {
+    page,
+    page_size: pageSize,
+    stage: recordTab === 'all' ? undefined : recordTab,
+    status: status || undefined,
+    keyword: keyword || undefined,
+    sort: 'updated_at',
+    order: 'desc',
+  })
 
   const items = query.data?.data || []
   const total = query.data?.pagination?.total || 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  // 从路由配置动态生成阶段筛选项
-  const stageOptions = useMemo(() => {
-    const opts = [{ key: '', label: '全部阶段' }]
-    if (routes) {
-      routes.forEach(r => {
-        if (r.stage && !opts.some(o => o.key === r.stage)) {
-          opts.push({ key: r.stage, label: r.label })
-        }
-      })
-    }
-    return opts
-  }, [routes])
-
-  const statusOptions = useMemo(() => [
-    { key: '', label: '全部状态' },
-    { key: 'queued', label: '待执行' },
-    { key: 'dispatched', label: '已分发' },
-    { key: 'running', label: '执行中' },
-    { key: 'succeeded', label: '已完成' },
-    { key: 'failed', label: '失败' },
-  ], [])
+  const statusOptions = useMemo(
+    () => [
+      { key: '', label: '全部状态' },
+      { key: 'queued', label: '待执行' },
+      { key: 'dispatched', label: '已分发' },
+      { key: 'running', label: '执行中' },
+      { key: 'succeeded', label: '已完成' },
+      { key: 'failed', label: '失败' },
+    ],
+    [],
+  )
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
-      <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl backdrop-blur-3xl">
-        <h3 className="text-xl font-black text-white tracking-tight mb-1">扫描记录</h3>
-        <p className="text-[13px] text-apple-text-tertiary font-medium">按单元查看任务的扫描过程、当前状态与结果摘要，便于定位执行链是否正常。</p>
+    <div className='flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8'>
+      {/* <div className='bg-white/[0.02] border border-white/5 p-6 rounded-2xl backdrop-blur-3xl'>
+        <h3 className='text-xl font-black text-white tracking-tight mb-1'>扫描记录</h3>
+        <p className='text-[13px] text-apple-text-tertiary font-medium'>
+          按扫描类型拆分查看记录和详情，避免不同引擎结果结构混在同一视图里。
+        </p>
+      </div> */}
+
+      <div className='flex flex-wrap gap-3'>
+        {RECORD_TABS.map((tab) => {
+          const active = recordTab === tab.key
+          return (
+            <button
+              key={tab.key}
+              type='button'
+              onClick={() => {
+                setRecordTab(tab.key)
+                setPage(1)
+                setSelectedRecord(null)
+              }}
+              className={`min-w-[180px] rounded-2xl border px-4 py-3 text-left transition-all ${active
+                  ? 'border-apple-blue/40 bg-apple-blue/10 shadow-lg shadow-apple-blue/10'
+                  : 'border-white/8 bg-white/[0.03] hover:bg-white/[0.05]'
+                }`}
+            >
+              <div className={`text-sm font-black ${active ? 'text-white' : 'text-apple-text-secondary'}`}>{tab.label}</div>
+              <div className='mt-1 text-xs text-apple-text-tertiary'>{tab.description}</div>
+            </button>
+          )
+        })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
         <Input
           isClearable
           value={keyword}
-          placeholder="搜索目标或结果摘要"
-          onValueChange={(value) => { setKeyword(value); setPage(1) }}
+          placeholder='搜索目标或结果摘要'
+          onValueChange={(value) => {
+            setKeyword(value)
+            setPage(1)
+          }}
           classNames={{ inputWrapper: 'bg-white/5 border border-white/5 rounded-2xl h-12', input: 'text-sm' }}
-          startContent={<MagnifyingGlassIcon className="w-4 h-4 text-apple-text-tertiary" />}
+          startContent={<MagnifyingGlassIcon className='w-4 h-4 text-apple-text-tertiary' />}
         />
         <Select
-          selectedKeys={stage ? [stage] : []}
-          placeholder="阶段"
-          onSelectionChange={(keys) => { setStage(Array.from(keys)[0] as string || ''); setPage(1) }}
-          classNames={{ trigger: 'bg-white/5 border border-white/5 rounded-2xl h-12' }}
-          popoverProps={{ classNames: { content: "bg-apple-bg/95 backdrop-blur-3xl border border-white/10 shadow-2xl p-1 min-w-[180px]" } }}
-        >
-          {stageOptions.map((item) => <SelectItem key={item.key}>{item.label}</SelectItem>)}
-        </Select>
-        <Select
           selectedKeys={status ? [status] : []}
-          placeholder="状态"
-          onSelectionChange={(keys) => { setStatus(Array.from(keys)[0] as string || ''); setPage(1) }}
+          placeholder='状态'
+          onSelectionChange={(keys) => {
+            setStatus((Array.from(keys)[0] as string) || '')
+            setPage(1)
+          }}
           classNames={{ trigger: 'bg-white/5 border border-white/5 rounded-2xl h-12' }}
-          popoverProps={{ classNames: { content: "bg-apple-bg/95 backdrop-blur-3xl border border-white/10 shadow-2xl p-1 min-w-[160px]" } }}
+          popoverProps={{ classNames: { content: 'bg-apple-bg/95 backdrop-blur-3xl border border-white/10 shadow-2xl p-1 min-w-[160px]' } }}
         >
-          {statusOptions.map((item) => <SelectItem key={item.key}>{item.label}</SelectItem>)}
+          {statusOptions.map((item) => (
+            <SelectItem key={item.key}>{item.label}</SelectItem>
+          ))}
         </Select>
       </div>
 
-      <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto">
-        <Table removeWrapper aria-label="Task Records" layout="fixed" classNames={{ base: 'p-4 min-w-[1400px]', table: 'table-fixed', th: 'bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2 text-left', td: 'border-b border-white/5 py-4 text-left last:border-0', tr: 'hover:bg-white/[0.03] transition-colors' }}>
+      <div className='rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto'>
+        <Table
+          removeWrapper
+          aria-label='Task Records'
+          layout='fixed'
+          classNames={{
+            base: 'p-4 min-w-[1400px]',
+            table: 'table-fixed',
+            th: 'bg-transparent text-apple-text-tertiary uppercase text-[10px] tracking-[0.2em] font-black h-14 border-b border-white/5 pb-2 text-left',
+            td: 'border-b border-white/5 py-4 text-left last:border-0',
+            tr: 'hover:bg-white/[0.03] transition-colors',
+          }}
+        >
           <TableHeader>
             <TableColumn width={130}>阶段</TableColumn>
             <TableColumn width={110}>路由编码</TableColumn>
@@ -226,13 +294,24 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
             <TableColumn width={100}>耗时</TableColumn>
             <TableColumn width={160}>开始时间</TableColumn>
             <TableColumn width={280}>结果摘要</TableColumn>
+            <TableColumn width={96}>详情</TableColumn>
           </TableHeader>
-          <TableBody emptyContent={<div className="py-20 text-apple-text-tertiary text-[13px] font-bold tracking-widest uppercase">当前筛选条件下暂无扫描记录。</div>} isLoading={query.isPending} loadingContent={<Skeleton className="h-40 w-full rounded-[24px] bg-white/5" />}>
+          <TableBody
+            emptyContent={<div className='py-20 text-apple-text-tertiary text-[13px] font-bold tracking-widest uppercase'>当前筛选条件下暂无扫描记录。</div>}
+            isLoading={query.isPending}
+            loadingContent={<Skeleton className='h-40 w-full rounded-[24px] bg-white/5' />}
+          >
             {items.map((item) => (
               <TableRow key={item.unit_id}>
                 <TableCell>{getRecordTypeLabel(routes, item.task_type, item.task_subtype)}</TableCell>
-                <TableCell><span className="font-mono text-[10px] text-apple-text-tertiary" title={item.route_code}>{item.route_code ? getRouteLabel(routes, item.route_code) : '-'}</span></TableCell>
-                <TableCell><span className="font-mono text-[12px] break-all">{item.target_key}</span></TableCell>
+                <TableCell>
+                  <span className='font-mono text-[10px] text-apple-text-tertiary' title={item.route_code}>
+                    {item.route_code ? getRouteLabel(routes, item.route_code) : '-'}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className='font-mono text-[12px] break-all'>{item.target_key}</span>
+                </TableCell>
                 <TableCell>{renderStatus(item)}</TableCell>
                 <TableCell>{desiredStateBadge(item.desired_state)}</TableCell>
                 <TableCell>{item.worker_id || '-'}</TableCell>
@@ -240,17 +319,50 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
                 <TableCell>{formatDuration(item.duration_ms)}</TableCell>
                 <TableCell>{formatDateTime(item.started_at)}</TableCell>
                 <TableCell>{renderResultSummary(item)}</TableCell>
+                <TableCell>
+                  <Button
+                    size='sm'
+                    variant='flat'
+                    className='min-w-0 rounded-xl bg-white/5 text-apple-blue-light hover:bg-white/10 font-bold'
+                    onPress={() => setSelectedRecord(item)}
+                    startContent={<EyeIcon className='w-4 h-4' />}
+                  >
+                    详情
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {total > 0 && (
-          <div className="flex justify-between items-center px-6 py-5 border-t border-white/5 bg-white/[0.01]">
-            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-apple-text-tertiary">当前记录 <span className="text-white mx-1">{total}</span> 条</span>
-            {totalPages > 1 && <Pagination size="sm" page={page} total={totalPages} onChange={setPage} classNames={{ wrapper: 'gap-2', item: 'bg-white/5 text-apple-text-secondary font-bold rounded-xl border border-white/5 hover:bg-white/10 transition-all min-w-[32px] h-8 text-[12px]', cursor: 'bg-apple-blue font-black rounded-xl shadow-lg shadow-apple-blue/30 text-white' }} />}
+          <div className='flex justify-between items-center px-6 py-5 border-t border-white/5 bg-white/[0.01]'>
+            <span className='text-[10px] uppercase font-black tracking-[0.2em] text-apple-text-tertiary'>
+              {RECORD_TABS.find((tab) => tab.key === recordTab)?.label || '当前记录'}
+              <span className='text-white mx-1'>{total}</span>条
+            </span>
+            {totalPages > 1 && (
+              <Pagination
+                size='sm'
+                page={page}
+                total={totalPages}
+                onChange={setPage}
+                classNames={{
+                  wrapper: 'gap-2',
+                  item: 'bg-white/5 text-apple-text-secondary font-bold rounded-xl border border-white/5 hover:bg-white/10 transition-all min-w-[32px] h-8 text-[12px]',
+                  cursor: 'bg-apple-blue font-black rounded-xl shadow-lg shadow-apple-blue/30 text-white',
+                }}
+              />
+            )}
           </div>
         )}
       </div>
+
+      <TaskRecordDetailDrawer
+        isOpen={Boolean(selectedRecord)}
+        onClose={() => setSelectedRecord(null)}
+        taskId={taskId}
+        record={selectedRecord}
+      />
     </div>
   )
 }

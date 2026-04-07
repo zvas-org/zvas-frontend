@@ -160,6 +160,85 @@ export interface TaskRecordVM {
   desired_state: string
 }
 
+
+export interface TaskRecordPortResultVM {
+  target: string
+  resolved_ip: string
+  port: number
+  protocol: string
+  service: string
+  version: string
+  banner: string
+  subject: string
+  dns_names: string[]
+  fingerprinted: boolean
+  status: string
+  homepage_url: string
+}
+
+export interface TaskRecordHTTPResultVM {
+  target: string
+  site_url: string
+  probe_status: string
+  probe_error: string
+  status_code: number
+  title: string
+  content_length: number
+  server: string
+  html_hash: string
+  favicon_hash: string
+  icp: string
+  expanded_asset_kind: string
+  expanded_display_name: string
+  expanded_normalized_key: string
+  expanded_source_type: string
+  expanded_confidence_level: string
+  request_message: string
+  response_header_text: string
+  response_header_map: Record<string, any>
+  response_body: string
+}
+
+export interface TaskRecordVulScanSummaryVM {
+  target_url: string
+  site_asset_id: string
+  profile_code: string
+  scan_mode: string
+  vulnerability_count: number
+  severity_summary: Record<string, any>
+  skip_reason: string
+  error: string
+  stats: Record<string, any>
+}
+
+export interface TaskRecordVulnerabilityVM {
+  id: string
+  vulnerability_key: string
+  target_url: string
+  rule_id: string
+  rule_name: string
+  severity: string
+  tags: string[]
+  matcher_name: string
+  matched_at?: string
+  host: string
+  ip: string
+  port: number
+  scheme: string
+  classification: Record<string, any>
+  evidence: Record<string, any>
+  raw: Record<string, any>
+}
+
+export interface TaskRecordDetailVM extends TaskRecordVM {
+  payload: Record<string, any>
+  result: Record<string, any>
+  port_results: TaskRecordPortResultVM[]
+  http_result?: TaskRecordHTTPResultVM
+  vul_scan_summary?: TaskRecordVulScanSummaryVM
+  vulnerabilities: TaskRecordVulnerabilityVM[]
+}
+
 function mapGroupProgress(arr: any[]): GroupProgressVM[] {
   return (arr || []).map((g: any) => ({
     group_code: g.group_code || '',
@@ -283,6 +362,80 @@ function mapToTaskRecordVM(dto: any): TaskRecordVM {
     result_summary: dto.result_summary || '',
     route_code: dto.route_code || '',
     desired_state: dto.desired_state || '',
+  }
+}
+
+
+function mapToTaskRecordDetailVM(dto: any): TaskRecordDetailVM {
+  return {
+    ...mapToTaskRecordVM(dto),
+    payload: dto.payload || {},
+    result: dto.result || {},
+    port_results: (dto.port_results || []).map((item: any) => ({
+      target: item.target || '',
+      resolved_ip: item.resolved_ip || '',
+      port: item.port ?? 0,
+      protocol: item.protocol || '',
+      service: item.service || '',
+      version: item.version || '',
+      banner: item.banner || '',
+      subject: item.subject || '',
+      dns_names: item.dns_names || [],
+      fingerprinted: Boolean(item.fingerprinted),
+      status: item.status || '',
+      homepage_url: item.homepage_url || '',
+    })),
+    http_result: dto.http_result ? {
+      target: dto.http_result.target || '',
+      site_url: dto.http_result.site_url || '',
+      probe_status: dto.http_result.probe_status || '',
+      probe_error: dto.http_result.probe_error || '',
+      status_code: dto.http_result.status_code ?? 0,
+      title: dto.http_result.title || '',
+      content_length: dto.http_result.content_length ?? 0,
+      server: dto.http_result.server || '',
+      html_hash: dto.http_result.html_hash || '',
+      favicon_hash: dto.http_result.favicon_hash || '',
+      icp: dto.http_result.icp || '',
+      expanded_asset_kind: dto.http_result.expanded_asset_kind || '',
+      expanded_display_name: dto.http_result.expanded_display_name || '',
+      expanded_normalized_key: dto.http_result.expanded_normalized_key || '',
+      expanded_source_type: dto.http_result.expanded_source_type || '',
+      expanded_confidence_level: dto.http_result.expanded_confidence_level || '',
+      request_message: dto.http_result.request_message || '',
+      response_header_text: dto.http_result.response_header_text || '',
+      response_header_map: dto.http_result.response_header_map || {},
+      response_body: dto.http_result.response_body || '',
+    } : undefined,
+    vul_scan_summary: dto.vul_scan_summary ? {
+      target_url: dto.vul_scan_summary.target_url || '',
+      site_asset_id: dto.vul_scan_summary.site_asset_id || '',
+      profile_code: dto.vul_scan_summary.profile_code || '',
+      scan_mode: dto.vul_scan_summary.scan_mode || '',
+      vulnerability_count: dto.vul_scan_summary.vulnerability_count ?? 0,
+      severity_summary: dto.vul_scan_summary.severity_summary || {},
+      skip_reason: dto.vul_scan_summary.skip_reason || '',
+      error: dto.vul_scan_summary.error || '',
+      stats: dto.vul_scan_summary.stats || {},
+    } : undefined,
+    vulnerabilities: (dto.vulnerabilities || []).map((item: any) => ({
+      id: item.id || '',
+      vulnerability_key: item.vulnerability_key || '',
+      target_url: item.target_url || '',
+      rule_id: item.rule_id || '',
+      rule_name: item.rule_name || '',
+      severity: item.severity || '',
+      tags: item.tags || [],
+      matcher_name: item.matcher_name || '',
+      matched_at: item.matched_at || '',
+      host: item.host || '',
+      ip: item.ip || '',
+      port: item.port ?? 0,
+      scheme: item.scheme || '',
+      classification: item.classification || {},
+      evidence: item.evidence || {},
+      raw: item.raw || {},
+    })),
   }
 }
 
@@ -457,6 +610,18 @@ export function useTaskRecords(
     },
     enabled: Boolean(id),
     refetchInterval: 5000,
+  })
+}
+
+
+export function useTaskRecordDetail(id?: string, unitId?: string, enabled = true) {
+  return useQuery({
+    queryKey: ['tasks', id, 'records', unitId, 'detail'],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: any }>(`/tasks/${id}/records/${unitId}`)
+      return mapToTaskRecordDetailVM(res.data.data)
+    },
+    enabled: Boolean(id && unitId && enabled),
   })
 }
 

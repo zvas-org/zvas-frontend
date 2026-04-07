@@ -47,29 +47,29 @@ function ExpandedRow({ taskId, item, assetKind }: { taskId?: string; item: TaskS
     const ports = Array.isArray(payload?.ports) && payload.ports.length > 0
       ? (payload.ports as Record<string, string>[])
       : (Array.isArray(payload?.open_ports) ? (payload.open_ports as (string | number)[]).map((p, idx) => ({
-          port: String(p),
-          protocol: '-',
-          service: (Array.isArray(payload?.services) ? payload.services[idx] : '-') ?? '-',
-          banner: '-',
-          cert_subject: '-',
-          dns_names: '-',
-          status: '-',
-        })) : [])
+        port: String(p),
+        protocol: '-',
+        service: (Array.isArray(payload?.services) ? payload.services[idx] : '-') ?? '-',
+        banner: '-',
+        cert_subject: '-',
+        dns_names: '-',
+        status: '-',
+      })) : [])
 
     return (
       <div className="px-6 py-4 bg-white/[0.01] border-l-2 border-l-apple-blue animate-in fade-in slide-in-from-top-2 duration-200">
-      <div className="flex flex-wrap items-center gap-6 mb-5">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">端口明细</span>
-        </div>
-        
-        {payload?.expanded_from_cidr && payload?.source_cidr && (
-          <div className="flex flex-col gap-1.5 bg-apple-blue/5 border border-apple-blue/10 px-4 py-2 rounded-xl">
-             <span className="text-[9px] uppercase font-black tracking-widest text-apple-blue-light opacity-80">来源网段</span>
-             <span className="text-[12px] font-mono font-bold text-apple-blue-light">{payload.source_cidr}</span>
+        <div className="flex flex-wrap items-center gap-6 mb-5">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">端口明细</span>
           </div>
-        )}
-      </div>
+
+          {payload?.expanded_from_cidr && payload?.source_cidr && (
+            <div className="flex flex-col gap-1.5 bg-apple-blue/5 border border-apple-blue/10 px-4 py-2 rounded-xl">
+              <span className="text-[9px] uppercase font-black tracking-widest text-apple-blue-light opacity-80">来源网段</span>
+              <span className="text-[12px] font-mono font-bold text-apple-blue-light">{payload.source_cidr}</span>
+            </div>
+          )}
+        </div>
         {ports.length === 0 ? (
           <div className="py-6 text-center text-[12px] text-apple-text-tertiary italic">暂无端口明细记录</div>
         ) : (
@@ -178,8 +178,8 @@ function ExpandedRow({ taskId, item, assetKind }: { taskId?: string; item: TaskS
             <span className="text-[10px] uppercase font-black tracking-widest text-apple-text-tertiary">存活状态</span>
             <div className="flex items-center gap-2">
               {sum?.probe_status === 'alive' ? <span className="text-[10px] font-bold tracking-widest bg-apple-green/10 text-apple-green-light border border-apple-green/30 px-2 py-0.5 rounded uppercase">站点存活</span> :
-               sum?.probe_status === 'unreachable' ? <Tooltip content={sum?.probe_error || '无法确认细节'}><span className="text-[10px] font-bold tracking-widest bg-white/5 text-apple-text-secondary border border-white/20 px-2 py-0.5 rounded uppercase cursor-help">站点不存活</span></Tooltip> :
-               <span className="text-[10px] font-bold tracking-widest bg-white/5 text-white/50 border border-white/10 px-2 py-0.5 rounded uppercase">-</span>}
+                sum?.probe_status === 'unreachable' ? <Tooltip content={sum?.probe_error || '无法确认细节'}><span className="text-[10px] font-bold tracking-widest bg-white/5 text-apple-text-secondary border border-white/20 px-2 py-0.5 rounded uppercase cursor-help">站点不存活</span></Tooltip> :
+                  <span className="text-[10px] font-bold tracking-widest bg-white/5 text-white/50 border border-white/10 px-2 py-0.5 rounded uppercase">-</span>}
             </div>
           </div>
           <div className="flex flex-col gap-1">
@@ -287,7 +287,7 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
         <TableCell key="title">
           <div className="flex items-center gap-2">
             {sum?.probe_status === 'alive' ? <span className="w-2 h-2 rounded-full bg-apple-green shrink-0" title="站点存活"></span> :
-             sum?.probe_status === 'unreachable' ? <span className="w-2 h-2 rounded-full bg-apple-text-secondary shrink-0" title={`站点不存活: ${sum?.probe_error || '未知'}`}></span> : null}
+              sum?.probe_status === 'unreachable' ? <span className="w-2 h-2 rounded-full bg-apple-text-secondary shrink-0" title={`站点不存活: ${sum?.probe_error || '未知'}`}></span> : null}
             <span className="text-apple-text-secondary truncate block max-w-[180px]">{sum?.title || '-'}</span>
           </div>
         </TableCell>,
@@ -302,10 +302,10 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
       <TableCell key="labels">
         <div className="flex gap-1.5 flex-wrap">
           {item.extra_payload?.expanded_from_cidr && (
-             <span className="text-[9px] bg-apple-blue/10 border border-apple-blue/20 text-apple-blue-light px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest">CIDR展开</span>
+            <span className="text-[9px] bg-apple-blue/10 border border-apple-blue/20 text-apple-blue-light px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest">CIDR展开</span>
           )}
           {(item.system_facets || []).slice(0, 3).map((tag: string) => (
-             <span key={tag} className="text-[9px] font-black tracking-widest text-apple-text-secondary uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">{tag}</span>
+            <span key={tag} className="text-[9px] font-black tracking-widest text-apple-text-secondary uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">{tag}</span>
           ))}
         </div>
       </TableCell>,
@@ -328,17 +328,17 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
         <TableColumn key="domain_count" width={110}>关联域名数</TableColumn>,
       )
     } else if (assetKind === 'domain') {
-       base.push(
-         <TableColumn key="root_domain" width={200}>根域</TableColumn>,
-         <TableColumn key="ip_count" width={100}>关联 IP 数</TableColumn>,
-         <TableColumn key="site_count" width={110}>关联站点数</TableColumn>,
-       )
+      base.push(
+        <TableColumn key="root_domain" width={200}>根域</TableColumn>,
+        <TableColumn key="ip_count" width={100}>关联 IP 数</TableColumn>,
+        <TableColumn key="site_count" width={110}>关联站点数</TableColumn>,
+      )
     } else if (assetKind === 'site') {
-       base.push(
-         <TableColumn key="title" width={200}>Title</TableColumn>,
-         <TableColumn key="status_code" width={100}>状态码</TableColumn>,
-         <TableColumn key="cert" width={140}>证书</TableColumn>
-       )
+      base.push(
+        <TableColumn key="title" width={200}>Title</TableColumn>,
+        <TableColumn key="status_code" width={100}>状态码</TableColumn>,
+        <TableColumn key="cert" width={140}>证书</TableColumn>
+      )
     }
 
     base.push(
@@ -351,12 +351,12 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
-      <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl flex items-center justify-between backdrop-blur-3xl">
+      {/* <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl flex items-center justify-between backdrop-blur-3xl">
         <div>
           <h3 className="text-xl font-black text-white tracking-tight mb-1">资产视图</h3>
           <p className="text-[13px] text-apple-text-tertiary font-medium">展示本次任务涉及的输入资产以及扫描阶段新发现的衍生资产。</p>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-2">
         <Tabs
@@ -432,14 +432,14 @@ export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
               )
 
               if (isExpanded) {
-                 const expandedBg = (
-                   <TableRow key={`${rowId}-expanded`} className="bg-white/[0.01]">
-                     <TableCell colSpan={columns.length} className="p-0 border-b border-white/5">
-                        <ExpandedRow taskId={taskId} item={item} assetKind={assetKind} />
-                     </TableCell>
-                   </TableRow>
-                 )
-                 return [mainRow, expandedBg]
+                const expandedBg = (
+                  <TableRow key={`${rowId}-expanded`} className="bg-white/[0.01]">
+                    <TableCell colSpan={columns.length} className="p-0 border-b border-white/5">
+                      <ExpandedRow taskId={taskId} item={item} assetKind={assetKind} />
+                    </TableCell>
+                  </TableRow>
+                )
+                return [mainRow, expandedBg]
               }
 
               return [mainRow]
