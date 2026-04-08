@@ -4,6 +4,9 @@ import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 
 import { useTaskSnapshotAssets, useTaskSnapshotAssetDetail, type TaskSnapshotAssetVM } from '@/api/adapters/task'
 import { parseHttpProbeSummary } from '@/api/adapters/asset'
+import { useUrlTabState } from '@/hooks/useUrlTabState'
+
+const TASK_ASSET_KIND_TABS = ['ip', 'domain', 'site'] as const
 
 const ASSET_KIND_LABEL: Record<string, string> = {
   ip: 'IP',
@@ -225,7 +228,7 @@ function ExpandedRow({ taskId, item, assetKind }: { taskId?: string; item: TaskS
 }
 
 export function TaskAssetViewTab({ taskId }: { taskId?: string }) {
-  const [assetKind, setAssetKind] = useState<'ip' | 'domain' | 'site'>('ip')
+  const [assetKind, setAssetKind] = useUrlTabState({ param: 'asset_tab', defaultValue: 'ip', values: TASK_ASSET_KIND_TABS })
   const [originFilter, setOriginFilter] = useState<'all' | 'input' | 'expanded'>('all')
   const [page, setPage] = useState(1)
   const pageSize = 20

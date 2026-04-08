@@ -276,7 +276,7 @@ export function AssetPoolsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1.5">
-                        {(!pool.tags || pool.tags.length === 0) ? <span className="text-[10px] text-apple-text-tertiary italic">-</span> : pool.tags.map(t => (
+                        {(!pool.tags || pool.tags.length === 0) ? <span className="text-[10px] text-apple-text-tertiary italic">-</span> : pool.tags.map((t: string) => (
                           <span key={t} className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-apple-text-secondary text-[10px] font-black uppercase tracking-wider">
                             {t}
                           </span>

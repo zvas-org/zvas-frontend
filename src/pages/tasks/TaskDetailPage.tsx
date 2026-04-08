@@ -14,8 +14,11 @@ import { TaskOverviewTab } from '@/components/tasks/TaskOverviewTab'
 import { TaskAssetViewTab } from '@/components/tasks/TaskAssetViewTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
 import { TaskRecordsTab } from '@/components/tasks/TaskRecordsTab'
+import { TaskFindingsTab } from '@/components/tasks/TaskFindingsTab'
 import { PauseIcon, PlayIcon as PlayIconSolid, StopIcon } from '@heroicons/react/24/solid'
+import { useUrlTabState } from '@/hooks/useUrlTabState'
 
+const TASK_DETAIL_TABS = ['overview', 'assets', 'records', 'progress', 'findings', 'reports'] as const
 
 export function TaskDetailPage() {
   const { id } = useParams()
@@ -28,7 +31,7 @@ export function TaskDetailPage() {
   const resumeTask = useResumeTask()
   const stopTask = useStopTask()
 
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useUrlTabState({ param: 'tab', defaultValue: 'overview', values: TASK_DETAIL_TABS })
   const [runError, setRunError] = useState<string | null>(null)
 
   if (detailQuery.isPending) {
@@ -126,7 +129,7 @@ export function TaskDetailPage() {
       )}
 
       <div className="border-b border-white/5 mt-2">
-        <Tabs aria-label="Task Options" selectedKey={activeTab} onSelectionChange={(k) => setActiveTab(k as string)} variant="underlined" classNames={{ tabList: 'gap-6 p-0', cursor: 'bg-apple-blue h-[2px] w-full', tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors' }}>
+        <Tabs aria-label="Task Options" selectedKey={activeTab} onSelectionChange={(k) => setActiveTab(k as (typeof TASK_DETAIL_TABS)[number])} variant="underlined" classNames={{ tabList: 'gap-6 p-0', cursor: 'bg-apple-blue h-[2px] w-full', tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors' }}>
           <Tab key="overview" title="概览" />
           <Tab key="assets" title="资产视图" />
           <Tab key="records" title="扫描记录" />
@@ -141,7 +144,7 @@ export function TaskDetailPage() {
         {activeTab === 'assets' && <TaskAssetViewTab taskId={task.id} />}
         {activeTab === 'records' && <TaskRecordsTab taskId={task.id} />}
         {activeTab === 'progress' && <TaskProgressTab progress={progress} />}
-        {activeTab === 'findings' && <PlaceholderTab title="待模块接入" desc="此页面保留为以后开放扫描结果的专门呈现。当前暂无真实业务数据。" />}
+        {activeTab === 'findings' && <TaskFindingsTab taskId={task.id} />}
         {activeTab === 'reports' && <PlaceholderTab title="待模块接入" desc="系统将在扫描结束后统一生成分析报表，当前模块暂未开放。" />}
       </div>
     </div>

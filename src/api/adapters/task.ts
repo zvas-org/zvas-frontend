@@ -625,6 +625,48 @@ export function useTaskRecordDetail(id?: string, unitId?: string, enabled = true
   })
 }
 
+export function useTaskFindings(
+  id?: string,
+  params?: {
+    page?: number
+    page_size?: number
+    url?: string
+    poc_id?: string
+    severity?: string
+  },
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['tasks', id, 'findings', params],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/tasks/${id}/findings`, { params })
+      return {
+        ...res.data,
+        data: (res.data.data || []).map((item: any) => ({
+          id: item.id || '',
+          vulnerability_key: item.vulnerability_key || '',
+          target_url: item.target_url || '',
+          rule_id: item.rule_id || '',
+          rule_name: item.rule_name || '',
+          severity: item.severity || '',
+          tags: item.tags || [],
+          matcher_name: item.matcher_name || '',
+          matched_at: item.matched_at || '',
+          host: item.host || '',
+          ip: item.ip || '',
+          port: item.port ?? 0,
+          scheme: item.scheme || '',
+          classification: item.classification || {},
+          evidence: item.evidence || {},
+          raw: item.raw || {},
+        })),
+      }
+    },
+    enabled: Boolean(id && enabled),
+    refetchInterval: enabled ? 5000 : false,
+  })
+}
+
 export interface CreateTaskAssetPoolConfig {
   mode: 'create' | 'existing'
   asset_pool_id?: string

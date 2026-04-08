@@ -26,6 +26,9 @@ import { ManualInputModal } from '@/components/assets/ManualInputModal'
 import { FileImportModal } from '@/components/assets/FileImportModal'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { TrashIcon } from '@heroicons/react/24/outline'
+import { useUrlTabState } from '@/hooks/useUrlTabState'
+
+const ASSET_POOL_DETAIL_TABS = ['overview', 'inputs', 'ip', 'domain', 'site', 'tasks', 'findings', 'reports'] as const
 
 export function AssetPoolDetailPage() {
   const { id } = useParams()
@@ -34,7 +37,7 @@ export function AssetPoolDetailPage() {
   const poolQuery = useAssetPoolDetail(id)
   const pool = poolQuery.data
 
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useUrlTabState({ param: 'tab', defaultValue: 'overview', values: ASSET_POOL_DETAIL_TABS })
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [manualModeOpen, setManualModeOpen] = useState(false)
   const [fileImportOpen, setFileImportOpen] = useState(false)
@@ -154,7 +157,7 @@ export function AssetPoolDetailPage() {
         <Tabs
           aria-label="Asset Pool Workspaces"
           selectedKey={activeTab}
-          onSelectionChange={(k) => setActiveTab(k as string)}
+          onSelectionChange={(k) => setActiveTab(k as (typeof ASSET_POOL_DETAIL_TABS)[number])}
           variant="light"
           classNames={{
             base: "w-full overflow-x-auto scrollbar-hide mb-4",

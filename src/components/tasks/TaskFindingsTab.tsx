@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react'
+import { useMemo, useState, type KeyboardEvent } from 'react'
 
 import {
   Button,
@@ -24,12 +24,12 @@ import {
 import {
   ArrowPathIcon,
   BugAntIcon,
+  LinkIcon,
   MagnifyingGlassIcon,
   ShieldExclamationIcon,
 } from '@heroicons/react/24/outline'
-import { useSearchParams } from 'react-router-dom'
 
-import { type FindingSummaryView, useAssetPoolFindings } from '@/api/adapters/asset'
+import { type TaskRecordVulnerabilityVM, useTaskFindings } from '@/api/adapters/task'
 
 const PAGE_SIZE = 20
 
@@ -43,47 +43,6 @@ const EMPTY_FILTERS: FindingFilterState = {
   url: '',
   pocID: '',
   severity: 'all',
-}
-
-const URL_FILTER_PARAM_URL = 'findings_url'
-const URL_FILTER_PARAM_POC_ID = 'findings_poc_id'
-const URL_FILTER_PARAM_SEVERITY = 'findings_severity'
-const SEVERITY_VALUES = new Set(['all', 'critical', 'high', 'medium', 'low', 'info'])
-
-function readFiltersFromSearchParams(searchParams: URLSearchParams): FindingFilterState {
-  const severity = (searchParams.get(URL_FILTER_PARAM_SEVERITY) || '').trim().toLowerCase()
-  return {
-    url: (searchParams.get(URL_FILTER_PARAM_URL) || '').trim(),
-    pocID: (searchParams.get(URL_FILTER_PARAM_POC_ID) || '').trim(),
-    severity: SEVERITY_VALUES.has(severity) ? severity : 'all',
-  }
-}
-
-function writeFiltersToSearchParams(searchParams: URLSearchParams, filters: FindingFilterState): URLSearchParams {
-  const next = new URLSearchParams(searchParams)
-  const url = filters.url.trim()
-  const pocID = filters.pocID.trim()
-  const severity = (filters.severity || 'all').trim().toLowerCase()
-
-  if (url) {
-    next.set(URL_FILTER_PARAM_URL, url)
-  } else {
-    next.delete(URL_FILTER_PARAM_URL)
-  }
-
-  if (pocID) {
-    next.set(URL_FILTER_PARAM_POC_ID, pocID)
-  } else {
-    next.delete(URL_FILTER_PARAM_POC_ID)
-  }
-
-  if (severity && severity !== 'all') {
-    next.set(URL_FILTER_PARAM_SEVERITY, severity)
-  } else {
-    next.delete(URL_FILTER_PARAM_SEVERITY)
-  }
-
-  return next
 }
 
 function severityColor(severity: string): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' {
@@ -133,26 +92,26 @@ function formatPlainValue(value: unknown): string {
   return String(value)
 }
 
-function getRawInfoMap(item: FindingSummaryView): Record<string, any> {
+function getRawInfoMap(item: TaskRecordVulnerabilityVM): Record<string, any> {
   const info = item.raw?.info
   return info && typeof info === 'object' && !Array.isArray(info) ? (info as Record<string, any>) : {}
 }
 
-function getMatchedLink(item: FindingSummaryView): string {
-  return firstNonEmptyText(item.raw?.['matched-at'], item.target_url, item.asset_ref, item.host)
+function getMatchedLink(item: TaskRecordVulnerabilityVM): string {
+  return firstNonEmptyText(item.raw?.['matched-at'], item.target_url, item.host)
 }
 
-function getDescription(item: FindingSummaryView): string {
+function getDescription(item: TaskRecordVulnerabilityVM): string {
   const info = getRawInfoMap(item)
   return firstNonEmptyText(
     info.description,
     item.classification?.description,
     item.raw?.description,
-    item.title,
+    item.rule_name,
   )
 }
 
-function getRemediation(item: FindingSummaryView): string {
+function getRemediation(item: TaskRecordVulnerabilityVM): string {
   const info = getRawInfoMap(item)
   const reference = info.reference
   return firstNonEmptyText(
@@ -163,11 +122,11 @@ function getRemediation(item: FindingSummaryView): string {
   )
 }
 
-function getEvidenceText(item: FindingSummaryView, key: 'request' | 'response' | 'curl_command'): string {
+function getEvidenceText(item: TaskRecordVulnerabilityVM, key: 'request' | 'response' | 'curl_command'): string {
   return formatPlainValue(item.evidence?.[key])
 }
 
-function truncateText(value: string, limit = 56): string {
+function truncateText(value: string, limit = 64): string {
   const text = value.trim()
   if (!text) return '-'
   return text.length > limit ? `${text.slice(0, limit)}...` : text
@@ -221,7 +180,7 @@ function MessageBlock({ title, content }: { title: string; content: string }) {
   )
 }
 
-function RenderTextCell({ value, limit = 56, mono = false }: { value: string; limit?: number; mono?: boolean }) {
+function RenderTextCell({ value, limit = 64, mono = false }: { value: string; limit?: number; mono?: boolean }) {
   const text = value.trim()
   if (!text) return <span className="text-apple-text-tertiary">-</span>
   const display = truncateText(text, limit)
@@ -236,7 +195,7 @@ function RenderTextCell({ value, limit = 56, mono = false }: { value: string; li
   )
 }
 
-function FindingsDrawer({ item, onClose }: { item: FindingSummaryView | null; onClose: () => void }) {
+function FindingsDrawer({ item, onClose }: { item: TaskRecordVulnerabilityVM | null; onClose: () => void }) {
   const matchedLink = item ? getMatchedLink(item) : ''
   const description = item ? getDescription(item) : ''
   const remediation = item ? getRemediation(item) : ''
@@ -263,25 +222,23 @@ function FindingsDrawer({ item, onClose }: { item: FindingSummaryView | null; on
           <DrawerHeader className="flex flex-col gap-3">
             <span className="text-[11px] font-black uppercase tracking-[0.28em] text-apple-text-tertiary">漏洞详情</span>
             <div className="flex flex-wrap items-center gap-3">
-              <h3 className="text-2xl font-black tracking-tight text-white">{item?.title || '-'}</h3>
+              <h3 className="text-2xl font-black tracking-tight text-white">{item?.rule_name || '-'}</h3>
               <Chip size="sm" variant="flat" color={severityColor(item?.severity || '')} classNames={{ base: 'border-0 px-2 font-black uppercase tracking-[0.18em]' }}>
                 {item?.severity || '-'}
               </Chip>
             </div>
-            <p className="break-all font-mono text-sm text-apple-text-secondary">{item?.target_url || item?.asset_ref || '-'}</p>
+            <p className="break-all font-mono text-sm text-apple-text-secondary">{item?.target_url || '-'}</p>
           </DrawerHeader>
           <DrawerBody className="space-y-8 overflow-y-auto">
             {item && (
               <>
                 <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                  <InfoCard label="POC ID" value={item.rule_id || '-'} />
-                  <InfoCard label="发现时间" value={formatDateTime(item.created_at)} />
-                  <InfoCard label="目标 URL" value={item.target_url || item.asset_ref || '-'} />
+                  <InfoCard label="模板 ID" value={item.rule_id || '-'} />
+                  <InfoCard label="发现时间" value={formatDateTime(item.matched_at)} />
+                  <InfoCard label="目标 URL" value={item.target_url || '-'} />
                   <InfoCard label="IP" value={item.ip || '-'} />
                   <InfoCard label="命中链接" value={matchedLink || '-'} />
                   <InfoCard label="匹配器" value={firstNonEmptyText(item.matcher_name, `${item.scheme || '-'}:${item.port || '-'}`)} />
-                  <InfoCard label="来源任务" value={item.task_id || '-'} />
-                  <InfoCard label="来源快照" value={item.snapshot_id || '-'} />
                 </div>
 
                 <section className="space-y-3">
@@ -315,48 +272,36 @@ function FindingsDrawer({ item, onClose }: { item: FindingSummaryView | null; on
   )
 }
 
-export function AssetPoolFindingsTab({ poolId }: { poolId: string }) {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const urlFilters = useMemo(() => readFiltersFromSearchParams(searchParams), [searchParams])
+export function TaskFindingsTab({ taskId }: { taskId: string }) {
   const [page, setPage] = useState(1)
-  const [draftFilters, setDraftFilters] = useState<FindingFilterState>(urlFilters)
-  const [selectedItem, setSelectedItem] = useState<FindingSummaryView | null>(null)
-
-  useEffect(() => {
-    setDraftFilters(urlFilters)
-    setPage(1)
-  }, [urlFilters])
+  const [draftFilters, setDraftFilters] = useState<FindingFilterState>(EMPTY_FILTERS)
+  const [filters, setFilters] = useState<FindingFilterState>(EMPTY_FILTERS)
+  const [selectedItem, setSelectedItem] = useState<TaskRecordVulnerabilityVM | null>(null)
 
   const queryParams = useMemo(() => ({
     page,
     page_size: PAGE_SIZE,
-    url: urlFilters.url || undefined,
-    poc_id: urlFilters.pocID || undefined,
-    severity: urlFilters.severity === 'all' ? undefined : urlFilters.severity,
-  }), [page, urlFilters])
+    url: filters.url || undefined,
+    poc_id: filters.pocID || undefined,
+    severity: filters.severity === 'all' ? undefined : filters.severity,
+  }), [filters, page])
 
-  const { data, isPending, isError, refetch } = useAssetPoolFindings(poolId, queryParams)
+  const { data, isPending, isError, refetch } = useTaskFindings(taskId, queryParams)
 
   const items = data?.data || []
   const total = data?.pagination?.total || 0
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total])
-  const hasActiveFilters = Boolean(urlFilters.url || urlFilters.pocID || urlFilters.severity !== 'all')
+  const hasActiveFilters = Boolean(filters.url || filters.pocID || filters.severity !== 'all')
 
   function handleApplyFilters() {
-    const nextFilters = {
-      url: draftFilters.url.trim(),
-      pocID: draftFilters.pocID.trim(),
-      severity: draftFilters.severity || 'all',
-    }
     setPage(1)
-    setDraftFilters(nextFilters)
-    setSearchParams(writeFiltersToSearchParams(searchParams, nextFilters), { replace: true })
+    setFilters({ ...draftFilters })
   }
 
   function handleResetFilters() {
     setPage(1)
     setDraftFilters({ ...EMPTY_FILTERS })
-    setSearchParams(writeFiltersToSearchParams(searchParams, EMPTY_FILTERS), { replace: true })
+    setFilters({ ...EMPTY_FILTERS })
   }
 
   function handleFilterEnter(event: KeyboardEvent<HTMLInputElement>) {
@@ -366,19 +311,19 @@ export function AssetPoolFindingsTab({ poolId }: { poolId: string }) {
   }
 
   return (
-    <div className="mb-8 flex w-full animate-in fade-in flex-col gap-6 duration-500">
-      <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col">
           <h3 className="mb-1 flex items-center gap-2 text-xl font-black tracking-tight text-white">
             <BugAntIcon className="h-6 w-6 text-apple-red-light drop-shadow-[0_0_8px_rgba(255,59,48,0.5)]" />
-            <span>资产池累计漏洞清单</span>
+            <span>当前任务漏洞清单</span>
           </h3>
-          <p className="text-[13px] font-medium text-apple-text-tertiary">累计展示该资产池在所有任务快照中实际发现过的漏洞记录，可按 URL、POC ID、级别筛选并查看请求与响应报文。</p>
+          <p className="text-[13px] font-medium text-apple-text-tertiary">展示当前任务工作流中实际命中的漏洞记录，可按 URL、POC ID、级别筛选并查看请求与响应报文。</p>
         </div>
         <Button
           variant="flat"
           isIconOnly
-          className="h-12 w-12 rounded-[16px] border border-white/5 bg-apple-tertiary-bg/10 backdrop-blur-md transition-colors hover:bg-white/10"
+          className="h-12 w-12 rounded-[16px] border border-white/5 bg-apple-tertiary-bg/10 backdrop-blur-md hover:bg-white/10 transition-colors"
           onPress={() => refetch()}
         >
           <ArrowPathIcon className="h-5 w-5 text-apple-text-secondary" />
@@ -443,25 +388,25 @@ export function AssetPoolFindingsTab({ poolId }: { poolId: string }) {
           </div>
         </div>
         {hasActiveFilters && (
-          <div className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-apple-text-tertiary">
-            已启用筛选 {urlFilters.url ? `| URL: ${urlFilters.url}` : ''} {urlFilters.pocID ? `| POC: ${urlFilters.pocID}` : ''} {urlFilters.severity !== 'all' ? `| 等级: ${urlFilters.severity}` : ''}
+          <div className="mt-3 text-[11px] font-bold tracking-[0.16em] text-apple-text-tertiary uppercase">
+            已启用筛选 {filters.url ? `| URL: ${filters.url}` : ''} {filters.pocID ? `| POC: ${filters.pocID}` : ''} {filters.severity !== 'all' ? `| 等级: ${filters.severity}` : ''}
           </div>
         )}
       </section>
 
       {isError && (
         <div className="rounded-[24px] border border-red-500/20 bg-red-500/5 p-6 text-sm text-red-200">
-          资产池漏洞清单加载失败，请稍后重试。
+          漏洞清单加载失败，请稍后重试。
         </div>
       )}
 
-      <div className="custom-scrollbar overflow-x-auto rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl">
+      <div className="overflow-x-auto rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl custom-scrollbar">
         <Table
           removeWrapper
-          aria-label="Asset Pool Findings Table"
+          aria-label="Task Findings Table"
           layout="fixed"
           classNames={{
-            base: 'min-w-[1560px] p-4',
+            base: 'min-w-[1760px] p-4',
             table: 'table-fixed',
             th: 'h-14 border-b border-white/5 bg-transparent pb-2 text-left text-[10px] font-black uppercase tracking-[0.2em] text-apple-text-tertiary',
             td: 'border-b border-white/5 py-4 align-top last:border-0',
@@ -469,13 +414,16 @@ export function AssetPoolFindingsTab({ poolId }: { poolId: string }) {
           }}
         >
           <TableHeader>
-            <TableColumn width={280}>URL</TableColumn>
-            <TableColumn width={180}>POC ID</TableColumn>
-            <TableColumn width={220}>漏洞名称</TableColumn>
+            <TableColumn width={220}>URL</TableColumn>
+            <TableColumn width={140}>IP</TableColumn>
+            <TableColumn width={220}>链接</TableColumn>
+            <TableColumn width={150}>模板 ID</TableColumn>
+            <TableColumn width={180}>名称</TableColumn>
             <TableColumn width={110}>级别</TableColumn>
-            <TableColumn width={220}>来源任务</TableColumn>
-            <TableColumn width={140}>详情</TableColumn>
-            <TableColumn width={190}>发现时间</TableColumn>
+            <TableColumn width={120}>报文</TableColumn>
+            <TableColumn width={280}>描述</TableColumn>
+            <TableColumn width={280}>修复建议</TableColumn>
+            <TableColumn width={180}>发现时间</TableColumn>
           </TableHeader>
           <TableBody
             isLoading={isPending}
@@ -484,42 +432,54 @@ export function AssetPoolFindingsTab({ poolId }: { poolId: string }) {
               <div className="flex flex-col items-center gap-3 py-20 text-sm font-bold text-apple-text-tertiary">
                 <ShieldExclamationIcon className="h-12 w-12 text-apple-green-light opacity-60 drop-shadow-[0_0_12px_rgba(52,199,89,0.4)]" />
                 <span className="text-[13px] font-black uppercase tracking-[0.1em] text-white">NO_VULNERABILITIES</span>
-                <span className="text-[12px] font-medium text-apple-text-tertiary">{hasActiveFilters ? '当前筛选条件下没有匹配的漏洞记录。' : '当前资产池还没有累计漏洞记录。'}</span>
+                <span className="text-[12px] font-medium text-apple-text-tertiary">{hasActiveFilters ? '当前筛选条件下没有匹配的漏洞记录。' : '当前任务还没有产出漏洞记录。'}</span>
               </div>
             )}
           >
-            {items.map((item) => (
-              <TableRow key={item.finding_id}>
-                <TableCell><RenderTextCell value={item.target_url || item.asset_ref || '-'} limit={44} mono /></TableCell>
-                <TableCell><RenderTextCell value={item.rule_id || '-'} limit={24} mono /></TableCell>
-                <TableCell><RenderTextCell value={item.title || '-'} limit={34} /></TableCell>
-                <TableCell>
-                  <Chip size="sm" variant="flat" color={severityColor(item.severity)} classNames={{ base: 'border-0 px-1 font-black uppercase tracking-[0.12em]' }}>
-                    {item.severity || '-'}
-                  </Chip>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <div><RenderTextCell value={item.task_id || '-'} limit={28} mono /></div>
-                    <div className="font-mono text-[10px] text-apple-text-tertiary">快照 {truncateText(item.snapshot_id || '-', 26)}</div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Button size="sm" variant="flat" className="rounded-xl bg-white/6 font-bold text-white hover:bg-white/10" onPress={() => setSelectedItem(item)}>
-                    查看详情
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <span className="font-mono text-[12px] text-apple-text-secondary">{formatDateTime(item.created_at)}</span>
-                </TableCell>
-              </TableRow>
-            ))}
+            {items.map((item) => {
+              const matchedLink = getMatchedLink(item)
+              const description = getDescription(item)
+              const remediation = getRemediation(item)
+              return (
+                <TableRow key={item.id || item.vulnerability_key}>
+                  <TableCell><RenderTextCell value={item.target_url || '-'} limit={40} mono /></TableCell>
+                  <TableCell><RenderTextCell value={item.ip || '-'} limit={22} mono /></TableCell>
+                  <TableCell>
+                    {matchedLink && matchedLink !== '-' ? (
+                      <a href={matchedLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[12px] font-semibold text-apple-blue-light hover:text-white">
+                        <LinkIcon className="h-4 w-4 flex-none" />
+                        <span className="truncate">{truncateText(matchedLink, 34)}</span>
+                      </a>
+                    ) : (
+                      <span className="text-apple-text-tertiary">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell><RenderTextCell value={item.rule_id || '-'} limit={24} mono /></TableCell>
+                  <TableCell><RenderTextCell value={item.rule_name || '-'} limit={28} /></TableCell>
+                  <TableCell>
+                    <Chip size="sm" variant="flat" color={severityColor(item.severity)} classNames={{ base: 'border-0 px-1 font-black uppercase tracking-[0.12em]' }}>
+                      {item.severity || '-'}
+                    </Chip>
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="flat" className="rounded-xl bg-white/6 font-bold text-white hover:bg-white/10" onPress={() => setSelectedItem(item)}>
+                      查看报文
+                    </Button>
+                  </TableCell>
+                  <TableCell><RenderTextCell value={description || '-'} limit={72} /></TableCell>
+                  <TableCell><RenderTextCell value={remediation || '-'} limit={72} /></TableCell>
+                  <TableCell>
+                    <span className="font-mono text-[12px] text-apple-text-secondary">{formatDateTime(item.matched_at)}</span>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
 
         {!isError && total > 0 && (
           <div className="flex items-center justify-between border-t border-white/5 bg-white/[0.01] px-6 py-5">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-apple-text-tertiary">累计漏洞 <span className="mx-1 text-white">{total}</span> 条</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-apple-text-tertiary">漏洞记录 <span className="mx-1 text-white">{total}</span> 项</span>
             {totalPages > 1 && (
               <Pagination
                 size="sm"

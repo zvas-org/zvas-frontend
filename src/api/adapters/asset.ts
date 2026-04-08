@@ -118,232 +118,83 @@ export interface CreateAssetPoolPayload {
 
 export interface ImportInputsPayload {
   mode: string
-  source: string
+  source?: string
   source_ref?: string
-  items: string[]
+  items?: string[]
+  content?: string
+  file?: File | null
 }
 
-export interface InputImportResult {
-  total: number
-  accepted_count: number
-  duplicate_count: number
-  invalid_count: number
+export interface AssetPoolListParams {
+  page?: number
+  page_size?: number
+  keyword?: string
+  tag?: string
+  sort?: string
+  order?: string
 }
 
-function mapToAssetPoolListItemVM(dto: any): AssetPoolListItemVM {
-  return {
-    id: dto.id || '',
-    name: dto.name || 'Untitled Pool',
-    description: dto.description || '',
-    tags: dto.tags || [],
-    asset_count: dto.summary?.asset_count ?? dto.asset_count ?? 0,
-    task_count: dto.summary?.task_count ?? dto.task_count ?? 0,
-    finding_count: dto.summary?.finding_count ?? dto.finding_count ?? 0,
-    created_at: dto.created_at || '',
-    updated_at: dto.updated_at || dto.created_at || '',
-    status: dto.status || 'active',
-  }
+export interface AssetPoolAssetListParams {
+  page?: number
+  page_size?: number
+  view?: string
+  asset_kind?: string
+  keyword?: string
+  status?: string
+  confidence?: string
+  tag?: string
+  sort?: string
+  order?: string
 }
 
-function mapToAssetPoolDetailVM(dto: any): AssetPoolDetailVM {
-  const base = mapToAssetPoolListItemVM(dto)
-  return {
-    ...base,
-    scope_rule: dto.scope_rule || {},
-    summary: dto.summary || undefined,
-    recent_tasks: dto.recent_tasks || [],
-    recent_findings: dto.recent_findings || [],
-  }
+export interface AssetPoolInputListResponse {
+  data: PoolInputRecordVM[]
+  pagination?: PaginationMeta
 }
 
-function mapToPoolInputRecordVM(dto: any): PoolInputRecordVM {
-  return {
-    id: dto.id || '',
-    raw_value: dto.raw_value || '',
-    normalized_value: dto.normalized_value || '',
-    parsed_type: dto.parsed_type || 'unknown',
-    ingest_type: dto.ingest_type || 'unknown',
-    source_type: dto.source_type || 'unknown',
-    source_ref: dto.source_ref || '',
-    status: dto.status || 'unknown',
-    created_at: dto.created_at || '',
-  }
+export interface AssetPoolDetailResponse {
+  data: AssetPoolDetailVM
 }
 
-function mapToPoolAssetVM(dto: any): PoolAssetVM {
-  return {
-    id: dto.id || '',
-    asset_kind: dto.asset_kind || 'unknown',
-    display_name: dto.display_name || '',
-    normalized_key: dto.normalized_key || '',
-    status: dto.status || 'unknown',
-    confidence_level: dto.confidence_level || 'unknown',
-    system_facets: dto.system_facets || [],
-    custom_tags: dto.custom_tags || [],
-    source_summary: dto.source_summary || {},
-    detail: dto.detail || {},
-    created_at: dto.created_at || '',
-    updated_at: dto.updated_at || dto.created_at || '',
-  }
+export interface PoolAssetListResponse {
+  data: PoolAssetVM[]
+  pagination?: PaginationMeta
 }
 
-export interface AssetPoolStatusInfo {
-  label: string
-  color: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
-  isDeleting: boolean
+export interface AssetPoolSummaryVM {
+  asset_count: number
+  task_count: number
+  finding_count: number
 }
 
-export function getAssetPoolStatusInfo(status: string): AssetPoolStatusInfo {
-  switch (status) {
-    case 'active':
-      return { label: '活跃', color: 'success', isDeleting: false }
-    case 'deleted':
-      return { label: '已删除', color: 'danger', isDeleting: false }
-    default:
-      return { label: status || '正常', color: 'default', isDeleting: false }
-  }
+export interface RecentTaskVM {
+  id: string
+  name: string
+  status: string
+  created_at: string
 }
 
-export function useAssetPools(params: { page?: number; page_size?: number; keyword?: string; tag?: string; sort?: string; order?: string }) {
-  return useQuery({
-    queryKey: ['asset-pools', params],
-    queryFn: async () => {
-      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>('/asset-pools', { params })
-      return {
-        ...res.data,
-        data: (res.data.data || []).map(mapToAssetPoolListItemVM),
-      }
-    },
-  })
+export interface RecentFindingVM {
+  id: string
+  title: string
+  severity: string
+  created_at: string
 }
 
-export function useAssetPoolDetail(id?: string) {
-  return useQuery({
-    queryKey: ['asset-pools', id],
-    queryFn: async () => {
-      const res = await httpClient.get<{ data: any }>(`/asset-pools/${id}`)
-      return mapToAssetPoolDetailVM(res.data.data)
-    },
-    enabled: Boolean(id),
-  })
+export interface AssetRelationVM {
+  relation_type: string
+  target_asset_id: string
+  target_asset_kind: string
+  target_display_name: string
+  properties: Record<string, any>
+  created_at: string
 }
 
-export function useCreateAssetPool() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (payload: CreateAssetPoolPayload) => {
-      const res = await httpClient.post<{ data: any }>('/asset-pools', payload)
-      return mapToAssetPoolListItemVM(res.data.data)
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['asset-pools'] })
-    },
-  })
-}
-
-export function useUpdateAssetPool() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: Partial<CreateAssetPoolPayload> }) => {
-      const res = await httpClient.patch<{ data: any }>(`/asset-pools/${id}`, payload)
-      return mapToAssetPoolListItemVM(res.data.data)
-    },
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: ['asset-pools', variables.id] })
-      qc.invalidateQueries({ queryKey: ['asset-pools'] })
-    },
-  })
-}
-
-export function useDeleteAssetPool() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (id: string) => {
-      await httpClient.delete(`/asset-pools/${id}`)
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['asset-pools'] })
-    },
-  })
-}
-
-export function useImportInputs() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: ImportInputsPayload }) => {
-      const res = await httpClient.post<{ data: InputImportResult }>(`/asset-pools/${id}/inputs/import`, payload)
-      return res.data.data
-    },
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: ['asset-pools', variables.id] })
-      qc.invalidateQueries({ queryKey: ['asset-pools', variables.id, 'inputs'] })
-      qc.invalidateQueries({ queryKey: ['asset-pools', variables.id, 'assets'] })
-    },
-  })
-}
-
-export const useImportSeeds = useImportInputs
-
-export function useAssetPoolInputs(
-  id?: string,
-  params?: {
-    page?: number
-    page_size?: number
-    ingest_type?: string
-    source_type?: string
-    parsed_type?: string
-    status?: string
-    keyword?: string
-    sort?: string
-    order?: string
-  },
-) {
-  return useQuery({
-    queryKey: ['asset-pools', id, 'inputs', params],
-    queryFn: async () => {
-      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/asset-pools/${id}/inputs`, { params })
-      return {
-        ...res.data,
-        data: (res.data.data || []).map(mapToPoolInputRecordVM),
-      }
-    },
-    enabled: Boolean(id),
-  })
-}
-
-export function useCreateTaskFromPool() {
-  return useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
-      const res = await httpClient.post<{ data: any }>(`/asset-pools/${id}/tasks`, payload)
-      return res.data.data
-    },
-  })
-}
-
-export function useAssetPoolAssets(
-  id?: string,
-  params?: {
-    page?: number
-    page_size?: number
-    view?: 'ip' | 'domain' | 'site'
-    keyword?: string
-    confidence?: string
-    tag?: string
-    sort?: string
-    order?: string
-  },
-) {
-  return useQuery({
-    queryKey: ['asset-pools', id, 'assets', params],
-    queryFn: async () => {
-      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/asset-pools/${id}/assets`, { params })
-      return {
-        ...res.data,
-        data: (res.data.data || []).map(mapToPoolAssetVM),
-      }
-    },
-    enabled: Boolean(id),
-  })
+export interface AssetObservationVM {
+  observation_type: string
+  source_task_id: string
+  summary: Record<string, any>
+  created_at: string
 }
 
 export interface TaskSummaryView {
@@ -363,7 +214,6 @@ export interface TaskSummaryView {
   started_at?: string
   finished_at?: string
   desired_state: string
-  // Task-025 新增
   active_route_code: string
   active_group: string
   blocked_reason: string
@@ -378,8 +228,22 @@ export interface FindingSummaryView {
   severity: string
   status: string
   asset_ref: string
+  task_id: string
+  snapshot_id: string
+  asset_id: string
+  rule_id: string
+  target_url: string
+  host: string
+  ip: string
+  port: number
+  scheme: string
+  matcher_name: string
   created_at: string
+  updated_at: string
   detail?: Record<string, any>
+  classification?: Record<string, any>
+  evidence?: Record<string, any>
+  raw?: Record<string, any>
 }
 
 function mapToTaskSummaryView(dto: any): TaskSummaryView {
@@ -429,18 +293,55 @@ export function useAssetPoolTasks(id?: string, params?: { page?: number; page_si
   })
 }
 
-export function useAssetPoolFindings(id?: string, params?: { page?: number; page_size?: number; severity?: string; status?: string }) {
+function mapToFindingSummaryView(dto: any): FindingSummaryView {
+  const detail = dto.detail || {}
+  const classification = detail.classification && typeof detail.classification === 'object' && !Array.isArray(detail.classification) ? detail.classification : {}
+  const evidence = detail.evidence && typeof detail.evidence === 'object' && !Array.isArray(detail.evidence) ? detail.evidence : {}
+  const raw = detail.raw && typeof detail.raw === 'object' && !Array.isArray(detail.raw) ? detail.raw : {}
+  const assetRef = detail.target_url || detail.host || detail.url || dto.asset_id || '-'
+  return {
+    finding_id: dto.id || '',
+    finding_type: dto.finding_type || '',
+    title: dto.title || '',
+    severity: dto.severity || '',
+    status: dto.status || '',
+    asset_ref: assetRef,
+    task_id: dto.task_id || '',
+    snapshot_id: dto.snapshot_id || '',
+    asset_id: dto.asset_id || '',
+    rule_id: detail.rule_id || '',
+    target_url: detail.target_url || '',
+    host: detail.host || '',
+    ip: detail.ip || '',
+    port: detail.port ?? 0,
+    scheme: detail.scheme || '',
+    matcher_name: detail.matcher_name || '',
+    created_at: dto.created_at || '',
+    updated_at: dto.updated_at || dto.created_at || '',
+    detail,
+    classification,
+    evidence,
+    raw,
+  }
+}
+
+export function useAssetPoolFindings(
+  id?: string,
+  params?: { page?: number; page_size?: number; url?: string; poc_id?: string; severity?: string; status?: string },
+) {
   return useQuery({
     queryKey: ['asset-pools', id, 'findings', params],
     queryFn: async () => {
-      const res = await httpClient.get<{ data: FindingSummaryView[]; pagination?: PaginationMeta }>(`/asset-pools/${id}/findings`, { params })
-      return res.data
+      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/asset-pools/${id}/findings`, { params })
+      return {
+        ...res.data,
+        data: (res.data.data || []).map(mapToFindingSummaryView),
+      }
     },
     enabled: Boolean(id),
   })
 }
 
-// Since ReportView is not defined in asset.ts, we need to redefine it or just import it. Let's just define a minimal type here to avoid circular dependencies.
 export interface ReportSummaryView {
   id: string
   name: string
@@ -464,7 +365,6 @@ export function useAssetPoolReports(id?: string, params?: { page?: number; page_
   })
 }
 
-// ─── 单条资产池资产详情（懒加载，仅展开时触发）──────────────────────────────
 export function useAssetPoolAssetDetail(poolId?: string, assetId?: string) {
   return useQuery({
     queryKey: ['asset-pools', poolId, 'assets', assetId],
@@ -488,5 +388,208 @@ export function useAssetPoolAssetDetail(poolId?: string, assetId?: string) {
     },
     enabled: Boolean(poolId && assetId),
     staleTime: 30_000,
+  })
+}
+
+export function useAssetPoolDetail(id?: string) {
+  return useQuery({
+    queryKey: ['asset-pools', id],
+    queryFn: async (): Promise<AssetPoolDetailVM> => {
+      const res = await httpClient.get<{ data: any }>(`/asset-pools/${id}`)
+      const dto = res.data.data || res.data
+      return {
+        id: dto.id || '',
+        name: dto.name || '',
+        description: dto.description || '',
+        tags: dto.tags || [],
+        asset_count: dto.asset_count ?? dto.summary?.asset_count ?? 0,
+        task_count: dto.task_count ?? dto.summary?.task_count ?? 0,
+        finding_count: dto.finding_count ?? dto.summary?.finding_count ?? 0,
+        created_at: dto.created_at || '',
+        updated_at: dto.updated_at || dto.created_at || '',
+        status: dto.status || 'active',
+        scope_rule: dto.scope_rule || {},
+        summary: dto.summary ? {
+          asset_count: dto.summary.asset_count ?? 0,
+          task_count: dto.summary.task_count ?? 0,
+          finding_count: dto.summary.finding_count ?? 0,
+        } : undefined,
+        recent_tasks: dto.recent_tasks || [],
+        recent_findings: dto.recent_findings || [],
+      }
+    },
+    enabled: Boolean(id),
+  })
+}
+
+export function useAssetPoolList(params: AssetPoolListParams) {
+  return useQuery({
+    queryKey: ['asset-pools', params],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>('/asset-pools', { params })
+      return {
+        ...res.data,
+        data: (res.data.data || []).map((dto: any) => ({
+          id: dto.id || '',
+          name: dto.name || '',
+          description: dto.description || '',
+          tags: dto.tags || [],
+          asset_count: dto.asset_count ?? 0,
+          task_count: dto.task_count ?? 0,
+          finding_count: dto.finding_count ?? 0,
+          created_at: dto.created_at || '',
+          updated_at: dto.updated_at || dto.created_at || '',
+          status: dto.status || 'active',
+        })),
+      }
+    },
+  })
+}
+
+export function useAssetPools(params: AssetPoolListParams) {
+  return useAssetPoolList(params)
+}
+
+export function useCreateAssetPool() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: CreateAssetPoolPayload) => {
+      const res = await httpClient.post('/asset-pools', payload)
+      return res.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['asset-pools'] })
+    },
+  })
+}
+
+export function useUpdateAssetPool() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: Partial<CreateAssetPoolPayload> }) => {
+      const res = await httpClient.patch(`/asset-pools/${id}`, payload)
+      return res.data
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['asset-pools'] })
+      qc.invalidateQueries({ queryKey: ['asset-pools', vars.id] })
+    },
+  })
+}
+
+export function useDeleteAssetPool() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await httpClient.delete(`/asset-pools/${id}`)
+      return res.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['asset-pools'] })
+    },
+  })
+}
+
+export function useImportAssetPoolInputs() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: ImportInputsPayload }) => {
+      const res = await httpClient.post(`/asset-pools/${id}/inputs:import`, payload)
+      return res.data
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['asset-pools', vars.id] })
+      qc.invalidateQueries({ queryKey: ['asset-pools', vars.id, 'inputs'] })
+      qc.invalidateQueries({ queryKey: ['asset-pools'] })
+    },
+  })
+}
+
+export function useImportInputs() {
+  return useImportAssetPoolInputs()
+}
+
+export function useAssetPoolInputs(id?: string, params?: { page?: number; page_size?: number; status?: string; source_type?: string; keyword?: string; sort?: string; order?: string }) {
+  return useQuery({
+    queryKey: ['asset-pools', id, 'inputs', params],
+    queryFn: async (): Promise<AssetPoolInputListResponse> => {
+      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/asset-pools/${id}/inputs`, { params })
+      return {
+        ...res.data,
+        data: (res.data.data || []).map((dto: any) => ({
+          id: dto.id || '',
+          raw_value: dto.raw_value || '',
+          normalized_value: dto.normalized_value || '',
+          parsed_type: dto.parsed_type || '',
+          ingest_type: dto.ingest_type || '',
+          source_type: dto.source_type || '',
+          source_ref: dto.source_ref || '',
+          status: dto.status || '',
+          created_at: dto.created_at || '',
+        })),
+      }
+    },
+    enabled: Boolean(id),
+  })
+}
+
+export function useAssetPoolAssets(id?: string, params?: AssetPoolAssetListParams) {
+  return useQuery({
+    queryKey: ['asset-pools', id, 'assets', params],
+    queryFn: async (): Promise<PoolAssetListResponse> => {
+      const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/asset-pools/${id}/assets`, { params })
+      return {
+        ...res.data,
+        data: (res.data.data || []).map((dto: any) => ({
+          id: dto.id || '',
+          asset_kind: dto.asset_kind || 'unknown',
+          display_name: dto.display_name || '',
+          normalized_key: dto.normalized_key || '',
+          status: dto.status || 'active',
+          confidence_level: dto.confidence_level || 'unknown',
+          system_facets: dto.system_facets || [],
+          custom_tags: dto.custom_tags || [],
+          source_summary: dto.source_summary || {},
+          detail: dto.detail || {},
+          created_at: dto.created_at || '',
+          updated_at: dto.updated_at || dto.created_at || '',
+        })),
+      }
+    },
+    enabled: Boolean(id),
+  })
+}
+
+export function useAssetPoolRelations(poolId?: string, assetId?: string) {
+  return useQuery({
+    queryKey: ['asset-pools', poolId, 'assets', assetId, 'relations'],
+    queryFn: async (): Promise<AssetRelationVM[]> => {
+      const res = await httpClient.get<{ data: any[] }>(`/asset-pools/${poolId}/assets/${assetId}/relations`)
+      return (res.data.data || []).map((dto: any) => ({
+        relation_type: dto.relation_type || '',
+        target_asset_id: dto.target_asset_id || '',
+        target_asset_kind: dto.target_asset_kind || '',
+        target_display_name: dto.target_display_name || '',
+        properties: dto.properties || {},
+        created_at: dto.created_at || '',
+      }))
+    },
+    enabled: Boolean(poolId && assetId),
+  })
+}
+
+export function useAssetPoolObservations(poolId?: string, assetId?: string) {
+  return useQuery({
+    queryKey: ['asset-pools', poolId, 'assets', assetId, 'observations'],
+    queryFn: async (): Promise<AssetObservationVM[]> => {
+      const res = await httpClient.get<{ data: any[] }>(`/asset-pools/${poolId}/assets/${assetId}/observations`)
+      return (res.data.data || []).map((dto: any) => ({
+        observation_type: dto.observation_type || '',
+        source_task_id: dto.source_task_id || '',
+        summary: dto.summary || {},
+        created_at: dto.created_at || '',
+      }))
+    },
+    enabled: Boolean(poolId && assetId),
   })
 }
