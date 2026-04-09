@@ -540,6 +540,32 @@ function renderVulScan(detail: TaskRecordDetailVM) {
   )
 }
 
+function renderWeakScan(detail: TaskRecordDetailVM) {
+  if (!detail.weak_scan_summary) return null
+
+  const summary = detail.weak_scan_summary
+
+  return (
+    <section className="space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-apple-text-tertiary">弱点扫描详情</h3>
+        <p className="text-xs text-apple-text-tertiary">按弱点扫描执行摘要展示目标、策略、漏洞等级分布与报告引用。</p>
+      </div>
+      <div className="space-y-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <DetailPair label="目标 URL" value={<TruncatedText value={summary.target_url} limit={48} mono />} />
+          <DetailPair label="漏洞数量" value={summary.vulnerability_count} />
+          <DetailPair label="扫描策略" value={summary.scan_profile || '-'} />
+          <DetailPair label="引擎标识" value={<TruncatedText value={summary.engine} limit={24} mono />} />
+          <DetailPair label="报告引用" value={<TruncatedText value={summary.report_ref} limit={48} mono />} />
+          <DetailPair label="执行错误" value={summary.error || '-'} />
+        </div>
+        {renderSeveritySummary(summary.severity_summary)}
+      </div>
+    </section>
+  )
+}
+
 function renderFallbackSummary(detail: TaskRecordDetailVM) {
   const summary = detail.result_summary?.trim()
   if (!summary) {
@@ -584,7 +610,8 @@ export function TaskRecordDetailDrawer({ taskId, record, isOpen, onClose }: Prop
   const hasPortDetail = Boolean(detail?.port_results.length)
   const hasHTTPDetail = Boolean(detail?.http_result)
   const hasVulDetail = Boolean(detail?.vul_scan_summary || detail?.vulnerabilities.length)
-  const hasStructuredResult = hasPortDetail || hasHTTPDetail || hasVulDetail
+  const hasWeakDetail = Boolean(detail?.weak_scan_summary)
+  const hasStructuredResult = hasPortDetail || hasHTTPDetail || hasVulDetail || hasWeakDetail
 
   return (
     <Drawer
@@ -623,10 +650,12 @@ export function TaskRecordDetailDrawer({ taskId, record, isOpen, onClose }: Prop
             {detail && (
               <>
                 {renderPortResults(sortedPortResults, portSort, setPortSort)}
-                {hasPortDetail && (hasHTTPDetail || hasVulDetail) && <Divider className="bg-white/6" />}
+                {hasPortDetail && (hasHTTPDetail || hasVulDetail || hasWeakDetail) && <Divider className="bg-white/6" />}
                 {renderHTTPResult(detail)}
-                {hasHTTPDetail && hasVulDetail && <Divider className="bg-white/6" />}
+                {hasHTTPDetail && (hasVulDetail || hasWeakDetail) && <Divider className="bg-white/6" />}
                 {renderVulScan(detail)}
+                {hasVulDetail && hasWeakDetail && <Divider className="bg-white/6" />}
+                {renderWeakScan(detail)}
                 {!hasStructuredResult && renderFallbackSummary(detail)}
               </>
             )}

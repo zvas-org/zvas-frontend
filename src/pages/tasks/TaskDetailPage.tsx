@@ -5,20 +5,39 @@ import {
   Skeleton,
   Chip,
 } from '@heroui/react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
 
+import type { TaskDetailVM } from '@/api/adapters/task'
 import { useTaskDetail, useTaskProgress, useRunTask, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
 import { TaskOverviewTab } from '@/components/tasks/TaskOverviewTab'
 import { TaskAssetViewTab } from '@/components/tasks/TaskAssetViewTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
 import { TaskRecordsTab } from '@/components/tasks/TaskRecordsTab'
 import { TaskFindingsTab } from '@/components/tasks/TaskFindingsTab'
+import { TaskWeakScanResultsTab } from '@/components/tasks/TaskWeakScanResultsTab'
 import { PauseIcon, PlayIcon as PlayIconSolid, StopIcon } from '@heroicons/react/24/solid'
 import { useUrlTabState } from '@/hooks/useUrlTabState'
 
-const TASK_DETAIL_TABS = ['overview', 'assets', 'records', 'progress', 'findings', 'reports'] as const
+const TASK_DETAIL_TABS = ['overview', 'assets', 'records', 'progress', 'findings', 'weak_scan', 'reports'] as const
+type TaskDetailTabKey = (typeof TASK_DETAIL_TABS)[number]
+
+const VULN_SCAN_PLANS = new Set(['vuln_scan', 'vul_scan', 'vul_scan.site', 'vuln_scan.nuclei'])
+const WEAK_SCAN_PLANS = new Set(['weak_scan', 'weak_scan.site'])
+const VULN_SCAN_TEMPLATES = new Set(['site_vuln_scan', 'vuln_scan', 'full_scan'])
+const WEAK_SCAN_TEMPLATES = new Set(['site_weak_scan', 'weak_scan'])
+
+function hasPlan(task: TaskDetailVM | undefined, plans: Set<string>, templates: Set<string>) {
+  if (!task) return false
+
+  const combinedPlans = [...(task.route_plan || []), ...(task.stage_plan || [])]
+  if (combinedPlans.some((item) => plans.has(item))) {
+    return true
+  }
+
+  return templates.has(task.template_code)
+}
 
 export function TaskDetailPage() {
   const { id } = useParams()
@@ -31,8 +50,27 @@ export function TaskDetailPage() {
   const resumeTask = useResumeTask()
   const stopTask = useStopTask()
 
-  const [activeTab, setActiveTab] = useUrlTabState({ param: 'tab', defaultValue: 'overview', values: TASK_DETAIL_TABS })
+  const [activeTab, setActiveTab] = useUrlTabState<TaskDetailTabKey>({ param: 'tab', defaultValue: 'overview', values: TASK_DETAIL_TABS })
   const [runError, setRunError] = useState<string | null>(null)
+  const task = detailQuery.data
+  const progress = progressQuery.data
+
+  const showFindingsTab = useMemo(() => hasPlan(task, VULN_SCAN_PLANS, VULN_SCAN_TEMPLATES), [task])
+  const showWeakScanTab = useMemo(() => hasPlan(task, WEAK_SCAN_PLANS, WEAK_SCAN_TEMPLATES), [task])
+  const visibleTabs = useMemo<TaskDetailTabKey[]>(() => {
+    const tabs: TaskDetailTabKey[] = ['overview', 'assets', 'records', 'progress']
+    if (showFindingsTab) tabs.push('findings')
+    if (showWeakScanTab) tabs.push('weak_scan')
+    tabs.push('reports')
+    return tabs
+  }, [showFindingsTab, showWeakScanTab])
+  const selectedTab: TaskDetailTabKey = visibleTabs.includes(activeTab) ? activeTab : 'overview'
+
+  useEffect(() => {
+    if (!task) return
+    if (visibleTabs.includes(activeTab)) return
+    setActiveTab('overview')
+  }, [activeTab, setActiveTab, task, visibleTabs])
 
   if (detailQuery.isPending) {
     return (
@@ -42,9 +80,6 @@ export function TaskDetailPage() {
       </div>
     )
   }
-
-  const task = detailQuery.data
-  const progress = progressQuery.data
 
   if (detailQuery.isError || !task) {
     return (
@@ -129,23 +164,25 @@ export function TaskDetailPage() {
       )}
 
       <div className="border-b border-white/5 mt-2">
-        <Tabs aria-label="Task Options" selectedKey={activeTab} onSelectionChange={(k) => setActiveTab(k as (typeof TASK_DETAIL_TABS)[number])} variant="underlined" classNames={{ tabList: 'gap-6 p-0', cursor: 'bg-apple-blue h-[2px] w-full', tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors' }}>
+        <Tabs aria-label="Task Options" selectedKey={selectedTab} onSelectionChange={(k) => setActiveTab(k as TaskDetailTabKey)} variant="underlined" classNames={{ tabList: 'gap-6 p-0', cursor: 'bg-apple-blue h-[2px] w-full', tab: 'h-14 px-2 text-apple-text-secondary data-[selected=true]:text-white data-[selected=true]:font-black text-[13px] uppercase tracking-widest transition-colors' }}>
           <Tab key="overview" title="概览" />
           <Tab key="assets" title="资产视图" />
           <Tab key="records" title="扫描记录" />
           <Tab key="progress" title="执行进度" />
-          <Tab key="findings" title="扫描结果" />
+          {showFindingsTab && <Tab key="findings" title="漏洞结果" />}
+          {showWeakScanTab && <Tab key="weak_scan" title="弱点扫描结果" />}
           <Tab key="reports" title="报告" />
         </Tabs>
       </div>
 
       <div className="pt-2 min-h-[50vh]">
-        {activeTab === 'overview' && <TaskOverviewTab task={task} />}
-        {activeTab === 'assets' && <TaskAssetViewTab taskId={task.id} />}
-        {activeTab === 'records' && <TaskRecordsTab taskId={task.id} />}
-        {activeTab === 'progress' && <TaskProgressTab progress={progress} />}
-        {activeTab === 'findings' && <TaskFindingsTab taskId={task.id} />}
-        {activeTab === 'reports' && <PlaceholderTab title="待模块接入" desc="系统将在扫描结束后统一生成分析报表，当前模块暂未开放。" />}
+        {selectedTab === 'overview' && <TaskOverviewTab task={task} />}
+        {selectedTab === 'assets' && <TaskAssetViewTab taskId={task.id} />}
+        {selectedTab === 'records' && <TaskRecordsTab taskId={task.id} />}
+        {selectedTab === 'progress' && <TaskProgressTab progress={progress} />}
+        {selectedTab === 'findings' && <TaskFindingsTab taskId={task.id} />}
+        {selectedTab === 'weak_scan' && <TaskWeakScanResultsTab taskId={task.id} />}
+        {selectedTab === 'reports' && <PlaceholderTab title="待模块接入" desc="系统将在扫描结束后统一生成分析报表，当前模块暂未开放。" />}
       </div>
     </div>
   )

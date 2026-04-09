@@ -211,6 +211,16 @@ export interface TaskRecordVulScanSummaryVM {
   stats: Record<string, any>
 }
 
+export interface TaskRecordWeakScanSummaryVM {
+  engine: string
+  target_url: string
+  scan_profile: string
+  vulnerability_count: number
+  severity_summary: Record<string, any>
+  report_ref: string
+  error: string
+}
+
 export interface TaskRecordVulnerabilityVM {
   id: string
   vulnerability_key: string
@@ -236,6 +246,7 @@ export interface TaskRecordDetailVM extends TaskRecordVM {
   port_results: TaskRecordPortResultVM[]
   http_result?: TaskRecordHTTPResultVM
   vul_scan_summary?: TaskRecordVulScanSummaryVM
+  weak_scan_summary?: TaskRecordWeakScanSummaryVM
   vulnerabilities: TaskRecordVulnerabilityVM[]
 }
 
@@ -367,10 +378,11 @@ function mapToTaskRecordVM(dto: any): TaskRecordVM {
 
 
 function mapToTaskRecordDetailVM(dto: any): TaskRecordDetailVM {
+  const result = dto.result || {}
   return {
     ...mapToTaskRecordVM(dto),
     payload: dto.payload || {},
-    result: dto.result || {},
+    result,
     port_results: (dto.port_results || []).map((item: any) => ({
       target: item.target || '',
       resolved_ip: item.resolved_ip || '',
@@ -418,6 +430,7 @@ function mapToTaskRecordDetailVM(dto: any): TaskRecordDetailVM {
       error: dto.vul_scan_summary.error || '',
       stats: dto.vul_scan_summary.stats || {},
     } : undefined,
+    weak_scan_summary: mapToTaskRecordWeakScanSummary(dto, result),
     vulnerabilities: (dto.vulnerabilities || []).map((item: any) => ({
       id: item.id || '',
       vulnerability_key: item.vulnerability_key || '',
@@ -436,6 +449,27 @@ function mapToTaskRecordDetailVM(dto: any): TaskRecordDetailVM {
       evidence: item.evidence || {},
       raw: item.raw || {},
     })),
+  }
+}
+
+function mapToTaskRecordWeakScanSummary(dto: any, result: Record<string, any>): TaskRecordWeakScanSummaryVM | undefined {
+  const summary = dto.weak_scan_summary || result || {}
+  const taskType = dto.task_type || dto.taskType || ''
+  const stage = dto.stage || ''
+  const routeCode = dto.route_code || ''
+  const engine = summary.engine || ''
+  const isWeakScan = taskType === 'weak_scan' || stage === 'weak_scan' || routeCode === 'weak_scan.site' || engine === 'weak-scan-site'
+  if (!isWeakScan) {
+    return undefined
+  }
+  return {
+    engine: summary.engine || 'weak-scan-site',
+    target_url: summary.target_url || dto.target_key || '',
+    scan_profile: summary.scan_profile || summary.profile_code || '',
+    vulnerability_count: summary.vulnerability_count ?? 0,
+    severity_summary: summary.severity_summary || {},
+    report_ref: summary.report_ref || summary.report_url || summary.report_id || '',
+    error: summary.error || '',
   }
 }
 
@@ -504,11 +538,13 @@ export function getBlockedReasonLabel(reason: string): string {
 /** Task-030 专用：映射具体阶段内的特有插件实现路由，抹去第三方品牌和底层配置 */
 export function getAttackRouteLabel(route: string): string {
   if (route === 'vuln_scan.nuclei' || route === 'vuln_scan' || route === 'vul_scan.site') return '漏洞扫描'
+  if (route === 'weak_scan.site' || route === 'weak_scan') return '弱点扫描'
   return route || ''
 }
 
 export function getTemplateCodeLabel(code: string): string {
   if (code === 'vuln_scan') return '漏洞扫描'
+  if (code === 'weak_scan' || code === 'site_weak_scan') return '弱点扫描'
   return code || '-'
 }
 

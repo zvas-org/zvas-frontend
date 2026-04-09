@@ -132,6 +132,8 @@ export function getRouteLabel(routes: TaskRouteMeta[] | undefined, stageOrType: 
     'vuln_scan.nuclei': '漏洞扫描',
     vuln_scan: '漏洞扫描',
     vul_scan: '漏洞扫描',
+    'weak_scan.site': '弱点扫描',
+    weak_scan: '弱点扫描',
   }
   if (fallbackLabels[stageOrType]) return fallbackLabels[stageOrType]
   if (!routes) return stageOrType
