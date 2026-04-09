@@ -22,13 +22,14 @@ import type { TaskRecordVM } from '@/api/adapters/task'
 import { getRecordTypeLabel, getRouteLabel, useTaskRoutes } from '@/api/adapters/route'
 import { TaskRecordDetailDrawer } from '@/components/tasks/TaskRecordDetailDrawer'
 
-type RecordTabKey = 'all' | 'port_scan' | 'http_probe' | 'vuln_scan'
+type RecordTabKey = 'all' | 'port_scan' | 'http_probe' | 'vuln_scan' | 'weak_scan'
 
 const RECORD_TABS: Array<{ key: RecordTabKey; label: string; description: string }> = [
   { key: 'all', label: '全部记录', description: '统一查看所有扫描单元' },
   { key: 'port_scan', label: '端口扫描', description: '查看端口开放和服务识别' },
   { key: 'http_probe', label: '站点识别', description: '查看请求与响应报文' },
   { key: 'vuln_scan', label: '漏洞扫描', description: '查看漏洞命中与摘要' },
+  { key: 'weak_scan', label: '弱点扫描', description: '查看 weakScan 执行摘要与明细入口' },
 ]
 
 function formatDateTime(value?: string) {
