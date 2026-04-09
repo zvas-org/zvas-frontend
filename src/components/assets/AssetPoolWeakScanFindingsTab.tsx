@@ -34,45 +34,75 @@ const PAGE_SIZE = 20
 
 type WeakScanFilterState = {
   url: string
+  keyword: string
+  taskID: string
   ruleID: string
   severity: string
   status: string
+  sort: string
+  order: string
 }
 
 const EMPTY_FILTERS: WeakScanFilterState = {
   url: '',
+  keyword: '',
+  taskID: '',
   ruleID: '',
   severity: 'all',
   status: 'all',
+  sort: 'matched_at',
+  order: 'desc',
 }
 
 const URL_FILTER_PARAM_URL = 'weak_scan_url'
+const URL_FILTER_PARAM_KEYWORD = 'weak_scan_keyword'
+const URL_FILTER_PARAM_TASK_ID = 'weak_scan_task_id'
 const URL_FILTER_PARAM_RULE_ID = 'weak_scan_rule_id'
 const URL_FILTER_PARAM_SEVERITY = 'weak_scan_severity'
 const URL_FILTER_PARAM_STATUS = 'weak_scan_status'
+const URL_FILTER_PARAM_SORT = 'weak_scan_sort'
+const URL_FILTER_PARAM_ORDER = 'weak_scan_order'
 const SEVERITY_VALUES = new Set(['all', 'critical', 'high', 'medium', 'low', 'info'])
 const STATUS_VALUES = new Set(['all', 'open', 'confirmed', 'fixed', 'ignored', 'false_positive', 'retest'])
+const SORT_VALUES = new Set(['matched_at', 'updated_at', 'severity', 'task_id'])
+const ORDER_VALUES = new Set(['asc', 'desc'])
 
 function readFiltersFromSearchParams(searchParams: URLSearchParams): WeakScanFilterState {
   const severity = (searchParams.get(URL_FILTER_PARAM_SEVERITY) || '').trim().toLowerCase()
   const status = (searchParams.get(URL_FILTER_PARAM_STATUS) || '').trim().toLowerCase()
+  const sort = (searchParams.get(URL_FILTER_PARAM_SORT) || '').trim().toLowerCase()
+  const order = (searchParams.get(URL_FILTER_PARAM_ORDER) || '').trim().toLowerCase()
   return {
     url: (searchParams.get(URL_FILTER_PARAM_URL) || '').trim(),
+    keyword: (searchParams.get(URL_FILTER_PARAM_KEYWORD) || '').trim(),
+    taskID: (searchParams.get(URL_FILTER_PARAM_TASK_ID) || '').trim(),
     ruleID: (searchParams.get(URL_FILTER_PARAM_RULE_ID) || '').trim(),
     severity: SEVERITY_VALUES.has(severity) ? severity : 'all',
     status: STATUS_VALUES.has(status) ? status : 'all',
+    sort: SORT_VALUES.has(sort) ? sort : 'matched_at',
+    order: ORDER_VALUES.has(order) ? order : 'desc',
   }
 }
 
 function writeFiltersToSearchParams(searchParams: URLSearchParams, filters: WeakScanFilterState): URLSearchParams {
   const next = new URLSearchParams(searchParams)
   const url = filters.url.trim()
+  const keyword = filters.keyword.trim()
+  const taskID = filters.taskID.trim()
   const ruleID = filters.ruleID.trim()
   const severity = (filters.severity || 'all').trim().toLowerCase()
   const status = (filters.status || 'all').trim().toLowerCase()
+  const sort = (filters.sort || 'matched_at').trim().toLowerCase()
+  const order = (filters.order || 'desc').trim().toLowerCase()
 
   if (url) next.set(URL_FILTER_PARAM_URL, url)
   else next.delete(URL_FILTER_PARAM_URL)
+
+  if (keyword) next.set(URL_FILTER_PARAM_KEYWORD, keyword)
+  else next.delete(URL_FILTER_PARAM_KEYWORD)
+
+  if (taskID) next.set(URL_FILTER_PARAM_TASK_ID, taskID)
+  else next.delete(URL_FILTER_PARAM_TASK_ID)
 
   if (ruleID) next.set(URL_FILTER_PARAM_RULE_ID, ruleID)
   else next.delete(URL_FILTER_PARAM_RULE_ID)
@@ -83,7 +113,30 @@ function writeFiltersToSearchParams(searchParams: URLSearchParams, filters: Weak
   if (status !== 'all') next.set(URL_FILTER_PARAM_STATUS, status)
   else next.delete(URL_FILTER_PARAM_STATUS)
 
+  if (sort !== 'matched_at') next.set(URL_FILTER_PARAM_SORT, sort)
+  else next.delete(URL_FILTER_PARAM_SORT)
+
+  if (order !== 'desc') next.set(URL_FILTER_PARAM_ORDER, order)
+  else next.delete(URL_FILTER_PARAM_ORDER)
+
   return next
+}
+
+function sortLabel(sort: string): string {
+  switch (sort) {
+    case 'updated_at':
+      return '最近更新时间'
+    case 'severity':
+      return '风险等级'
+    case 'task_id':
+      return '来源任务'
+    default:
+      return '最近命中时间'
+  }
+}
+
+function orderLabel(order: string): string {
+  return order === 'asc' ? '升序' : '降序'
 }
 
 function severityColor(severity: string): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' {
@@ -308,9 +361,13 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
     page,
     page_size: PAGE_SIZE,
     url: urlFilters.url || undefined,
+    keyword: urlFilters.keyword || undefined,
+    task_id: urlFilters.taskID || undefined,
     rule_id: urlFilters.ruleID || undefined,
     severity: urlFilters.severity === 'all' ? undefined : urlFilters.severity,
     status: urlFilters.status === 'all' ? undefined : urlFilters.status,
+    sort: urlFilters.sort === 'matched_at' ? undefined : urlFilters.sort,
+    order: urlFilters.order === 'desc' ? undefined : urlFilters.order,
   }), [page, urlFilters])
 
   const { data, isPending, isError, refetch } = useAssetPoolWeakScanFindings(poolId, queryParams)
@@ -318,14 +375,19 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
   const items = data?.data || []
   const total = data?.pagination?.total || 0
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total])
-  const hasActiveFilters = Boolean(urlFilters.url || urlFilters.ruleID || urlFilters.severity !== 'all' || urlFilters.status !== 'all')
+  const hasActiveFilters = Boolean(urlFilters.url || urlFilters.keyword || urlFilters.taskID || urlFilters.ruleID || urlFilters.severity !== 'all' || urlFilters.status !== 'all')
+  const showConditionSummary = hasActiveFilters || urlFilters.sort !== 'matched_at' || urlFilters.order !== 'desc'
 
   function handleApplyFilters() {
     const nextFilters = {
       url: draftFilters.url.trim(),
+      keyword: draftFilters.keyword.trim(),
+      taskID: draftFilters.taskID.trim(),
       ruleID: draftFilters.ruleID.trim(),
       severity: draftFilters.severity || 'all',
       status: draftFilters.status || 'all',
+      sort: draftFilters.sort || 'matched_at',
+      order: draftFilters.order || 'desc',
     }
     setPage(1)
     setDraftFilters(nextFilters)
@@ -352,7 +414,7 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
             <ShieldExclamationIcon className="h-6 w-6 text-apple-blue-light drop-shadow-[0_0_8px_rgba(10,132,255,0.45)]" />
             <span>资产池累计弱点扫描结果</span>
           </h3>
-          <p className="text-[13px] font-medium text-apple-text-tertiary">独立展示该资产池在全部任务中沉淀的弱点扫描结果，可按 URL、弱点规则、级别与状态筛选查看。</p>
+          <p className="text-[13px] font-medium text-apple-text-tertiary">独立展示该资产池在全部任务中沉淀的弱点扫描结果，可按 URL、关键字、任务、弱点规则、级别、状态与排序方式筛选查看。</p>
         </div>
         <Button
           variant="flat"
@@ -365,7 +427,7 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
       </div>
 
       <section className="rounded-[28px] border border-white/8 bg-white/[0.02] p-4 backdrop-blur-3xl">
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_220px_220px_auto]">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
           <Input
             isClearable
             value={draftFilters.url}
@@ -374,6 +436,33 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
             onKeyDown={handleFilterEnter}
             variant="flat"
             startContent={<MagnifyingGlassIcon className="h-5 w-5 text-apple-text-tertiary" />}
+            classNames={{
+              inputWrapper: 'h-12 rounded-[18px] border border-white/8 bg-white/5 backdrop-blur-md transition-colors hover:bg-white/[0.07]',
+              input: 'text-sm text-white placeholder:text-apple-text-tertiary',
+            }}
+          />
+
+          <Input
+            isClearable
+            value={draftFilters.keyword}
+            placeholder="按规则名 / 描述 / 建议关键字筛选"
+            onValueChange={(value) => setDraftFilters((prev) => ({ ...prev, keyword: value }))}
+            onKeyDown={handleFilterEnter}
+            variant="flat"
+            startContent={<MagnifyingGlassIcon className="h-5 w-5 text-apple-text-tertiary" />}
+            classNames={{
+              inputWrapper: 'h-12 rounded-[18px] border border-white/8 bg-white/5 backdrop-blur-md transition-colors hover:bg-white/[0.07]',
+              input: 'text-sm text-white placeholder:text-apple-text-tertiary',
+            }}
+          />
+
+          <Input
+            isClearable
+            value={draftFilters.taskID}
+            placeholder="按来源任务 ID 筛选"
+            onValueChange={(value) => setDraftFilters((prev) => ({ ...prev, taskID: value }))}
+            onKeyDown={handleFilterEnter}
+            variant="flat"
             classNames={{
               inputWrapper: 'h-12 rounded-[18px] border border-white/8 bg-white/5 backdrop-blur-md transition-colors hover:bg-white/[0.07]',
               input: 'text-sm text-white placeholder:text-apple-text-tertiary',
@@ -432,7 +521,39 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
             <SelectItem key="retest" textValue="Retest">Retest</SelectItem>
           </Select>
 
-          <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+          <Select
+            aria-label="排序字段"
+            selectedKeys={new Set([draftFilters.sort])}
+            onChange={(event) => setDraftFilters((prev) => ({ ...prev, sort: event.target.value || 'matched_at' }))}
+            variant="flat"
+            classNames={{
+              trigger: 'h-12 rounded-[18px] border border-white/8 bg-white/5 pr-10 text-white backdrop-blur-md transition-colors hover:bg-white/[0.07]',
+              value: 'truncate pl-1 text-white',
+            }}
+            popoverProps={{ classNames: { content: 'min-w-[220px] border border-white/10 bg-apple-bg/95 p-1 backdrop-blur-3xl shadow-2xl' } }}
+          >
+            <SelectItem key="matched_at" textValue="最近命中时间">最近命中时间</SelectItem>
+            <SelectItem key="updated_at" textValue="最近更新时间">最近更新时间</SelectItem>
+            <SelectItem key="severity" textValue="风险等级">风险等级</SelectItem>
+            <SelectItem key="task_id" textValue="来源任务">来源任务</SelectItem>
+          </Select>
+
+          <Select
+            aria-label="排序方向"
+            selectedKeys={new Set([draftFilters.order])}
+            onChange={(event) => setDraftFilters((prev) => ({ ...prev, order: event.target.value || 'desc' }))}
+            variant="flat"
+            classNames={{
+              trigger: 'h-12 rounded-[18px] border border-white/8 bg-white/5 pr-10 text-white backdrop-blur-md transition-colors hover:bg-white/[0.07]',
+              value: 'truncate pl-1 text-white',
+            }}
+            popoverProps={{ classNames: { content: 'min-w-[180px] border border-white/10 bg-apple-bg/95 p-1 backdrop-blur-3xl shadow-2xl' } }}
+          >
+            <SelectItem key="desc" textValue="降序">降序</SelectItem>
+            <SelectItem key="asc" textValue="升序">升序</SelectItem>
+          </Select>
+
+          <div className="flex flex-wrap items-center gap-3 xl:col-span-4 2xl:col-span-6 xl:justify-end">
             <Button color="primary" className="h-12 rounded-[18px] px-6 font-black" onPress={handleApplyFilters}>
               查询
             </Button>
@@ -441,9 +562,16 @@ function AssetPoolWeakScanFindingsTabContent({ poolId, searchParams, setSearchPa
             </Button>
           </div>
         </div>
-        {hasActiveFilters && (
+        {showConditionSummary && (
           <div className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-apple-text-tertiary">
-            已启用筛选 {urlFilters.url ? `| URL: ${urlFilters.url}` : ''} {urlFilters.ruleID ? `| 规则: ${urlFilters.ruleID}` : ''} {urlFilters.severity !== 'all' ? `| 等级: ${urlFilters.severity}` : ''} {urlFilters.status !== 'all' ? `| 状态: ${urlFilters.status}` : ''}
+            当前条件
+            {urlFilters.url ? ` | URL: ${urlFilters.url}` : ''}
+            {urlFilters.keyword ? ` | 关键字: ${urlFilters.keyword}` : ''}
+            {urlFilters.taskID ? ` | 任务: ${urlFilters.taskID}` : ''}
+            {urlFilters.ruleID ? ` | 规则: ${urlFilters.ruleID}` : ''}
+            {urlFilters.severity !== 'all' ? ` | 等级: ${urlFilters.severity}` : ''}
+            {urlFilters.status !== 'all' ? ` | 状态: ${urlFilters.status}` : ''}
+            {` | 排序: ${sortLabel(urlFilters.sort)} ${orderLabel(urlFilters.order)}`}
           </div>
         )}
       </section>

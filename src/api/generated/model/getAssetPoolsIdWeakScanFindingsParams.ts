@@ -20,6 +20,10 @@ page_size?: number;
  */
 url?: string;
 /**
+ * 按来源任务 ID 筛选
+ */
+task_id?: string;
+/**
  * 按弱点规则 ID / 远端漏洞 ID / finding key 筛选
  */
 rule_id?: string;
@@ -31,4 +35,16 @@ severity?: string;
  * 弱点状态
  */
 status?: string;
+/**
+ * 按规则名、规则 ID、描述、建议等关键字筛选
+ */
+keyword?: string;
+/**
+ * 排序字段 matched_at|updated_at|severity|task_id
+ */
+sort?: string;
+/**
+ * 排序方向 asc|desc
+ */
+order?: string;
 };

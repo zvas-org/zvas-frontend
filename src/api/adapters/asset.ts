@@ -382,9 +382,13 @@ export function useAssetPoolWeakScanFindings(
     page?: number
     page_size?: number
     url?: string
+    keyword?: string
+    task_id?: string
     rule_id?: string
     severity?: string
     status?: string
+    sort?: string
+    order?: string
   },
 ) {
   return useQuery({

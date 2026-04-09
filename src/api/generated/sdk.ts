@@ -130,7 +130,7 @@ export const getGetAssetPoolsUrl = (params?: GetAssetPoolsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -142,16 +142,16 @@ export const getGetAssetPoolsUrl = (params?: GetAssetPoolsParams,) => {
 }
 
 export const getAssetPools = async (params?: GetAssetPoolsParams, options?: RequestInit): Promise<getAssetPoolsResponse> => {
-
+  
   return apiClient<getAssetPoolsResponse>(getGetAssetPoolsUrl(params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -162,7 +162,7 @@ export const getGetAssetPoolsQueryKey = (params?: GetAssetPoolsParams,) => {
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(params?: GetAssetPoolsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>>, }
 ) => {
 
@@ -170,13 +170,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsQueryKey(params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPools>>> = ({ signal }) => getAssetPools(params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -215,7 +215,7 @@ export function useGetAssetPools<TData = Awaited<ReturnType<typeof getAssetPools
 
 export function useGetAssetPools<TData = Awaited<ReturnType<typeof getAssetPools>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  params?: GetAssetPoolsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPools>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsQueryOptions(params,options)
@@ -264,15 +264,15 @@ export type postAssetPoolsResponse = (postAssetPoolsResponseSuccess | postAssetP
 export const getPostAssetPoolsUrl = () => {
 
 
-
+  
 
   return `/asset-pools`
 }
 
 export const postAssetPools = async (internalCenterHttpHandlerCreateAssetPoolRequest: InternalCenterHttpHandlerCreateAssetPoolRequest, options?: RequestInit): Promise<postAssetPoolsResponse> => {
-
+  
   return apiClient<postAssetPoolsResponse>(getPostAssetPoolsUrl(),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -280,7 +280,7 @@ export const postAssetPools = async (internalCenterHttpHandlerCreateAssetPoolReq
       internalCenterHttpHandlerCreateAssetPoolRequest,)
   }
 );}
-
+  
 
 
 
@@ -295,7 +295,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPools>>, {data: InternalCenterHttpHandlerCreateAssetPoolRequest}> = (props) => {
@@ -306,7 +306,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -328,7 +328,7 @@ export const usePostAssetPools = <TError = ErrorType<InternalCenterHttpHandlerEr
       > => {
       return useMutation(getPostAssetPoolsMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询资产池详情
  */
@@ -359,22 +359,22 @@ export type getAssetPoolsIdResponse = (getAssetPoolsIdResponseSuccess | getAsset
 export const getGetAssetPoolsIdUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}`
 }
 
 export const getAssetPoolsId = async (id: string, options?: RequestInit): Promise<getAssetPoolsIdResponse> => {
-
+  
   return apiClient<getAssetPoolsIdResponse>(getGetAssetPoolsIdUrl(id),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -385,7 +385,7 @@ export const getGetAssetPoolsIdQueryKey = (id: string,) => {
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>>, }
 ) => {
 
@@ -393,13 +393,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdQueryKey(id);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsId>>> = ({ signal }) => getAssetPoolsId(id, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -438,7 +438,7 @@ export function useGetAssetPoolsId<TData = Awaited<ReturnType<typeof getAssetPoo
 
 export function useGetAssetPoolsId<TData = Awaited<ReturnType<typeof getAssetPoolsId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsId>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdQueryOptions(id,options)
@@ -482,22 +482,22 @@ export type deleteAssetPoolsIdResponse = (deleteAssetPoolsIdResponseSuccess | de
 export const getDeleteAssetPoolsIdUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}`
 }
 
 export const deleteAssetPoolsId = async (id: string, options?: RequestInit): Promise<deleteAssetPoolsIdResponse> => {
-
+  
   return apiClient<deleteAssetPoolsIdResponse>(getDeleteAssetPoolsIdUrl(id),
-  {
+  {      
     ...options,
     method: 'DELETE'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -512,7 +512,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAssetPoolsId>>, {id: string}> = (props) => {
@@ -523,13 +523,13 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type DeleteAssetPoolsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAssetPoolsId>>>
-
+    
     export type DeleteAssetPoolsIdMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
 
     /**
@@ -545,7 +545,7 @@ export const useDeleteAssetPoolsId = <TError = ErrorType<InternalCenterHttpHandl
       > => {
       return useMutation(getDeleteAssetPoolsIdMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 更新资产池
  */
@@ -581,16 +581,16 @@ export type patchAssetPoolsIdResponse = (patchAssetPoolsIdResponseSuccess | patc
 export const getPatchAssetPoolsIdUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}`
 }
 
 export const patchAssetPoolsId = async (id: string,
     internalCenterHttpHandlerUpdateAssetPoolRequest: InternalCenterHttpHandlerUpdateAssetPoolRequest, options?: RequestInit): Promise<patchAssetPoolsIdResponse> => {
-
+  
   return apiClient<patchAssetPoolsIdResponse>(getPatchAssetPoolsIdUrl(id),
-  {
+  {      
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -598,7 +598,7 @@ export const patchAssetPoolsId = async (id: string,
       internalCenterHttpHandlerUpdateAssetPoolRequest,)
   }
 );}
-
+  
 
 
 
@@ -613,7 +613,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchAssetPoolsId>>, {id: string;data: InternalCenterHttpHandlerUpdateAssetPoolRequest}> = (props) => {
@@ -624,7 +624,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -646,7 +646,7 @@ export const usePatchAssetPoolsId = <TError = ErrorType<InternalCenterHttpHandle
       > => {
       return useMutation(getPatchAssetPoolsIdMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询资产池资产列表
  */
@@ -679,7 +679,7 @@ export const getGetAssetPoolsIdAssetsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -692,16 +692,16 @@ export const getGetAssetPoolsIdAssetsUrl = (id: string,
 
 export const getAssetPoolsIdAssets = async (id: string,
     params?: GetAssetPoolsIdAssetsParams, options?: RequestInit): Promise<getAssetPoolsIdAssetsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdAssetsResponse>(getGetAssetPoolsIdAssetsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -713,7 +713,7 @@ export const getGetAssetPoolsIdAssetsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdAssetsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetAssetPoolsIdAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>>, }
 ) => {
@@ -722,13 +722,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>> = ({ signal }) => getAssetPoolsIdAssets(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -771,7 +771,7 @@ export function useGetAssetPoolsIdAssets<TData = Awaited<ReturnType<typeof getAs
 export function useGetAssetPoolsIdAssets<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetAssetPoolsIdAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssets>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdAssetsQueryOptions(id,params,options)
@@ -816,23 +816,23 @@ export const getGetAssetPoolsIdAssetsAssetIdUrl = (id: string,
     assetId: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/assets/${assetId}`
 }
 
 export const getAssetPoolsIdAssetsAssetId = async (id: string,
     assetId: string, options?: RequestInit): Promise<getAssetPoolsIdAssetsAssetIdResponse> => {
-
+  
   return apiClient<getAssetPoolsIdAssetsAssetIdResponse>(getGetAssetPoolsIdAssetsAssetIdUrl(id,assetId),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -844,7 +844,7 @@ export const getGetAssetPoolsIdAssetsAssetIdQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdAssetsAssetIdQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetId>>, TError, TData>>, }
 ) => {
@@ -853,13 +853,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsAssetIdQueryKey(id,assetId);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetId>>> = ({ signal }) => getAssetPoolsIdAssetsAssetId(id,assetId, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id && assetId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -902,7 +902,7 @@ export function useGetAssetPoolsIdAssetsAssetId<TData = Awaited<ReturnType<typeo
 export function useGetAssetPoolsIdAssetsAssetId<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetId>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdAssetsAssetIdQueryOptions(id,assetId,options)
@@ -947,23 +947,23 @@ export const getGetAssetPoolsIdAssetsAssetIdObservationsUrl = (id: string,
     assetId: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/assets/${assetId}/observations`
 }
 
 export const getAssetPoolsIdAssetsAssetIdObservations = async (id: string,
     assetId: string, options?: RequestInit): Promise<getAssetPoolsIdAssetsAssetIdObservationsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdAssetsAssetIdObservationsResponse>(getGetAssetPoolsIdAssetsAssetIdObservationsUrl(id,assetId),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -975,7 +975,7 @@ export const getGetAssetPoolsIdAssetsAssetIdObservationsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdAssetsAssetIdObservationsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>>, }
 ) => {
@@ -984,13 +984,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsAssetIdObservationsQueryKey(id,assetId);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>> = ({ signal }) => getAssetPoolsIdAssetsAssetIdObservations(id,assetId, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id && assetId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -1033,7 +1033,7 @@ export function useGetAssetPoolsIdAssetsAssetIdObservations<TData = Awaited<Retu
 export function useGetAssetPoolsIdAssetsAssetIdObservations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdObservations>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdAssetsAssetIdObservationsQueryOptions(id,assetId,options)
@@ -1078,23 +1078,23 @@ export const getGetAssetPoolsIdAssetsAssetIdRelationsUrl = (id: string,
     assetId: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/assets/${assetId}/relations`
 }
 
 export const getAssetPoolsIdAssetsAssetIdRelations = async (id: string,
     assetId: string, options?: RequestInit): Promise<getAssetPoolsIdAssetsAssetIdRelationsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdAssetsAssetIdRelationsResponse>(getGetAssetPoolsIdAssetsAssetIdRelationsUrl(id,assetId),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -1106,7 +1106,7 @@ export const getGetAssetPoolsIdAssetsAssetIdRelationsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdAssetsAssetIdRelationsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>>, }
 ) => {
@@ -1115,13 +1115,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdAssetsAssetIdRelationsQueryKey(id,assetId);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>> = ({ signal }) => getAssetPoolsIdAssetsAssetIdRelations(id,assetId, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id && assetId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -1164,7 +1164,7 @@ export function useGetAssetPoolsIdAssetsAssetIdRelations<TData = Awaited<ReturnT
 export function useGetAssetPoolsIdAssetsAssetIdRelations<TData = Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdAssetsAssetIdRelations>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdAssetsAssetIdRelationsQueryOptions(id,assetId,options)
@@ -1210,7 +1210,7 @@ export const getGetAssetPoolsIdFindingsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1223,16 +1223,16 @@ export const getGetAssetPoolsIdFindingsUrl = (id: string,
 
 export const getAssetPoolsIdFindings = async (id: string,
     params?: GetAssetPoolsIdFindingsParams, options?: RequestInit): Promise<getAssetPoolsIdFindingsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdFindingsResponse>(getGetAssetPoolsIdFindingsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -1244,7 +1244,7 @@ export const getGetAssetPoolsIdFindingsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdFindingsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetAssetPoolsIdFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdFindings>>, TError, TData>>, }
 ) => {
@@ -1253,13 +1253,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdFindingsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdFindings>>> = ({ signal }) => getAssetPoolsIdFindings(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdFindings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -1302,7 +1302,7 @@ export function useGetAssetPoolsIdFindings<TData = Awaited<ReturnType<typeof get
 export function useGetAssetPoolsIdFindings<TData = Awaited<ReturnType<typeof getAssetPoolsIdFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetAssetPoolsIdFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdFindings>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdFindingsQueryOptions(id,params,options)
@@ -1348,7 +1348,7 @@ export const getGetAssetPoolsIdInputsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1361,16 +1361,16 @@ export const getGetAssetPoolsIdInputsUrl = (id: string,
 
 export const getAssetPoolsIdInputs = async (id: string,
     params?: GetAssetPoolsIdInputsParams, options?: RequestInit): Promise<getAssetPoolsIdInputsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdInputsResponse>(getGetAssetPoolsIdInputsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -1382,7 +1382,7 @@ export const getGetAssetPoolsIdInputsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdInputsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetAssetPoolsIdInputsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>>, }
 ) => {
@@ -1391,13 +1391,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdInputsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>> = ({ signal }) => getAssetPoolsIdInputs(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -1440,7 +1440,7 @@ export function useGetAssetPoolsIdInputs<TData = Awaited<ReturnType<typeof getAs
 export function useGetAssetPoolsIdInputs<TData = Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetAssetPoolsIdInputsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdInputs>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdInputsQueryOptions(id,params,options)
@@ -1489,16 +1489,16 @@ export type postAssetPoolsIdInputsImportResponse = (postAssetPoolsIdInputsImport
 export const getPostAssetPoolsIdInputsImportUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/inputs/import`
 }
 
 export const postAssetPoolsIdInputsImport = async (id: string,
     internalCenterHttpHandlerImportAssetPoolSeedsRequest: InternalCenterHttpHandlerImportAssetPoolSeedsRequest, options?: RequestInit): Promise<postAssetPoolsIdInputsImportResponse> => {
-
+  
   return apiClient<postAssetPoolsIdInputsImportResponse>(getPostAssetPoolsIdInputsImportUrl(id),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1506,7 +1506,7 @@ export const postAssetPoolsIdInputsImport = async (id: string,
       internalCenterHttpHandlerImportAssetPoolSeedsRequest,)
   }
 );}
-
+  
 
 
 
@@ -1521,7 +1521,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdInputsImport>>, {id: string;data: InternalCenterHttpHandlerImportAssetPoolSeedsRequest}> = (props) => {
@@ -1532,7 +1532,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -1554,7 +1554,7 @@ export const usePostAssetPoolsIdInputsImport = <TError = ErrorType<InternalCente
       > => {
       return useMutation(getPostAssetPoolsIdInputsImportMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询资产池关联报告列表
  */
@@ -1587,7 +1587,7 @@ export const getGetAssetPoolsIdReportsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1600,16 +1600,16 @@ export const getGetAssetPoolsIdReportsUrl = (id: string,
 
 export const getAssetPoolsIdReports = async (id: string,
     params?: GetAssetPoolsIdReportsParams, options?: RequestInit): Promise<getAssetPoolsIdReportsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdReportsResponse>(getGetAssetPoolsIdReportsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -1621,7 +1621,7 @@ export const getGetAssetPoolsIdReportsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdReportsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdReports>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetAssetPoolsIdReportsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReports>>, TError, TData>>, }
 ) => {
@@ -1630,13 +1630,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdReportsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdReports>>> = ({ signal }) => getAssetPoolsIdReports(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReports>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -1679,7 +1679,7 @@ export function useGetAssetPoolsIdReports<TData = Awaited<ReturnType<typeof getA
 export function useGetAssetPoolsIdReports<TData = Awaited<ReturnType<typeof getAssetPoolsIdReports>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetAssetPoolsIdReportsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReports>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdReportsQueryOptions(id,params,options)
@@ -1728,16 +1728,16 @@ export type postAssetPoolsIdSeedsImportResponse = (postAssetPoolsIdSeedsImportRe
 export const getPostAssetPoolsIdSeedsImportUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/seeds/import`
 }
 
 export const postAssetPoolsIdSeedsImport = async (id: string,
     internalCenterHttpHandlerImportAssetPoolSeedsRequest: InternalCenterHttpHandlerImportAssetPoolSeedsRequest, options?: RequestInit): Promise<postAssetPoolsIdSeedsImportResponse> => {
-
+  
   return apiClient<postAssetPoolsIdSeedsImportResponse>(getPostAssetPoolsIdSeedsImportUrl(id),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1745,7 +1745,7 @@ export const postAssetPoolsIdSeedsImport = async (id: string,
       internalCenterHttpHandlerImportAssetPoolSeedsRequest,)
   }
 );}
-
+  
 
 
 
@@ -1760,7 +1760,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdSeedsImport>>, {id: string;data: InternalCenterHttpHandlerImportAssetPoolSeedsRequest}> = (props) => {
@@ -1771,7 +1771,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -1793,7 +1793,7 @@ export const usePostAssetPoolsIdSeedsImport = <TError = ErrorType<InternalCenter
       > => {
       return useMutation(getPostAssetPoolsIdSeedsImportMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 创建目标快照
  */
@@ -1829,16 +1829,16 @@ export type postAssetPoolsIdTargetSetsResponse = (postAssetPoolsIdTargetSetsResp
 export const getPostAssetPoolsIdTargetSetsUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/target-sets`
 }
 
 export const postAssetPoolsIdTargetSets = async (id: string,
     internalCenterHttpHandlerCreateTargetSetRequest: InternalCenterHttpHandlerCreateTargetSetRequest, options?: RequestInit): Promise<postAssetPoolsIdTargetSetsResponse> => {
-
+  
   return apiClient<postAssetPoolsIdTargetSetsResponse>(getPostAssetPoolsIdTargetSetsUrl(id),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -1846,7 +1846,7 @@ export const postAssetPoolsIdTargetSets = async (id: string,
       internalCenterHttpHandlerCreateTargetSetRequest,)
   }
 );}
-
+  
 
 
 
@@ -1861,7 +1861,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdTargetSets>>, {id: string;data: InternalCenterHttpHandlerCreateTargetSetRequest}> = (props) => {
@@ -1872,7 +1872,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -1894,7 +1894,7 @@ export const usePostAssetPoolsIdTargetSets = <TError = ErrorType<InternalCenterH
       > => {
       return useMutation(getPostAssetPoolsIdTargetSetsMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询资产池关联任务列表
  */
@@ -1927,7 +1927,7 @@ export const getGetAssetPoolsIdTasksUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -1940,16 +1940,16 @@ export const getGetAssetPoolsIdTasksUrl = (id: string,
 
 export const getAssetPoolsIdTasks = async (id: string,
     params?: GetAssetPoolsIdTasksParams, options?: RequestInit): Promise<getAssetPoolsIdTasksResponse> => {
-
+  
   return apiClient<getAssetPoolsIdTasksResponse>(getGetAssetPoolsIdTasksUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -1961,7 +1961,7 @@ export const getGetAssetPoolsIdTasksQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdTasksQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdTasks>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetAssetPoolsIdTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdTasks>>, TError, TData>>, }
 ) => {
@@ -1970,13 +1970,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdTasksQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdTasks>>> = ({ signal }) => getAssetPoolsIdTasks(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdTasks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -2019,7 +2019,7 @@ export function useGetAssetPoolsIdTasks<TData = Awaited<ReturnType<typeof getAss
 export function useGetAssetPoolsIdTasks<TData = Awaited<ReturnType<typeof getAssetPoolsIdTasks>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetAssetPoolsIdTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdTasks>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdTasksQueryOptions(id,params,options)
@@ -2068,16 +2068,16 @@ export type postAssetPoolsIdTasksResponse = (postAssetPoolsIdTasksResponseSucces
 export const getPostAssetPoolsIdTasksUrl = (id: string,) => {
 
 
-
+  
 
   return `/asset-pools/${id}/tasks`
 }
 
 export const postAssetPoolsIdTasks = async (id: string,
     internalCenterHttpHandlerCreateAssetPoolTaskRequest: InternalCenterHttpHandlerCreateAssetPoolTaskRequest, options?: RequestInit): Promise<postAssetPoolsIdTasksResponse> => {
-
+  
   return apiClient<postAssetPoolsIdTasksResponse>(getPostAssetPoolsIdTasksUrl(id),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -2085,7 +2085,7 @@ export const postAssetPoolsIdTasks = async (id: string,
       internalCenterHttpHandlerCreateAssetPoolTaskRequest,)
   }
 );}
-
+  
 
 
 
@@ -2100,7 +2100,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAssetPoolsIdTasks>>, {id: string;data: InternalCenterHttpHandlerCreateAssetPoolTaskRequest}> = (props) => {
@@ -2111,7 +2111,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -2133,7 +2133,7 @@ export const usePostAssetPoolsIdTasks = <TError = ErrorType<InternalCenterHttpHa
       > => {
       return useMutation(getPostAssetPoolsIdTasksMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询资产池弱点扫描结果列表
  */
@@ -2166,7 +2166,7 @@ export const getGetAssetPoolsIdWeakScanFindingsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2179,16 +2179,16 @@ export const getGetAssetPoolsIdWeakScanFindingsUrl = (id: string,
 
 export const getAssetPoolsIdWeakScanFindings = async (id: string,
     params?: GetAssetPoolsIdWeakScanFindingsParams, options?: RequestInit): Promise<getAssetPoolsIdWeakScanFindingsResponse> => {
-
+  
   return apiClient<getAssetPoolsIdWeakScanFindingsResponse>(getGetAssetPoolsIdWeakScanFindingsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -2200,7 +2200,7 @@ export const getGetAssetPoolsIdWeakScanFindingsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetAssetPoolsIdWeakScanFindingsQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdWeakScanFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetAssetPoolsIdWeakScanFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdWeakScanFindings>>, TError, TData>>, }
 ) => {
@@ -2209,13 +2209,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdWeakScanFindingsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdWeakScanFindings>>> = ({ signal }) => getAssetPoolsIdWeakScanFindings(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdWeakScanFindings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -2258,7 +2258,7 @@ export function useGetAssetPoolsIdWeakScanFindings<TData = Awaited<ReturnType<ty
 export function useGetAssetPoolsIdWeakScanFindings<TData = Awaited<ReturnType<typeof getAssetPoolsIdWeakScanFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetAssetPoolsIdWeakScanFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdWeakScanFindings>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdWeakScanFindingsQueryOptions(id,params,options)
@@ -2303,7 +2303,7 @@ export const getGetAuditsUrl = (params?: GetAuditsParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -2315,16 +2315,16 @@ export const getGetAuditsUrl = (params?: GetAuditsParams,) => {
 }
 
 export const getAudits = async (params?: GetAuditsParams, options?: RequestInit): Promise<getAuditsResponse> => {
-
+  
   return apiClient<getAuditsResponse>(getGetAuditsUrl(params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -2335,7 +2335,7 @@ export const getGetAuditsQueryKey = (params?: GetAuditsParams,) => {
     ] as const;
     }
 
-
+    
 export const getGetAuditsQueryOptions = <TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(params?: GetAuditsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>>, }
 ) => {
 
@@ -2343,13 +2343,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAuditsQueryKey(params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAudits>>> = ({ signal }) => getAudits(params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -2388,7 +2388,7 @@ export function useGetAudits<TData = Awaited<ReturnType<typeof getAudits>>, TErr
 
 export function useGetAudits<TData = Awaited<ReturnType<typeof getAudits>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  params?: GetAuditsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAudits>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAuditsQueryOptions(params,options)
@@ -2432,15 +2432,15 @@ export type postAuthChangePasswordResponse = (postAuthChangePasswordResponseSucc
 export const getPostAuthChangePasswordUrl = () => {
 
 
-
+  
 
   return `/auth/change-password`
 }
 
 export const postAuthChangePassword = async (internalCenterHttpHandlerChangePasswordRequest: InternalCenterHttpHandlerChangePasswordRequest, options?: RequestInit): Promise<postAuthChangePasswordResponse> => {
-
+  
   return apiClient<postAuthChangePasswordResponse>(getPostAuthChangePasswordUrl(),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -2448,7 +2448,7 @@ export const postAuthChangePassword = async (internalCenterHttpHandlerChangePass
       internalCenterHttpHandlerChangePasswordRequest,)
   }
 );}
-
+  
 
 
 
@@ -2463,7 +2463,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthChangePassword>>, {data: InternalCenterHttpHandlerChangePasswordRequest}> = (props) => {
@@ -2474,7 +2474,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -2496,7 +2496,7 @@ export const usePostAuthChangePassword = <TError = ErrorType<InternalCenterHttpH
       > => {
       return useMutation(getPostAuthChangePasswordMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 账号密码登录
  */
@@ -2527,15 +2527,15 @@ export type postAuthLoginResponse = (postAuthLoginResponseSuccess | postAuthLogi
 export const getPostAuthLoginUrl = () => {
 
 
-
+  
 
   return `/auth/login`
 }
 
 export const postAuthLogin = async (internalCenterHttpHandlerLoginRequest: InternalCenterHttpHandlerLoginRequest, options?: RequestInit): Promise<postAuthLoginResponse> => {
-
+  
   return apiClient<postAuthLoginResponse>(getPostAuthLoginUrl(),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -2543,7 +2543,7 @@ export const postAuthLogin = async (internalCenterHttpHandlerLoginRequest: Inter
       internalCenterHttpHandlerLoginRequest,)
   }
 );}
-
+  
 
 
 
@@ -2558,7 +2558,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogin>>, {data: InternalCenterHttpHandlerLoginRequest}> = (props) => {
@@ -2569,7 +2569,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -2591,7 +2591,7 @@ export const usePostAuthLogin = <TError = ErrorType<InternalCenterHttpHandlerErr
       > => {
       return useMutation(getPostAuthLoginMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 退出登录
  */
@@ -2617,22 +2617,22 @@ export type postAuthLogoutResponse = (postAuthLogoutResponseSuccess | postAuthLo
 export const getPostAuthLogoutUrl = () => {
 
 
-
+  
 
   return `/auth/logout`
 }
 
 export const postAuthLogout = async ( options?: RequestInit): Promise<postAuthLogoutResponse> => {
-
+  
   return apiClient<postAuthLogoutResponse>(getPostAuthLogoutUrl(),
-  {
+  {      
     ...options,
     method: 'POST'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -2647,24 +2647,24 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogout>>, void> = () => {
-
+          
 
           return  postAuthLogout()
         }
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type PostAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogout>>>
-
+    
     export type PostAuthLogoutMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
 
     /**
@@ -2680,7 +2680,7 @@ export const usePostAuthLogout = <TError = ErrorType<InternalCenterHttpHandlerEr
       > => {
       return useMutation(getPostAuthLogoutMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 获取当前登录用户信息
  */
@@ -2706,22 +2706,22 @@ export type getAuthMeResponse = (getAuthMeResponseSuccess | getAuthMeResponseErr
 export const getGetAuthMeUrl = () => {
 
 
-
+  
 
   return `/auth/me`
 }
 
 export const getAuthMe = async ( options?: RequestInit): Promise<getAuthMeResponse> => {
-
+  
   return apiClient<getAuthMeResponse>(getGetAuthMeUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -2732,7 +2732,7 @@ export const getGetAuthMeQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetAuthMeQueryOptions = <TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, }
 ) => {
 
@@ -2740,13 +2740,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAuthMeQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) => getAuthMe({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -2785,7 +2785,7 @@ export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TErr
 
 export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAuthMeQueryOptions(options)
@@ -2829,22 +2829,22 @@ export type getRolesResponse = (getRolesResponseSuccess | getRolesResponseError)
 export const getGetRolesUrl = () => {
 
 
-
+  
 
   return `/roles`
 }
 
 export const getRoles = async ( options?: RequestInit): Promise<getRolesResponse> => {
-
+  
   return apiClient<getRolesResponse>(getGetRolesUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -2855,7 +2855,7 @@ export const getGetRolesQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetRolesQueryOptions = <TData = Awaited<ReturnType<typeof getRoles>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoles>>, TError, TData>>, }
 ) => {
 
@@ -2863,13 +2863,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetRolesQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoles>>> = ({ signal }) => getRoles({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRoles>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -2908,7 +2908,7 @@ export function useGetRoles<TData = Awaited<ReturnType<typeof getRoles>>, TError
 
 export function useGetRoles<TData = Awaited<ReturnType<typeof getRoles>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRoles>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetRolesQueryOptions(options)
@@ -2940,22 +2940,22 @@ export type getSystemHealthResponse = (getSystemHealthResponseSuccess)
 export const getGetSystemHealthUrl = () => {
 
 
-
+  
 
   return `/system/health`
 }
 
 export const getSystemHealth = async ( options?: RequestInit): Promise<getSystemHealthResponse> => {
-
+  
   return apiClient<getSystemHealthResponse>(getGetSystemHealthUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -2966,7 +2966,7 @@ export const getGetSystemHealthQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetSystemHealthQueryOptions = <TData = Awaited<ReturnType<typeof getSystemHealth>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemHealth>>, TError, TData>>, }
 ) => {
 
@@ -2974,13 +2974,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetSystemHealthQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemHealth>>> = ({ signal }) => getSystemHealth({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemHealth>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3019,7 +3019,7 @@ export function useGetSystemHealth<TData = Awaited<ReturnType<typeof getSystemHe
 
 export function useGetSystemHealth<TData = Awaited<ReturnType<typeof getSystemHealth>>, TError = ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemHealth>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetSystemHealthQueryOptions(options)
@@ -3063,22 +3063,22 @@ export type getSystemSettingsResponse = (getSystemSettingsResponseSuccess | getS
 export const getGetSystemSettingsUrl = () => {
 
 
-
+  
 
   return `/system/settings`
 }
 
 export const getSystemSettings = async ( options?: RequestInit): Promise<getSystemSettingsResponse> => {
-
+  
   return apiClient<getSystemSettingsResponse>(getGetSystemSettingsUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3089,7 +3089,7 @@ export const getGetSystemSettingsQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetSystemSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getSystemSettings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemSettings>>, TError, TData>>, }
 ) => {
 
@@ -3097,13 +3097,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetSystemSettingsQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemSettings>>> = ({ signal }) => getSystemSettings({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3142,7 +3142,7 @@ export function useGetSystemSettings<TData = Awaited<ReturnType<typeof getSystem
 
 export function useGetSystemSettings<TData = Awaited<ReturnType<typeof getSystemSettings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemSettings>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetSystemSettingsQueryOptions(options)
@@ -3174,22 +3174,22 @@ export type getSystemVersionResponse = (getSystemVersionResponseSuccess)
 export const getGetSystemVersionUrl = () => {
 
 
-
+  
 
   return `/system/version`
 }
 
 export const getSystemVersion = async ( options?: RequestInit): Promise<getSystemVersionResponse> => {
-
+  
   return apiClient<getSystemVersionResponse>(getGetSystemVersionUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3200,7 +3200,7 @@ export const getGetSystemVersionQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetSystemVersionQueryOptions = <TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>>, }
 ) => {
 
@@ -3208,13 +3208,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetSystemVersionQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemVersion>>> = ({ signal }) => getSystemVersion({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3253,7 +3253,7 @@ export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemV
 
 export function useGetSystemVersion<TData = Awaited<ReturnType<typeof getSystemVersion>>, TError = ErrorType<unknown>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemVersion>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetSystemVersionQueryOptions(options)
@@ -3297,22 +3297,22 @@ export type getTaskRoutesResponse = (getTaskRoutesResponseSuccess | getTaskRoute
 export const getGetTaskRoutesUrl = () => {
 
 
-
+  
 
   return `/task-routes`
 }
 
 export const getTaskRoutes = async ( options?: RequestInit): Promise<getTaskRoutesResponse> => {
-
+  
   return apiClient<getTaskRoutesResponse>(getGetTaskRoutesUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3323,7 +3323,7 @@ export const getGetTaskRoutesQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetTaskRoutesQueryOptions = <TData = Awaited<ReturnType<typeof getTaskRoutes>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaskRoutes>>, TError, TData>>, }
 ) => {
 
@@ -3331,13 +3331,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTaskRoutesQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTaskRoutes>>> = ({ signal }) => getTaskRoutes({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTaskRoutes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3376,7 +3376,7 @@ export function useGetTaskRoutes<TData = Awaited<ReturnType<typeof getTaskRoutes
 
 export function useGetTaskRoutes<TData = Awaited<ReturnType<typeof getTaskRoutes>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaskRoutes>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTaskRoutesQueryOptions(options)
@@ -3420,22 +3420,22 @@ export type getTaskTemplatesResponse = (getTaskTemplatesResponseSuccess | getTas
 export const getGetTaskTemplatesUrl = () => {
 
 
-
+  
 
   return `/task-templates`
 }
 
 export const getTaskTemplates = async ( options?: RequestInit): Promise<getTaskTemplatesResponse> => {
-
+  
   return apiClient<getTaskTemplatesResponse>(getGetTaskTemplatesUrl(),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3446,7 +3446,7 @@ export const getGetTaskTemplatesQueryKey = () => {
     ] as const;
     }
 
-
+    
 export const getGetTaskTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof getTaskTemplates>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaskTemplates>>, TError, TData>>, }
 ) => {
 
@@ -3454,13 +3454,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTaskTemplatesQueryKey();
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTaskTemplates>>> = ({ signal }) => getTaskTemplates({ signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTaskTemplates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3499,7 +3499,7 @@ export function useGetTaskTemplates<TData = Awaited<ReturnType<typeof getTaskTem
 
 export function useGetTaskTemplates<TData = Awaited<ReturnType<typeof getTaskTemplates>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaskTemplates>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTaskTemplatesQueryOptions(options)
@@ -3548,22 +3548,22 @@ export type getTaskTemplatesCodeResponse = (getTaskTemplatesCodeResponseSuccess 
 export const getGetTaskTemplatesCodeUrl = (code: string,) => {
 
 
-
+  
 
   return `/task-templates/${code}`
 }
 
 export const getTaskTemplatesCode = async (code: string, options?: RequestInit): Promise<getTaskTemplatesCodeResponse> => {
-
+  
   return apiClient<getTaskTemplatesCodeResponse>(getGetTaskTemplatesCodeUrl(code),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3574,7 +3574,7 @@ export const getGetTaskTemplatesCodeQueryKey = (code: string,) => {
     ] as const;
     }
 
-
+    
 export const getGetTaskTemplatesCodeQueryOptions = <TData = Awaited<ReturnType<typeof getTaskTemplatesCode>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaskTemplatesCode>>, TError, TData>>, }
 ) => {
 
@@ -3582,13 +3582,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTaskTemplatesCodeQueryKey(code);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTaskTemplatesCode>>> = ({ signal }) => getTaskTemplatesCode(code, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(code), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTaskTemplatesCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3627,7 +3627,7 @@ export function useGetTaskTemplatesCode<TData = Awaited<ReturnType<typeof getTas
 
 export function useGetTaskTemplatesCode<TData = Awaited<ReturnType<typeof getTaskTemplatesCode>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTaskTemplatesCode>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTaskTemplatesCodeQueryOptions(code,options)
@@ -3672,7 +3672,7 @@ export const getGetTasksUrl = (params?: GetTasksParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -3684,16 +3684,16 @@ export const getGetTasksUrl = (params?: GetTasksParams,) => {
 }
 
 export const getTasks = async (params?: GetTasksParams, options?: RequestInit): Promise<getTasksResponse> => {
-
+  
   return apiClient<getTasksResponse>(getGetTasksUrl(params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3704,7 +3704,7 @@ export const getGetTasksQueryKey = (params?: GetTasksParams,) => {
     ] as const;
     }
 
-
+    
 export const getGetTasksQueryOptions = <TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(params?: GetTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>>, }
 ) => {
 
@@ -3712,13 +3712,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksQueryKey(params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasks>>> = ({ signal }) => getTasks(params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3757,7 +3757,7 @@ export function useGetTasks<TData = Awaited<ReturnType<typeof getTasks>>, TError
 
 export function useGetTasks<TData = Awaited<ReturnType<typeof getTasks>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  params?: GetTasksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksQueryOptions(params,options)
@@ -3806,15 +3806,15 @@ export type postTasksResponse = (postTasksResponseSuccess | postTasksResponseErr
 export const getPostTasksUrl = () => {
 
 
-
+  
 
   return `/tasks`
 }
 
 export const postTasks = async (internalCenterHttpHandlerCreateTaskRequest: InternalCenterHttpHandlerCreateTaskRequest, options?: RequestInit): Promise<postTasksResponse> => {
-
+  
   return apiClient<postTasksResponse>(getPostTasksUrl(),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -3822,7 +3822,7 @@ export const postTasks = async (internalCenterHttpHandlerCreateTaskRequest: Inte
       internalCenterHttpHandlerCreateTaskRequest,)
   }
 );}
-
+  
 
 
 
@@ -3837,7 +3837,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTasks>>, {data: InternalCenterHttpHandlerCreateTaskRequest}> = (props) => {
@@ -3848,7 +3848,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -3870,7 +3870,7 @@ export const usePostTasks = <TError = ErrorType<InternalCenterHttpHandlerErrorRe
       > => {
       return useMutation(getPostTasksMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询任务详情
  */
@@ -3901,22 +3901,22 @@ export type getTasksIdResponse = (getTasksIdResponseSuccess | getTasksIdResponse
 export const getGetTasksIdUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}`
 }
 
 export const getTasksId = async (id: string, options?: RequestInit): Promise<getTasksIdResponse> => {
-
+  
   return apiClient<getTasksIdResponse>(getGetTasksIdUrl(id),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -3927,7 +3927,7 @@ export const getGetTasksIdQueryKey = (id: string,) => {
     ] as const;
     }
 
-
+    
 export const getGetTasksIdQueryOptions = <TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>>, }
 ) => {
 
@@ -3935,13 +3935,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdQueryKey(id);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksId>>> = ({ signal }) => getTasksId(id, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -3980,7 +3980,7 @@ export function useGetTasksId<TData = Awaited<ReturnType<typeof getTasksId>>, TE
 
 export function useGetTasksId<TData = Awaited<ReturnType<typeof getTasksId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksId>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdQueryOptions(id,options)
@@ -4024,22 +4024,22 @@ export type getTasksIdControlStateResponse = (getTasksIdControlStateResponseSucc
 export const getGetTasksIdControlStateUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/control-state`
 }
 
 export const getTasksIdControlState = async (id: string, options?: RequestInit): Promise<getTasksIdControlStateResponse> => {
-
+  
   return apiClient<getTasksIdControlStateResponse>(getGetTasksIdControlStateUrl(id),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4050,7 +4050,7 @@ export const getGetTasksIdControlStateQueryKey = (id: string,) => {
     ] as const;
     }
 
-
+    
 export const getGetTasksIdControlStateQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdControlState>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdControlState>>, TError, TData>>, }
 ) => {
 
@@ -4058,13 +4058,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdControlStateQueryKey(id);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdControlState>>> = ({ signal }) => getTasksIdControlState(id, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdControlState>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -4103,7 +4103,7 @@ export function useGetTasksIdControlState<TData = Awaited<ReturnType<typeof getT
 
 export function useGetTasksIdControlState<TData = Awaited<ReturnType<typeof getTasksIdControlState>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdControlState>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdControlStateQueryOptions(id,options)
@@ -4149,7 +4149,7 @@ export const getGetTasksIdFindingsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4162,16 +4162,16 @@ export const getGetTasksIdFindingsUrl = (id: string,
 
 export const getTasksIdFindings = async (id: string,
     params?: GetTasksIdFindingsParams, options?: RequestInit): Promise<getTasksIdFindingsResponse> => {
-
+  
   return apiClient<getTasksIdFindingsResponse>(getGetTasksIdFindingsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4183,7 +4183,7 @@ export const getGetTasksIdFindingsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdFindingsQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetTasksIdFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindings>>, TError, TData>>, }
 ) => {
@@ -4192,13 +4192,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdFindingsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdFindings>>> = ({ signal }) => getTasksIdFindings(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -4241,7 +4241,7 @@ export function useGetTasksIdFindings<TData = Awaited<ReturnType<typeof getTasks
 export function useGetTasksIdFindings<TData = Awaited<ReturnType<typeof getTasksIdFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetTasksIdFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindings>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdFindingsQueryOptions(id,params,options)
@@ -4290,22 +4290,22 @@ export type postTasksIdPauseResponse = (postTasksIdPauseResponseSuccess | postTa
 export const getPostTasksIdPauseUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/pause`
 }
 
 export const postTasksIdPause = async (id: string, options?: RequestInit): Promise<postTasksIdPauseResponse> => {
-
+  
   return apiClient<postTasksIdPauseResponse>(getPostTasksIdPauseUrl(id),
-  {
+  {      
     ...options,
     method: 'POST'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4320,7 +4320,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTasksIdPause>>, {id: string}> = (props) => {
@@ -4331,13 +4331,13 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type PostTasksIdPauseMutationResult = NonNullable<Awaited<ReturnType<typeof postTasksIdPause>>>
-
+    
     export type PostTasksIdPauseMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
 
     /**
@@ -4353,7 +4353,7 @@ export const usePostTasksIdPause = <TError = ErrorType<InternalCenterHttpHandler
       > => {
       return useMutation(getPostTasksIdPauseMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询任务进度
  */
@@ -4384,22 +4384,22 @@ export type getTasksIdProgressResponse = (getTasksIdProgressResponseSuccess | ge
 export const getGetTasksIdProgressUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/progress`
 }
 
 export const getTasksIdProgress = async (id: string, options?: RequestInit): Promise<getTasksIdProgressResponse> => {
-
+  
   return apiClient<getTasksIdProgressResponse>(getGetTasksIdProgressUrl(id),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4410,7 +4410,7 @@ export const getGetTasksIdProgressQueryKey = (id: string,) => {
     ] as const;
     }
 
-
+    
 export const getGetTasksIdProgressQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>>, }
 ) => {
 
@@ -4418,13 +4418,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdProgressQueryKey(id);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdProgress>>> = ({ signal }) => getTasksIdProgress(id, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -4463,7 +4463,7 @@ export function useGetTasksIdProgress<TData = Awaited<ReturnType<typeof getTasks
 
 export function useGetTasksIdProgress<TData = Awaited<ReturnType<typeof getTasksIdProgress>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdProgress>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdProgressQueryOptions(id,options)
@@ -4509,7 +4509,7 @@ export const getGetTasksIdRecordsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4522,16 +4522,16 @@ export const getGetTasksIdRecordsUrl = (id: string,
 
 export const getTasksIdRecords = async (id: string,
     params?: GetTasksIdRecordsParams, options?: RequestInit): Promise<getTasksIdRecordsResponse> => {
-
+  
   return apiClient<getTasksIdRecordsResponse>(getGetTasksIdRecordsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4543,7 +4543,7 @@ export const getGetTasksIdRecordsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdRecordsQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdRecords>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetTasksIdRecordsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdRecords>>, TError, TData>>, }
 ) => {
@@ -4552,13 +4552,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdRecordsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdRecords>>> = ({ signal }) => getTasksIdRecords(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdRecords>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -4601,7 +4601,7 @@ export function useGetTasksIdRecords<TData = Awaited<ReturnType<typeof getTasksI
 export function useGetTasksIdRecords<TData = Awaited<ReturnType<typeof getTasksIdRecords>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetTasksIdRecordsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdRecords>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdRecordsQueryOptions(id,params,options)
@@ -4646,23 +4646,23 @@ export const getGetTasksIdRecordsUnitIdUrl = (id: string,
     unitId: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/records/${unitId}`
 }
 
 export const getTasksIdRecordsUnitId = async (id: string,
     unitId: string, options?: RequestInit): Promise<getTasksIdRecordsUnitIdResponse> => {
-
+  
   return apiClient<getTasksIdRecordsUnitIdResponse>(getGetTasksIdRecordsUnitIdUrl(id,unitId),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4674,7 +4674,7 @@ export const getGetTasksIdRecordsUnitIdQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdRecordsUnitIdQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdRecordsUnitId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     unitId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdRecordsUnitId>>, TError, TData>>, }
 ) => {
@@ -4683,13 +4683,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdRecordsUnitIdQueryKey(id,unitId);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdRecordsUnitId>>> = ({ signal }) => getTasksIdRecordsUnitId(id,unitId, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id && unitId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdRecordsUnitId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -4732,7 +4732,7 @@ export function useGetTasksIdRecordsUnitId<TData = Awaited<ReturnType<typeof get
 export function useGetTasksIdRecordsUnitId<TData = Awaited<ReturnType<typeof getTasksIdRecordsUnitId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     unitId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdRecordsUnitId>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdRecordsUnitIdQueryOptions(id,unitId,options)
@@ -4781,22 +4781,22 @@ export type postTasksIdResumeResponse = (postTasksIdResumeResponseSuccess | post
 export const getPostTasksIdResumeUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/resume`
 }
 
 export const postTasksIdResume = async (id: string, options?: RequestInit): Promise<postTasksIdResumeResponse> => {
-
+  
   return apiClient<postTasksIdResumeResponse>(getPostTasksIdResumeUrl(id),
-  {
+  {      
     ...options,
     method: 'POST'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4811,7 +4811,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTasksIdResume>>, {id: string}> = (props) => {
@@ -4822,13 +4822,13 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type PostTasksIdResumeMutationResult = NonNullable<Awaited<ReturnType<typeof postTasksIdResume>>>
-
+    
     export type PostTasksIdResumeMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
 
     /**
@@ -4844,7 +4844,7 @@ export const usePostTasksIdResume = <TError = ErrorType<InternalCenterHttpHandle
       > => {
       return useMutation(getPostTasksIdResumeMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 启动任务
  */
@@ -4880,22 +4880,22 @@ export type postTasksIdRunResponse = (postTasksIdRunResponseSuccess | postTasksI
 export const getPostTasksIdRunUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/run`
 }
 
 export const postTasksIdRun = async (id: string, options?: RequestInit): Promise<postTasksIdRunResponse> => {
-
+  
   return apiClient<postTasksIdRunResponse>(getPostTasksIdRunUrl(id),
-  {
+  {      
     ...options,
     method: 'POST'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -4910,7 +4910,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTasksIdRun>>, {id: string}> = (props) => {
@@ -4921,13 +4921,13 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type PostTasksIdRunMutationResult = NonNullable<Awaited<ReturnType<typeof postTasksIdRun>>>
-
+    
     export type PostTasksIdRunMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
 
     /**
@@ -4943,7 +4943,7 @@ export const usePostTasksIdRun = <TError = ErrorType<InternalCenterHttpHandlerEr
       > => {
       return useMutation(getPostTasksIdRunMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询任务快照资产
  */
@@ -4976,7 +4976,7 @@ export const getGetTasksIdSnapshotAssetsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -4989,16 +4989,16 @@ export const getGetTasksIdSnapshotAssetsUrl = (id: string,
 
 export const getTasksIdSnapshotAssets = async (id: string,
     params?: GetTasksIdSnapshotAssetsParams, options?: RequestInit): Promise<getTasksIdSnapshotAssetsResponse> => {
-
+  
   return apiClient<getTasksIdSnapshotAssetsResponse>(getGetTasksIdSnapshotAssetsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -5010,7 +5010,7 @@ export const getGetTasksIdSnapshotAssetsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdSnapshotAssetsQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetTasksIdSnapshotAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>>, }
 ) => {
@@ -5019,13 +5019,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdSnapshotAssetsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>> = ({ signal }) => getTasksIdSnapshotAssets(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -5068,7 +5068,7 @@ export function useGetTasksIdSnapshotAssets<TData = Awaited<ReturnType<typeof ge
 export function useGetTasksIdSnapshotAssets<TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetTasksIdSnapshotAssetsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssets>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdSnapshotAssetsQueryOptions(id,params,options)
@@ -5118,23 +5118,23 @@ export const getGetTasksIdSnapshotAssetsAssetIdUrl = (id: string,
     assetId: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/snapshot-assets/${assetId}`
 }
 
 export const getTasksIdSnapshotAssetsAssetId = async (id: string,
     assetId: string, options?: RequestInit): Promise<getTasksIdSnapshotAssetsAssetIdResponse> => {
-
+  
   return apiClient<getTasksIdSnapshotAssetsAssetIdResponse>(getGetTasksIdSnapshotAssetsAssetIdUrl(id,assetId),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -5146,7 +5146,7 @@ export const getGetTasksIdSnapshotAssetsAssetIdQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdSnapshotAssetsAssetIdQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssetsAssetId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssetsAssetId>>, TError, TData>>, }
 ) => {
@@ -5155,13 +5155,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdSnapshotAssetsAssetIdQueryKey(id,assetId);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdSnapshotAssetsAssetId>>> = ({ signal }) => getTasksIdSnapshotAssetsAssetId(id,assetId, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id && assetId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssetsAssetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -5204,7 +5204,7 @@ export function useGetTasksIdSnapshotAssetsAssetId<TData = Awaited<ReturnType<ty
 export function useGetTasksIdSnapshotAssetsAssetId<TData = Awaited<ReturnType<typeof getTasksIdSnapshotAssetsAssetId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     assetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdSnapshotAssetsAssetId>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdSnapshotAssetsAssetIdQueryOptions(id,assetId,options)
@@ -5253,22 +5253,22 @@ export type postTasksIdStopResponse = (postTasksIdStopResponseSuccess | postTask
 export const getPostTasksIdStopUrl = (id: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/stop`
 }
 
 export const postTasksIdStop = async (id: string, options?: RequestInit): Promise<postTasksIdStopResponse> => {
-
+  
   return apiClient<postTasksIdStopResponse>(getPostTasksIdStopUrl(id),
-  {
+  {      
     ...options,
     method: 'POST'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -5283,7 +5283,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTasksIdStop>>, {id: string}> = (props) => {
@@ -5294,13 +5294,13 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
 
     export type PostTasksIdStopMutationResult = NonNullable<Awaited<ReturnType<typeof postTasksIdStop>>>
-
+    
     export type PostTasksIdStopMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
 
     /**
@@ -5316,7 +5316,7 @@ export const usePostTasksIdStop = <TError = ErrorType<InternalCenterHttpHandlerE
       > => {
       return useMutation(getPostTasksIdStopMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 查询任务弱点扫描结果
  */
@@ -5349,7 +5349,7 @@ export const getGetTasksIdWeakScanFindingsUrl = (id: string,
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -5362,16 +5362,16 @@ export const getGetTasksIdWeakScanFindingsUrl = (id: string,
 
 export const getTasksIdWeakScanFindings = async (id: string,
     params?: GetTasksIdWeakScanFindingsParams, options?: RequestInit): Promise<getTasksIdWeakScanFindingsResponse> => {
-
+  
   return apiClient<getTasksIdWeakScanFindingsResponse>(getGetTasksIdWeakScanFindingsUrl(id,params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -5383,7 +5383,7 @@ export const getGetTasksIdWeakScanFindingsQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdWeakScanFindingsQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdWeakScanFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     params?: GetTasksIdWeakScanFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdWeakScanFindings>>, TError, TData>>, }
 ) => {
@@ -5392,13 +5392,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdWeakScanFindingsQueryKey(id,params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdWeakScanFindings>>> = ({ signal }) => getTasksIdWeakScanFindings(id,params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdWeakScanFindings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -5441,7 +5441,7 @@ export function useGetTasksIdWeakScanFindings<TData = Awaited<ReturnType<typeof 
 export function useGetTasksIdWeakScanFindings<TData = Awaited<ReturnType<typeof getTasksIdWeakScanFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     params?: GetTasksIdWeakScanFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdWeakScanFindings>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdWeakScanFindingsQueryOptions(id,params,options)
@@ -5486,23 +5486,23 @@ export const getGetTasksIdWeakScanFindingsFindingIdUrl = (id: string,
     findingId: string,) => {
 
 
-
+  
 
   return `/tasks/${id}/weak-scan-findings/${findingId}`
 }
 
 export const getTasksIdWeakScanFindingsFindingId = async (id: string,
     findingId: string, options?: RequestInit): Promise<getTasksIdWeakScanFindingsFindingIdResponse> => {
-
+  
   return apiClient<getTasksIdWeakScanFindingsFindingIdResponse>(getGetTasksIdWeakScanFindingsFindingIdUrl(id,findingId),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -5514,7 +5514,7 @@ export const getGetTasksIdWeakScanFindingsFindingIdQueryKey = (id: string,
     ] as const;
     }
 
-
+    
 export const getGetTasksIdWeakScanFindingsFindingIdQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdWeakScanFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
     findingId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdWeakScanFindingsFindingId>>, TError, TData>>, }
 ) => {
@@ -5523,13 +5523,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTasksIdWeakScanFindingsFindingIdQueryKey(id,findingId);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdWeakScanFindingsFindingId>>> = ({ signal }) => getTasksIdWeakScanFindingsFindingId(id,findingId, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, enabled: !!(id && findingId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdWeakScanFindingsFindingId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -5572,7 +5572,7 @@ export function useGetTasksIdWeakScanFindingsFindingId<TData = Awaited<ReturnTyp
 export function useGetTasksIdWeakScanFindingsFindingId<TData = Awaited<ReturnType<typeof getTasksIdWeakScanFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  id: string,
     findingId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdWeakScanFindingsFindingId>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdWeakScanFindingsFindingIdQueryOptions(id,findingId,options)
@@ -5617,7 +5617,7 @@ export const getGetUsersUrl = (params?: GetUsersParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-
+    
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -5629,16 +5629,16 @@ export const getGetUsersUrl = (params?: GetUsersParams,) => {
 }
 
 export const getUsers = async (params?: GetUsersParams, options?: RequestInit): Promise<getUsersResponse> => {
-
+  
   return apiClient<getUsersResponse>(getGetUsersUrl(params),
-  {
+  {      
     ...options,
     method: 'GET'
-
-
+    
+    
   }
 );}
-
+  
 
 
 
@@ -5649,7 +5649,7 @@ export const getGetUsersQueryKey = (params?: GetUsersParams,) => {
     ] as const;
     }
 
-
+    
 export const getGetUsersQueryOptions = <TData = Awaited<ReturnType<typeof getUsers>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(params?: GetUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>, }
 ) => {
 
@@ -5657,13 +5657,13 @@ const {query: queryOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetUsersQueryKey(params);
 
-
+  
 
     const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsers>>> = ({ signal }) => getUsers(params, { signal });
 
+      
 
-
-
+      
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
@@ -5702,7 +5702,7 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
 
 export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
  params?: GetUsersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>, }
- , queryClient?: QueryClient
+ , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetUsersQueryOptions(params,options)
@@ -5751,15 +5751,15 @@ export type postUsersResponse = (postUsersResponseSuccess | postUsersResponseErr
 export const getPostUsersUrl = () => {
 
 
-
+  
 
   return `/users`
 }
 
 export const postUsers = async (internalCenterHttpHandlerCreateUserRequest: InternalCenterHttpHandlerCreateUserRequest, options?: RequestInit): Promise<postUsersResponse> => {
-
+  
   return apiClient<postUsersResponse>(getPostUsersUrl(),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -5767,7 +5767,7 @@ export const postUsers = async (internalCenterHttpHandlerCreateUserRequest: Inte
       internalCenterHttpHandlerCreateUserRequest,)
   }
 );}
-
+  
 
 
 
@@ -5782,7 +5782,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsers>>, {data: InternalCenterHttpHandlerCreateUserRequest}> = (props) => {
@@ -5793,7 +5793,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -5815,7 +5815,7 @@ export const usePostUsers = <TError = ErrorType<InternalCenterHttpHandlerErrorRe
       > => {
       return useMutation(getPostUsersMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 管理员重置用户密码
  */
@@ -5851,16 +5851,16 @@ export type postUsersIdResetPasswordResponse = (postUsersIdResetPasswordResponse
 export const getPostUsersIdResetPasswordUrl = (id: string,) => {
 
 
-
+  
 
   return `/users/${id}/reset-password`
 }
 
 export const postUsersIdResetPassword = async (id: string,
     internalCenterHttpHandlerResetUserPasswordRequest: InternalCenterHttpHandlerResetUserPasswordRequest, options?: RequestInit): Promise<postUsersIdResetPasswordResponse> => {
-
+  
   return apiClient<postUsersIdResetPasswordResponse>(getPostUsersIdResetPasswordUrl(id),
-  {
+  {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -5868,7 +5868,7 @@ export const postUsersIdResetPassword = async (id: string,
       internalCenterHttpHandlerResetUserPasswordRequest,)
   }
 );}
-
+  
 
 
 
@@ -5883,7 +5883,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUsersIdResetPassword>>, {id: string;data: InternalCenterHttpHandlerResetUserPasswordRequest}> = (props) => {
@@ -5894,7 +5894,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -5916,7 +5916,7 @@ export const usePostUsersIdResetPassword = <TError = ErrorType<InternalCenterHtt
       > => {
       return useMutation(getPostUsersIdResetPasswordMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 替换用户角色集合
  */
@@ -5952,16 +5952,16 @@ export type putUsersIdRolesResponse = (putUsersIdRolesResponseSuccess | putUsers
 export const getPutUsersIdRolesUrl = (id: string,) => {
 
 
-
+  
 
   return `/users/${id}/roles`
 }
 
 export const putUsersIdRoles = async (id: string,
     internalCenterHttpHandlerUpdateUserRolesRequest: InternalCenterHttpHandlerUpdateUserRolesRequest, options?: RequestInit): Promise<putUsersIdRolesResponse> => {
-
+  
   return apiClient<putUsersIdRolesResponse>(getPutUsersIdRolesUrl(id),
-  {
+  {      
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -5969,7 +5969,7 @@ export const putUsersIdRoles = async (id: string,
       internalCenterHttpHandlerUpdateUserRolesRequest,)
   }
 );}
-
+  
 
 
 
@@ -5984,7 +5984,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUsersIdRoles>>, {id: string;data: InternalCenterHttpHandlerUpdateUserRolesRequest}> = (props) => {
@@ -5995,7 +5995,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -6017,7 +6017,7 @@ export const usePutUsersIdRoles = <TError = ErrorType<InternalCenterHttpHandlerE
       > => {
       return useMutation(getPutUsersIdRolesMutationOptions(options), queryClient);
     }
-
+    
 /**
  * @summary 更新用户状态
  */
@@ -6053,16 +6053,16 @@ export type patchUsersIdStatusResponse = (patchUsersIdStatusResponseSuccess | pa
 export const getPatchUsersIdStatusUrl = (id: string,) => {
 
 
-
+  
 
   return `/users/${id}/status`
 }
 
 export const patchUsersIdStatus = async (id: string,
     internalCenterHttpHandlerUpdateUserStatusRequest: InternalCenterHttpHandlerUpdateUserStatusRequest, options?: RequestInit): Promise<patchUsersIdStatusResponse> => {
-
+  
   return apiClient<patchUsersIdStatusResponse>(getPatchUsersIdStatusUrl(id),
-  {
+  {      
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
@@ -6070,7 +6070,7 @@ export const patchUsersIdStatus = async (id: string,
       internalCenterHttpHandlerUpdateUserStatusRequest,)
   }
 );}
-
+  
 
 
 
@@ -6085,7 +6085,7 @@ const {mutation: mutationOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }};
 
-
+      
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchUsersIdStatus>>, {id: string;data: InternalCenterHttpHandlerUpdateUserStatusRequest}> = (props) => {
@@ -6096,7 +6096,7 @@ const {mutation: mutationOptions} = options ?
 
 
 
-
+        
 
 
   return  { mutationFn, ...mutationOptions }}
