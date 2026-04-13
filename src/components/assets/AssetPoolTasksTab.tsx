@@ -10,7 +10,7 @@ import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
 
 import { CreateTaskFromPoolModal } from '@/components/assets/CreateTaskFromPoolModal'
 import { useAssetPoolTasks } from '@/api/adapters/asset'
-import { usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel, getTemplateCodeLabel, isTerminalTaskStatus } from '@/api/adapters/task'
+import { usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel, getTemplateCodeLabel, isTerminalTaskStatus, taskHasWeakScanPlan } from '@/api/adapters/task'
 import { useTaskRoutes, mapStageLabels, getRouteActiveLabel } from '@/api/adapters/route'
 
 function formatTime(value?: string): string {
@@ -43,6 +43,11 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
     if (!pagination?.total || !pagination?.page_size) return 1
     return Math.max(1, Math.ceil(pagination.total / pagination.page_size))
   }, [pagination])
+
+  function buildTaskDetailPath(taskID: string, hasWeakScan: boolean) {
+    if (!hasWeakScan) return `/tasks/${taskID}`
+    return `/tasks/${taskID}?tab=weak_scan`
+  }
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full mb-8">
@@ -181,7 +186,7 @@ export function AssetPoolTasksTab({ poolId }: { poolId: string }) {
                       <Button
                         size="sm"
                         variant="bordered"
-                        onPress={() => navigate(`/tasks/${item.id}`)}
+                        onPress={() => navigate(buildTaskDetailPath(item.id, taskHasWeakScanPlan(item)))}
                         className="border-white/10 text-white font-bold rounded-lg h-7 min-w-0 px-2.5 text-[11px]"
                       >
                         详情

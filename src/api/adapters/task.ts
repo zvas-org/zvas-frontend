@@ -5,9 +5,22 @@ import type { PaginationMeta } from './asset'
 import { parseHttpProbeSummary } from './asset'
 
 export const TERMINAL_TASK_STATUSES = ['succeeded', 'failed', 'stopped', 'deleted']
+const WEAK_SCAN_TASK_PLANS = new Set(['weak_scan', 'weak_scan.site'])
+const WEAK_SCAN_TASK_TEMPLATES = new Set(['site_weak_scan', 'weak_scan'])
 
 export function isTerminalTaskStatus(status: string): boolean {
   return TERMINAL_TASK_STATUSES.includes(status)
+}
+
+export function taskHasWeakScanPlan(task: Pick<TaskListItemVM, 'template_code' | 'route_plan' | 'stage_plan'> | TaskDetailVM | null | undefined): boolean {
+  if (!task) return false
+
+  const plans = [...(task.route_plan || []), ...(task.stage_plan || [])]
+  if (plans.some((item) => WEAK_SCAN_TASK_PLANS.has(item))) {
+    return true
+  }
+
+  return WEAK_SCAN_TASK_TEMPLATES.has(task.template_code || '')
 }
 
 export interface HttpProbeObservation {

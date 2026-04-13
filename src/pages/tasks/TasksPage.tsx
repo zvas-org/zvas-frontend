@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
-import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel, isTerminalTaskStatus, getTemplateCodeLabel } from '@/api/adapters/task'
+import { useTasks, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo, getActiveGroupLabel, getBlockedReasonLabel, isTerminalTaskStatus, getTemplateCodeLabel, taskHasWeakScanPlan } from '@/api/adapters/task'
 import { useAssetPools } from '@/api/adapters/asset'
 import { useTaskRoutes, getRouteActiveLabel, mapStageLabels } from '@/api/adapters/route'
 import { PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/solid'
@@ -57,6 +57,11 @@ export function TasksPage() {
   const items = tasksQuery.data?.data || []
   const total = tasksQuery.data?.pagination?.total || 0
   const totalPages = Math.ceil(total / pageSize)
+
+  function buildTaskDetailPath(taskID: string, hasWeakScan: boolean) {
+    if (!hasWeakScan) return `/tasks/${taskID}`
+    return `/tasks/${taskID}?tab=weak_scan`
+  }
 
   return (
     <div className="flex flex-col gap-6 w-full text-apple-text-primary animate-in fade-in duration-1000 max-w-[1600px] mx-auto pb-20 p-4">
@@ -223,7 +228,7 @@ export function TasksPage() {
                         size="sm"
                         variant="bordered"
                         className="rounded-lg border-white/10 text-white font-bold h-7 min-w-0 px-3 text-[11px] hover:border-white/30 transition-all"
-                        onPress={() => navigate(`/tasks/${rowKey}`)}
+                        onPress={() => navigate(buildTaskDetailPath(rowKey, taskHasWeakScanPlan(task)))}
                       >
                         监控
                       </Button>
