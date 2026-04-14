@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { httpClient } from '@/api/client'
 import type { PaginationMeta } from './asset'
 
@@ -186,3 +186,18 @@ export function getTemplatePresetBadge(templateCode: string): { label: string; c
 
 /** 全端口高风险提示文案 */
 export const FULL_PORT_WARNING = '将扫描 1-65535 端口，执行耗时和资源消耗明显高于标准端口扫描'
+
+
+export function useUpdateTaskTemplateStatus() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { code: string; enabled: boolean }): Promise<TaskTemplateDetailVM> => {
+      const res = await httpClient.patch<{ data: any }>(`/task-templates/${input.code}/status`, { enabled: input.enabled })
+      return mapToTaskTemplateDetailVM(res.data.data)
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['task-templates'] })
+      qc.invalidateQueries({ queryKey: ['task-templates', vars.code] })
+    },
+  })
+}

@@ -13,6 +13,7 @@ type AdHocMode = 'existing' | 'create'
 export function TaskNewPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const requestedTemplateCode = searchParams.get('template_code') || ''
   const createTask = useCreateTask()
 
   const poolsQuery = useAssetPools({ page: 1, page_size: 100 })
@@ -20,21 +21,34 @@ export function TaskNewPage() {
 
   // ── 模板驱动数据源 ───────────────────────────────────────────────
   const { data: templatesData, isPending: isLoadingTemplates } = useTaskTemplates({ page_size: 100 })
-  const templates = useMemo(() => templatesData?.data || [], [templatesData?.data])
+  const templates = useMemo(() => (templatesData?.data || []).filter((item) => item.is_enabled), [templatesData?.data])
+  const hasAvailableTemplates = templates.length > 0
 
   // ── 公共字段 ──────────────────────────────────────────────────
   const [taskName, setTaskName] = useState('')
-  const [templateCode, setTemplateCode] = useState(searchParams.get('template_code') || '')
+  const [templateCode, setTemplateCode] = useState(requestedTemplateCode)
   const [targets, setTargets] = useState('')
   const [adHocMode, setAdHocMode] = useState<AdHocMode>('existing')
 
-  // 若路由没带，且获取到列表时则默认选中第一个
   useEffect(() => {
-    if (!templateCode && templates.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTemplateCode(templates[0].code)
+    if (templates.length === 0) {
+      if (templateCode) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTemplateCode('')
+      }
+      return
     }
-  }, [templateCode, templates])
+    if (templateCode && templates.some((item) => item.code === templateCode)) {
+      return
+    }
+    if (requestedTemplateCode && templates.some((item) => item.code === requestedTemplateCode)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTemplateCode(requestedTemplateCode)
+      return
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTemplateCode(templates[0].code)
+  }, [requestedTemplateCode, templateCode, templates])
 
   const { data: tplDetail, isPending: isLoadingTpl } = useTaskTemplateDetail(templateCode)
 
@@ -72,6 +86,7 @@ export function TaskNewPage() {
   const isValid = () => {
     if (!taskName.trim()) return false
     if (!targets.trim()) return false
+    if (!hasAvailableTemplates) return false
     if (!templateCode) return false
     if (adHocMode === 'existing' && !existingPoolId) return false
     if (adHocMode === 'create' && !newPoolName.trim()) return false
@@ -80,6 +95,7 @@ export function TaskNewPage() {
   }
 
   const handleSubmit = () => {
+    if (!hasAvailableTemplates || !templateCode) return
     const items = targets.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean)
     const tags = newPoolTags
       .split(/[\n,，]+/)
@@ -203,6 +219,7 @@ export function TaskNewPage() {
               variant="flat"
               aria-label="扫描模板"
               isLoading={isLoadingTemplates}
+              isDisabled={!hasAvailableTemplates}
               selectedKeys={templateCode ? [templateCode] : []}
               onChange={(e) => setTemplateCode(e.target.value)}
               className="flex-1"
@@ -220,6 +237,7 @@ export function TaskNewPage() {
             </Select>
             {isLoadingTpl && <Spinner size="sm" color="white" />}
           </div>
+          {!hasAvailableTemplates && <p className="text-[12px] text-apple-amber font-bold">暂无可用任务模板，请先在模板管理中启用模板。</p>}
         </div>
 
         {/* 覆盖参数区 */}
@@ -373,7 +391,9 @@ export function TaskNewPage() {
          <h2 className="text-[10px] uppercase font-black tracking-[0.2em] text-apple-blue-light flex items-center gap-2">
            <BeakerIcon className="w-4 h-4" /> 执行预览
          </h2>
-         {!tplDetail ? (
+         {!hasAvailableTemplates ? (
+           <p className="text-[12px] text-apple-amber">暂无可用任务模板，当前无法创建任务。</p>
+         ) : !tplDetail ? (
            <p className="text-[12px] text-apple-text-tertiary">正在拉取模板评述...</p>
          ) : (
            <div className="flex flex-col gap-3">

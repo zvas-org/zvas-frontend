@@ -18,16 +18,25 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
   const createTask = useCreateTask()
 
   const { data: templatesData, isPending: isLoadingTemplates } = useTaskTemplates({ page_size: 100 })
-  const templates = useMemo(() => templatesData?.data || [], [templatesData?.data])
+  const templates = useMemo(() => (templatesData?.data || []).filter((item) => item.is_enabled), [templatesData?.data])
+  const hasAvailableTemplates = templates.length > 0
 
   const [taskName, setTaskName] = useState('')
   const [templateCode, setTemplateCode] = useState('')
 
   useEffect(() => {
-    if (!templateCode && templates.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTemplateCode(templates[0].code)
+    if (templates.length === 0) {
+      if (templateCode) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTemplateCode('')
+      }
+      return
     }
+    if (templateCode && templates.some((item) => item.code === templateCode)) {
+      return
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTemplateCode(templates[0].code)
   }, [templateCode, templates])
 
   const { data: tplDetail, isPending: isLoadingTpl } = useTaskTemplateDetail(templateCode)
@@ -54,6 +63,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
   const vulScanSeveritySummary = useMemo(() => formatVulScanSeverityLabels(vulScanSeverity), [vulScanSeverity])
 
   const handleSubmit = () => {
+    if (!hasAvailableTemplates || !templateCode) return
     const name = taskName.trim() || `基于「${poolName || poolId}」的扫描任务`
 
 
@@ -167,6 +177,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                       variant="flat"
                       aria-label="扫描模板"
                       isLoading={isLoadingTemplates}
+                      isDisabled={!hasAvailableTemplates}
                       selectedKeys={templateCode ? [templateCode] : []}
                       onChange={(e) => setTemplateCode(e.target.value)}
                       className="flex-1"
@@ -181,6 +192,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                     </Select>
                     {isLoadingTpl && <Spinner size="sm" color="white" className="shrink-0" />}
                   </div>
+                  {!hasAvailableTemplates && <p className="text-[11px] text-apple-amber font-bold">暂无可用任务模板，请先在模板管理中启用模板。</p>}
                 </div>
               </div>
 
@@ -311,7 +323,9 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                  <h2 className="text-[9px] uppercase font-black tracking-[0.2em] text-apple-blue-light flex items-center gap-2">
                    <BeakerIcon className="w-3.5 h-3.5" /> 调度核心预览 (PREVIEW)
                  </h2>
-                 {!tplDetail ? (
+                 {!hasAvailableTemplates ? (
+                   <p className="text-[11px] text-apple-amber">暂无可用任务模板，当前无法从资产池发起任务。</p>
+                 ) : !tplDetail ? (
                    <p className="text-[11px] text-apple-text-tertiary">正在获取模板元数据...</p>
                  ) : (
                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -335,7 +349,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
               color="primary"
               className="w-full rounded-xl px-10 font-black shadow-lg shadow-apple-blue/20 sm:w-auto"
               isLoading={createTask.isPending}
-              isDisabled={Boolean(tplDetail?.supports_vul_scan && vulScanSeverity.length === 0)}
+              isDisabled={!hasAvailableTemplates || Boolean(tplDetail?.supports_vul_scan && vulScanSeverity.length === 0)}
               onPress={handleSubmit}
             >
               发起任务
