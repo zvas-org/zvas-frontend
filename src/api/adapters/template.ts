@@ -28,6 +28,7 @@ export interface TaskTemplateDetailVM extends TaskTemplateListItemVM {
   allowed_stages: string[]
   default_params: Record<string, string>
   supports_vul_scan: boolean
+  supports_weak_scan: boolean
   default_vul_scan_severity: string[]
 }
 
@@ -47,6 +48,7 @@ const VUL_SCAN_SEVERITY_LABELS: Record<string, string> = {
 
 const VUL_SCAN_SEVERITY_ORDER = VUL_SCAN_SEVERITY_OPTIONS.map((item) => item.value)
 const VUL_SCAN_STAGE_KEYS = new Set(['vuln_scan', 'vul_scan'])
+const WEAK_SCAN_STAGE_KEYS = new Set(['weak_scan'])
 const SITE_BASED_TEMPLATE_CODES = new Set(['site_http_probe', 'site_vuln_scan', 'site_attack_scan', 'site_weak_scan'])
 const TEMPLATE_PREVIEW_SUMMARY_MAP: Record<string, string> = {
   site_http_probe: '直接使用资产池已有站点执行首页识别，不补跑端口扫描。',
@@ -78,6 +80,7 @@ function mapToTaskTemplateDetailVM(dto: any): TaskTemplateDetailVM {
   const allowedStages = Array.isArray(dto.optional_stages) ? dto.optional_stages : []
   const defaultParams = dto.default_params && typeof dto.default_params === 'object' ? dto.default_params : {}
   const supportsVulScan = [...defaultStagePlan, ...allowedStages].some((stage) => VUL_SCAN_STAGE_KEYS.has(String(stage || '').trim()))
+  const supportsWeakScan = [...defaultStagePlan, ...allowedStages].some((stage) => WEAK_SCAN_STAGE_KEYS.has(String(stage || '').trim()))
   const defaultVulScanSeverity = supportsVulScan
     ? normalizeVulScanSeverityValues(defaultParams.vul_scan_severity || VUL_SCAN_SEVERITY_ORDER)
     : []
@@ -92,6 +95,7 @@ function mapToTaskTemplateDetailVM(dto: any): TaskTemplateDetailVM {
     allowed_stages: allowedStages,
     default_params: defaultParams,
     supports_vul_scan: supportsVulScan,
+    supports_weak_scan: supportsWeakScan,
     default_vul_scan_severity: defaultVulScanSeverity,
   }
 }

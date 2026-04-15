@@ -39,6 +39,8 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
   const [rate, setRate] = useState<number | ''>('')
   const [timeoutMs, setTimeoutMs] = useState<number | ''>('')
   const [vulScanSeverity, setVulScanSeverity] = useState<string[]>([])
+  const [enableVulScan, setEnableVulScan] = useState(false)
+  const [enableWeakScan, setEnableWeakScan] = useState(false)
 
   useEffect(() => {
     if (tplDetail) {
@@ -49,12 +51,16 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
       setRate(tplDetail.default_rate)
       setTimeoutMs(tplDetail.default_timeout_ms)
       setVulScanSeverity(tplDetail.supports_vul_scan ? tplDetail.default_vul_scan_severity : [])
+      setEnableVulScan(tplDetail.default_stage_plan.includes('vuln_scan'))
+      setEnableWeakScan(tplDetail.default_stage_plan.includes('weak_scan'))
     }
   }, [tplDetail])
 
   const vulScanSeveritySummary = useMemo(() => formatVulScanSeverityLabels(vulScanSeverity), [vulScanSeverity])
   const isSiteBasedSelectedTemplate = isSiteBasedTemplate(selectedTemplateCode)
   const previewSummary = getTaskTemplatePreviewSummary(tplDetail) || '无特殊预览说明。'
+  const allowAttackSurfaceOverrides = selectedTemplateCode === 'full_scan'
+  const shouldRequireVulSeverity = Boolean(tplDetail?.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan))
 
   const handleSubmit = () => {
     if (!hasAvailableTemplates || !selectedTemplateCode) return
@@ -79,7 +85,18 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
     }
 
     const params: Record<string, string> = {}
-    if (tplDetail?.supports_vul_scan) {
+    const stageOverrides: Record<string, boolean> = {}
+    if (allowAttackSurfaceOverrides) {
+      const defaultVulScanEnabled = tplDetail?.default_stage_plan.includes('vuln_scan') ?? false
+      const defaultWeakScanEnabled = tplDetail?.default_stage_plan.includes('weak_scan') ?? false
+      if (enableVulScan !== defaultVulScanEnabled) {
+        stageOverrides.vuln_scan = enableVulScan
+      }
+      if (enableWeakScan !== defaultWeakScanEnabled) {
+        stageOverrides.weak_scan = enableWeakScan
+      }
+    }
+    if (tplDetail?.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan)) {
       const selectedSeverity = buildVulScanSeverityParam(vulScanSeverity)
       const defaultSeverity = buildVulScanSeverityParam(tplDetail.default_vul_scan_severity)
       if (!selectedSeverity) {
@@ -100,6 +117,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
           generation_source: 'pool_filter',
         },
         template_overrides: Object.keys(templateOverrides).length > 0 ? templateOverrides : undefined,
+        stage_overrides: Object.keys(stageOverrides).length > 0 ? stageOverrides : undefined,
         params: Object.keys(params).length > 0 ? params : undefined,
       },
       {
@@ -191,8 +209,23 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
               </div>
 
               {/* Bento Grid for Overrides */}
-              {(tplDetail?.allow_port_mode_override || tplDetail?.allow_http_probe_override || tplDetail?.allow_advanced_override || tplDetail?.supports_vul_scan) && (
+              {(tplDetail?.allow_port_mode_override || tplDetail?.allow_http_probe_override || tplDetail?.allow_advanced_override || tplDetail?.supports_vul_scan || allowAttackSurfaceOverrides) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {allowAttackSurfaceOverrides && (
+                     <div className="flex flex-col gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl md:col-span-2">
+                       <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">攻击面扫描开关</label>
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                         <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3">
+                           <span className="text-[12px] text-white font-bold">nuclei 漏洞扫描</span>
+                           <Switch size="sm" isSelected={enableVulScan} onValueChange={setEnableVulScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue h-5 w-9', thumb: 'w-3 h-3 group-data-[selected=true]:ml-4' }} />
+                         </div>
+                         <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3">
+                           <span className="text-[12px] text-white font-bold">weakScan 弱点扫描</span>
+                           <Switch size="sm" isSelected={enableWeakScan} onValueChange={setEnableWeakScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue h-5 w-9', thumb: 'w-3 h-3 group-data-[selected=true]:ml-4' }} />
+                         </div>
+                       </div>
+                     </div>
+                   )}
                    {/* 端口扫描模块 */}
                    {tplDetail?.allow_port_mode_override && (
                      <div className="flex flex-col gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl relative overflow-hidden group">
@@ -246,7 +279,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                      </div>
                    )}
 
-                   {tplDetail?.supports_vul_scan && (
+                   {tplDetail?.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan) && (
                      <div className="flex flex-col gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl md:col-span-2">
                        <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">漏洞等级 (覆盖)</label>
                        <Select
@@ -328,7 +361,9 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                         {!!tplDetail.default_port_scan_mode && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-mono font-black border-r border-white/10 pr-2 mr-0.5" }}>{getPortModeLabel(portMode)}</Chip>}
                         {isSiteBasedSelectedTemplate && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black" }}>站点直扫</Chip>}
                         {httpProbe && <div className="w-1.5 h-1.5 rounded-full bg-apple-green animate-pulse" title="HomePage Probe Mode On" />}
-                        {tplDetail.supports_vul_scan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>等级: {vulScanSeveritySummary}</Chip>}
+                        {allowAttackSurfaceOverrides && enableVulScan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>nuclei</Chip>}
+                        {allowAttackSurfaceOverrides && enableWeakScan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>weakScan</Chip>}
+                        {tplDetail.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan) && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>等级: {vulScanSeveritySummary}</Chip>}
                      </div>
                    </div>
                  )}
@@ -344,7 +379,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
               color="primary"
               className="w-full rounded-xl px-10 font-black shadow-lg shadow-apple-blue/20 sm:w-auto"
               isLoading={createTask.isPending}
-              isDisabled={!hasAvailableTemplates || Boolean(tplDetail?.supports_vul_scan && vulScanSeverity.length === 0)}
+              isDisabled={!hasAvailableTemplates || Boolean(shouldRequireVulSeverity && vulScanSeverity.length === 0)}
               onPress={handleSubmit}
             >
               发起任务

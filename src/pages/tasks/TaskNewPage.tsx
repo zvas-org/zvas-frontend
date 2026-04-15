@@ -49,6 +49,8 @@ export function TaskNewPage() {
   const [rate, setRate] = useState<number | ''>('')
   const [timeoutMs, setTimeoutMs] = useState<number | ''>('')
   const [vulScanSeverity, setVulScanSeverity] = useState<string[]>([])
+  const [enableVulScan, setEnableVulScan] = useState(false)
+  const [enableWeakScan, setEnableWeakScan] = useState(false)
 
   // 模板切换时，重置默认值
   useEffect(() => {
@@ -60,12 +62,16 @@ export function TaskNewPage() {
       setRate(tplDetail.default_rate)
       setTimeoutMs(tplDetail.default_timeout_ms)
       setVulScanSeverity(tplDetail.supports_vul_scan ? tplDetail.default_vul_scan_severity : [])
+      setEnableVulScan(tplDetail.default_stage_plan.includes('vuln_scan'))
+      setEnableWeakScan(tplDetail.default_stage_plan.includes('weak_scan'))
     }
   }, [tplDetail])
 
   const vulScanSeveritySummary = useMemo(() => formatVulScanSeverityLabels(vulScanSeverity), [vulScanSeverity])
   const isSiteBasedSelectedTemplate = isSiteBasedTemplate(selectedTemplateCode)
   const previewSummary = getTaskTemplatePreviewSummary(tplDetail) || '未定义模板细节行为。'
+  const allowAttackSurfaceOverrides = selectedTemplateCode === 'full_scan'
+  const shouldRequireVulSeverity = Boolean(tplDetail?.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan))
 
   // ── 模式 A：归并到已有资产池 ──────────────────────────────────
   const [existingPoolId, setExistingPoolId] = useState('')
@@ -82,7 +88,7 @@ export function TaskNewPage() {
     if (!selectedTemplateCode) return false
     if (adHocMode === 'existing' && !existingPoolId) return false
     if (adHocMode === 'create' && !newPoolName.trim()) return false
-    if (tplDetail?.supports_vul_scan && vulScanSeverity.length === 0) return false
+    if (shouldRequireVulSeverity && vulScanSeverity.length === 0) return false
     return true
   }
 
@@ -113,7 +119,18 @@ export function TaskNewPage() {
     }
 
     const params: Record<string, string> = {}
-    if (tplDetail?.supports_vul_scan) {
+    const stageOverrides: Record<string, boolean> = {}
+    if (allowAttackSurfaceOverrides) {
+      const defaultVulScanEnabled = tplDetail?.default_stage_plan.includes('vuln_scan') ?? false
+      const defaultWeakScanEnabled = tplDetail?.default_stage_plan.includes('weak_scan') ?? false
+      if (enableVulScan !== defaultVulScanEnabled) {
+        stageOverrides.vuln_scan = enableVulScan
+      }
+      if (enableWeakScan !== defaultWeakScanEnabled) {
+        stageOverrides.weak_scan = enableWeakScan
+      }
+    }
+    if (tplDetail?.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan)) {
       const selectedSeverity = buildVulScanSeverityParam(vulScanSeverity)
       const defaultSeverity = buildVulScanSeverityParam(tplDetail.default_vul_scan_severity)
       if (!selectedSeverity) {
@@ -135,6 +152,7 @@ export function TaskNewPage() {
             : { mode: 'create', name: newPoolName.trim(), description: newPoolDesc.trim() || undefined, tags: tags.length > 0 ? tags : undefined },
         input: { source: 'manual', items },
         template_overrides: Object.keys(templateOverrides).length > 0 ? templateOverrides : undefined,
+        stage_overrides: Object.keys(stageOverrides).length > 0 ? stageOverrides : undefined,
         params: Object.keys(params).length > 0 ? params : undefined,
       },
       {
@@ -233,9 +251,25 @@ export function TaskNewPage() {
         </div>
 
         {/* 覆盖参数区 */}
-        {(tplDetail?.allow_port_mode_override || tplDetail?.allow_http_probe_override || tplDetail?.allow_advanced_override || tplDetail?.supports_vul_scan) && (
+        {tplDetail && (tplDetail.allow_port_mode_override || tplDetail.allow_http_probe_override || tplDetail.allow_advanced_override || tplDetail.supports_vul_scan || allowAttackSurfaceOverrides) && (
           <div className="flex flex-col gap-5 mt-4 pt-4 border-t border-white/5">
              <p className="text-[10px] text-apple-text-tertiary uppercase tracking-[0.2em] font-black">模板高级控制</p>
+             {allowAttackSurfaceOverrides && (
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="flex flex-col gap-1.5 rounded-[16px] border border-white/5 bg-white/[0.03] p-4">
+                   <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">漏洞扫描引擎</label>
+                   <Switch size="sm" isSelected={enableVulScan} onValueChange={setEnableVulScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue' }}>
+                     <span className="text-[13px] text-white">启用 nuclei 漏洞扫描</span>
+                   </Switch>
+                 </div>
+                 <div className="flex flex-col gap-1.5 rounded-[16px] border border-white/5 bg-white/[0.03] p-4">
+                   <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">弱点扫描引擎</label>
+                   <Switch size="sm" isSelected={enableWeakScan} onValueChange={setEnableWeakScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue' }}>
+                     <span className="text-[13px] text-white">启用 weakScan 弱点扫描</span>
+                   </Switch>
+                 </div>
+               </div>
+             )}
              {tplDetail.allow_port_mode_override && (
                <div className="flex flex-col gap-1.5">
                  <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">端口扫描模式 (覆盖)</label>
@@ -264,7 +298,7 @@ export function TaskNewPage() {
                  </Switch>
                </div>
              )}
-             {tplDetail.supports_vul_scan && (
+             {tplDetail.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan) && (
                <div className="flex flex-col gap-2 mt-2">
                  <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">漏洞等级 (覆盖)</label>
                  <Select
@@ -396,7 +430,9 @@ export function TaskNewPage() {
                 {!!tplDetail.default_port_scan_mode && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white font-mono h-6">{getPortModeLabel(portMode)}</Chip>}
                 {isSiteBasedSelectedTemplate && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">站点直扫</Chip>}
                 {httpProbe && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white font-mono h-6">http probe enabled</Chip>}
-                {tplDetail.supports_vul_scan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">漏洞等级: {vulScanSeveritySummary}</Chip>}
+                {allowAttackSurfaceOverrides && enableVulScan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">nuclei</Chip>}
+                {allowAttackSurfaceOverrides && enableWeakScan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">weakScan</Chip>}
+                {tplDetail.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan) && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">漏洞等级: {vulScanSeveritySummary}</Chip>}
              </div>
            </div>
          )}

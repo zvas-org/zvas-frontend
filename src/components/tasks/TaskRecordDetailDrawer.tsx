@@ -121,25 +121,6 @@ function getExecutionStatusLabel(status: string): string {
   }
 }
 
-function normalizeStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map((item) => firstNonEmptyText(item)).filter(Boolean)
-  }
-  const text = firstNonEmptyText(value)
-  if (!text) return []
-  if (text.startsWith('[') && text.endsWith(']')) {
-    try {
-      const parsed = JSON.parse(text)
-      if (Array.isArray(parsed)) {
-        return parsed.map((item) => firstNonEmptyText(item)).filter(Boolean)
-      }
-    } catch {
-      return [text]
-    }
-  }
-  return [text]
-}
-
 function buildRequestMessage(detail: TaskRecordDetailVM): string {
   const httpResult = detail.http_result
   if (!httpResult) return '当前记录没有请求报文。'

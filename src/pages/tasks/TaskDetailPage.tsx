@@ -25,7 +25,7 @@ type TaskDetailTabKey = (typeof TASK_DETAIL_TABS)[number]
 
 const VULN_SCAN_PLANS = new Set(['vuln_scan', 'vul_scan', 'vul_scan.site', 'vuln_scan.nuclei'])
 const WEAK_SCAN_PLANS = new Set(['weak_scan', 'weak_scan.site'])
-const VULN_SCAN_TEMPLATES = new Set(['site_vuln_scan', 'vuln_scan', 'full_scan'])
+const VULN_SCAN_TEMPLATES = new Set(['site_vuln_scan', 'vuln_scan'])
 const WEAK_SCAN_TEMPLATES = new Set(['site_weak_scan', 'weak_scan'])
 
 function hasPlan(task: TaskDetailVM | undefined, plans: Set<string>, templates: Set<string>) {
