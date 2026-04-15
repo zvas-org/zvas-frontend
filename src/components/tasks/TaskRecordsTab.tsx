@@ -63,6 +63,23 @@ function formatDuration(durationMs: number) {
   return `${(durationMs / 1000).toFixed(1)} s`;
 }
 
+function isInProgressStatus(status: string) {
+  return status === "queued" || status === "dispatched" || status === "running";
+}
+
+function getInProgressSummary(status: string) {
+  switch (status) {
+    case "queued":
+      return "待执行，尚未产生结果";
+    case "dispatched":
+      return "已分发，等待执行";
+    case "running":
+      return "执行中，等待结果收口";
+    default:
+      return "结果处理中";
+  }
+}
+
 function parseTaskRecordSummary(
   item: TaskRecordVM,
 ): Record<string, unknown> | null {
@@ -182,6 +199,14 @@ const SUMMARY_RENDERERS: Record<string, SummaryRenderer> = {
 };
 
 function renderResultSummary(item: TaskRecordVM) {
+  if (isInProgressStatus(item.status)) {
+    return (
+      <span className="truncate block w-full text-apple-blue-light font-medium">
+        {getInProgressSummary(item.status)}
+      </span>
+    );
+  }
+
   const key = item.task_subtype
     ? `${item.task_type}/${item.task_subtype}`
     : item.task_type;

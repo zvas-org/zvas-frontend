@@ -84,6 +84,23 @@ function firstNonEmptyText(...values: unknown[]): string {
   return ''
 }
 
+function isInProgressStatus(status: string): boolean {
+  return status === 'queued' || status === 'dispatched' || status === 'running'
+}
+
+function getInProgressDetailLabel(status: string): string {
+  switch (status) {
+    case 'queued':
+      return '待执行'
+    case 'dispatched':
+      return '等待执行'
+    case 'running':
+      return '执行中'
+    default:
+      return '处理中'
+  }
+}
+
 function normalizeStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((item) => firstNonEmptyText(item)).filter(Boolean)
@@ -611,6 +628,8 @@ function renderVulnerabilityCard(item: TaskRecordVulnerabilityVM) {
 function renderVulScan(detail: TaskRecordDetailVM) {
   if (!detail.vul_scan_summary && !detail.vulnerabilities.length) return null
 
+  const inProgress = isInProgressStatus(detail.status)
+
   return (
     <section className="space-y-4">
       <div className="space-y-1">
@@ -621,13 +640,18 @@ function renderVulScan(detail: TaskRecordDetailVM) {
         <div className="space-y-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             <DetailPair label="目标站点" value={detail.vul_scan_summary.target_url || '-'} />
-            <DetailPair label="漏洞数量" value={detail.vul_scan_summary.vulnerability_count} />
+            <DetailPair label="漏洞数量" value={inProgress ? getInProgressDetailLabel(detail.status) : detail.vul_scan_summary.vulnerability_count} />
             <DetailPair label="扫描模式" value={detail.vul_scan_summary.scan_mode || '-'} />
             <DetailPair label="Profile" value={detail.vul_scan_summary.profile_code || '-'} />
             <DetailPair label="跳过原因" value={detail.vul_scan_summary.skip_reason || '-'} />
             <DetailPair label="执行错误" value={detail.vul_scan_summary.error || '-'} />
           </div>
           {renderSeveritySummary(detail.vul_scan_summary.severity_summary)}
+          {inProgress && !detail.vulnerabilities.length && (
+            <div className="rounded-[20px] border border-apple-blue/20 bg-apple-blue/5 p-4 text-sm text-apple-blue-light">
+              当前漏洞扫描仍在执行中，数量与级别统计将在结果收口后更新。
+            </div>
+          )}
         </div>
       )}
       {!!detail.vulnerabilities.length && <div className="space-y-4">{detail.vulnerabilities.map(renderVulnerabilityCard)}</div>}
@@ -639,6 +663,7 @@ function renderWeakScan(detail: TaskRecordDetailVM, findings: TaskWeakScanFindin
   if (!detail.weak_scan_summary) return null
 
   const summary = detail.weak_scan_summary
+  const inProgress = isInProgressStatus(detail.status)
 
   return (
     <section className="space-y-4">
@@ -650,7 +675,7 @@ function renderWeakScan(detail: TaskRecordDetailVM, findings: TaskWeakScanFindin
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           <DetailPair label="目标 URL" value={<TruncatedText value={summary.target_url} limit={48} mono />} />
           <DetailPair label="资产 ID" value={<TruncatedText value={summary.site_asset_id} limit={24} mono />} />
-          <DetailPair label="漏洞数量" value={summary.vulnerability_count} />
+          <DetailPair label="漏洞数量" value={inProgress ? getInProgressDetailLabel(detail.status) : summary.vulnerability_count} />
           <DetailPair label="扫描策略" value={summary.scan_profile || '-'} />
           <DetailPair label="引擎标识" value={<TruncatedText value={summary.engine} limit={24} mono />} />
           <DetailPair label="报告引用" value={<TruncatedText value={summary.report_ref} limit={48} mono />} />
@@ -660,6 +685,11 @@ function renderWeakScan(detail: TaskRecordDetailVM, findings: TaskWeakScanFindin
           <DetailPair label="执行错误" value={summary.error || '-'} />
         </div>
         {renderSeveritySummary(summary.severity_summary)}
+        {inProgress && !findings.length && !findingsPending && !findingsError && (
+          <div className="rounded-[20px] border border-apple-blue/20 bg-apple-blue/5 p-4 text-sm text-apple-blue-light">
+            当前弱点扫描仍在执行中，详细结果将在任务完成后补齐。
+          </div>
+        )}
       </div>
       {findingsPending && <Skeleton className="h-48 w-full rounded-[24px] bg-white/5" />}
       {findingsError && (
@@ -690,7 +720,15 @@ function renderFallbackSummary(detail: TaskRecordDetailVM) {
   if (!summary) {
     return (
       <section className="rounded-[24px] border border-white/8 bg-white/[0.03] p-6 text-sm text-apple-text-secondary">
-        当前记录暂无可展示的结构化结果。
+        {isInProgressStatus(detail.status) ? '当前记录仍在执行中，结构化结果尚未返回。' : '当前记录暂无可展示的结构化结果。'}
+      </section>
+    )
+  }
+
+  if (isInProgressStatus(detail.status)) {
+    return (
+      <section className="rounded-[24px] border border-apple-blue/20 bg-apple-blue/5 p-6 text-sm text-apple-blue-light">
+        当前记录仍在执行中，回传摘要可能尚未最终收口，请以完成后的结果为准。
       </section>
     )
   }
