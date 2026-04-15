@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import {
   Button,
@@ -13,7 +14,7 @@ import {
   Tooltip,
 } from '@heroui/react'
 
-import type { TaskRecordDetailVM, TaskRecordVM, TaskRecordVulnerabilityVM, TaskWeakScanFindingVM } from '@/api/adapters/task'
+import type { TaskRecordDetailVM, TaskRecordVM, TaskWeakScanFindingVM } from '@/api/adapters/task'
 import { useTaskRecordDetail, useTaskWeakScanFindings } from '@/api/adapters/task'
 import { getRecordTypeLabel, useTaskRoutes } from '@/api/adapters/route'
 
@@ -101,12 +102,23 @@ function getInProgressDetailLabel(status: string): string {
   }
 }
 
-function getVulnerabilityBaseURL(item: TaskRecordVulnerabilityVM): string {
-  return firstNonEmptyText(item.base_url, item.target_url, item.host)
-}
-
-function getVulnerabilityLink(item: TaskRecordVulnerabilityVM): string {
-  return firstNonEmptyText(item.link, item.raw?.['matched-at'], item.target_url, item.host)
+function getExecutionStatusLabel(status: string): string {
+  switch (status) {
+    case 'queued':
+      return '待执行'
+    case 'dispatched':
+      return '等待执行'
+    case 'running':
+      return '执行中'
+    case 'succeeded':
+      return '已完成'
+    case 'failed':
+      return '执行失败'
+    case 'canceled':
+      return '已取消'
+    default:
+      return status || '-'
+  }
 }
 
 function normalizeStringArray(value: unknown): string[] {
@@ -485,57 +497,6 @@ function renderSeveritySummary(summary: Record<string, unknown>) {
   )
 }
 
-function renderClassification(item: TaskRecordVulnerabilityVM) {
-  const classification = item.classification || {}
-  const rows = [
-    { label: 'CVE', value: firstNonEmptyText(classification['cve-id'], classification.cve_id, classification.cve) },
-    { label: 'CWE', value: firstNonEmptyText(classification['cwe-id'], classification.cwe_id, classification.cwe) },
-    { label: 'CVSS 分数', value: firstNonEmptyText(classification['cvss-score'], classification.cvss_score) },
-    { label: 'CVSS 向量', value: firstNonEmptyText(classification['cvss-metrics'], classification.cvss_metrics) },
-    { label: 'CPE', value: firstNonEmptyText(classification.cpe) },
-    { label: 'EPSS', value: firstNonEmptyText(classification['epss-score'], classification.epss_score) },
-  ].filter((row) => row.value)
-
-  if (!rows.length) return null
-
-  return (
-    <section className="space-y-3">
-      <h4 className="text-[11px] font-bold uppercase tracking-[0.24em] text-apple-text-tertiary">漏洞分类</h4>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {rows.map((row) => (
-          <DetailPair key={row.label} label={row.label} value={row.value} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function renderVulnerabilityEvidence(item: TaskRecordVulnerabilityVM) {
-  const evidence = item.evidence || {}
-  const curlCommand = firstNonEmptyText(evidence.curl_command)
-  const matcherStatus = firstNonEmptyText(evidence.matcher_status)
-  const extractedResults = normalizeStringArray(evidence.extracted_results)
-  const requestText = firstNonEmptyText(evidence.request)
-  const responseText = firstNonEmptyText(evidence.response)
-
-  if (!curlCommand && !matcherStatus && !extractedResults.length && !requestText && !responseText) {
-    return null
-  }
-
-  return (
-    <section className="space-y-4">
-      <h4 className="text-[11px] font-bold uppercase tracking-[0.24em] text-apple-text-tertiary">命中证据</h4>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <DetailPair label="匹配状态" value={matcherStatus || '-'} />
-        <DetailPair label="提取结果" value={renderChipList(extractedResults, true)} />
-        <DetailPair label="cURL 复现" value={<TruncatedText value={curlCommand} limit={48} mono />} />
-      </div>
-      {requestText && <MessageBlock title="漏洞请求" content={requestText} copyable />}
-      {responseText && <MessageBlock title="漏洞响应" content={responseText} copyable collapsible collapseThreshold={1800} />}
-    </section>
-  )
-}
-
 function renderWeakScanClassification(item: TaskWeakScanFindingVM) {
   const rows = [
     { label: 'CVSS 评分', value: firstNonEmptyText(item.cvss_score, item.classification.cvss_score) },
@@ -609,64 +570,54 @@ function renderWeakScanFindingCard(item: TaskWeakScanFindingVM) {
   )
 }
 
-function renderVulnerabilityCard(item: TaskRecordVulnerabilityVM) {
-  const baseURL = getVulnerabilityBaseURL(item)
-  const link = getVulnerabilityLink(item)
-
-  return (
-    <div key={item.id || item.vulnerability_key} className="space-y-5 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <Chip size="sm" variant="flat" color={severityColor(item.severity)}>
-          {item.severity || 'unknown'}
-        </Chip>
-        <span className="text-sm font-semibold text-white">{item.rule_name || item.rule_id || '未命名规则'}</span>
-        {item.rule_id && <code className="font-mono text-[11px] text-apple-text-tertiary">{item.rule_id}</code>}
-      </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <DetailPair label="基础 URL" value={baseURL || '-'} />
-        <DetailPair label="命中链接" value={link || '-'} />
-        <DetailPair label="匹配器" value={item.matcher_name || '-'} />
-        <DetailPair label="主机 / IP" value={[item.host, item.ip].filter(Boolean).join(' / ') || '-'} />
-        <DetailPair label="协议 / 端口" value={[item.scheme, item.port || ''].filter(Boolean).join(' : ') || '-'} />
-        <DetailPair label="命中时间" value={formatDateTime(item.matched_at)} />
-        <DetailPair label="Tags" value={renderChipList(item.tags)} />
-      </div>
-      {renderClassification(item)}
-      {renderVulnerabilityEvidence(item)}
-    </div>
-  )
+function getCompactVulScanDetailSummary(detail: TaskRecordDetailVM): string {
+  if (isInProgressStatus(detail.status)) {
+    return getInProgressDetailLabel(detail.status)
+  }
+  const summary = detail.result_summary?.trim()
+  if (summary) {
+    return summary
+  }
+  if (detail.status === 'failed') return '执行失败'
+  if (detail.status === 'succeeded') return '已完成'
+  return '-'
 }
 
 function renderVulScan(detail: TaskRecordDetailVM) {
   if (!detail.vul_scan_summary && !detail.vulnerabilities.length) return null
 
   const inProgress = isInProgressStatus(detail.status)
+  const summary = detail.vul_scan_summary
 
   return (
     <section className="space-y-4">
       <div className="space-y-1">
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-apple-text-tertiary">漏洞扫描详情</h3>
-        <p className="text-xs text-apple-text-tertiary">按扫描摘要、漏洞分类和命中证据展示站点漏洞结果。</p>
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-apple-text-tertiary">漏洞扫描执行摘要</h3>
+        <p className="text-xs text-apple-text-tertiary">这里只展示漏扫单元的执行状态、时间和数量级摘要，具体漏洞请前往“漏洞结果”页查看。</p>
       </div>
-      {detail.vul_scan_summary && (
-        <div className="space-y-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            <DetailPair label="目标站点" value={detail.vul_scan_summary.target_url || '-'} />
-            <DetailPair label="漏洞数量" value={inProgress ? getInProgressDetailLabel(detail.status) : detail.vul_scan_summary.vulnerability_count} />
-            <DetailPair label="扫描模式" value={detail.vul_scan_summary.scan_mode || '-'} />
-            <DetailPair label="Profile" value={detail.vul_scan_summary.profile_code || '-'} />
-            <DetailPair label="跳过原因" value={detail.vul_scan_summary.skip_reason || '-'} />
-            <DetailPair label="执行错误" value={detail.vul_scan_summary.error || '-'} />
-          </div>
-          {renderSeveritySummary(detail.vul_scan_summary.severity_summary)}
-          {inProgress && !detail.vulnerabilities.length && (
-            <div className="rounded-[20px] border border-apple-blue/20 bg-apple-blue/5 p-4 text-sm text-apple-blue-light">
-              当前漏洞扫描仍在执行中，数量与级别统计将在结果收口后更新。
-            </div>
-          )}
+      <div className="space-y-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <DetailPair label="目标站点" value={summary?.target_url || detail.target_key || '-'} />
+          <DetailPair label="执行状态" value={getExecutionStatusLabel(detail.status)} />
+          <DetailPair label="执行节点" value={detail.worker_id || '-'} />
+          <DetailPair label="尝试次数" value={detail.attempt} />
+          <DetailPair label="开始时间" value={formatDateTime(detail.started_at)} />
+          <DetailPair label="结束时间" value={formatDateTime(detail.finished_at)} />
+          <DetailPair label="耗时" value={detail.duration_ms > 0 ? `${(detail.duration_ms / 1000).toFixed(1)} s` : '-'} />
+          <DetailPair label="扫描结果" value={getCompactVulScanDetailSummary(detail)} />
+          <DetailPair label="漏洞数量" value={inProgress ? getInProgressDetailLabel(detail.status) : summary?.vulnerability_count ?? '-'} />
+          <DetailPair label="扫描模式" value={summary?.scan_mode || '-'} />
+          <DetailPair label="Profile" value={summary?.profile_code || '-'} />
+          <DetailPair label="跳过原因" value={summary?.skip_reason || '-'} />
+          <DetailPair label="执行错误" value={summary?.error || '-'} />
         </div>
-      )}
-      {!!detail.vulnerabilities.length && <div className="space-y-4">{detail.vulnerabilities.map(renderVulnerabilityCard)}</div>}
+        {summary && renderSeveritySummary(summary.severity_summary)}
+        {inProgress && (
+          <div className="rounded-[20px] border border-apple-blue/20 bg-apple-blue/5 p-4 text-sm text-apple-blue-light">
+            当前漏洞扫描仍在执行中，数量与级别统计将在结果收口后更新。
+          </div>
+        )}
+      </div>
     </section>
   )
 }
@@ -759,8 +710,10 @@ function renderFallbackSummary(detail: TaskRecordDetailVM) {
 }
 
 export function TaskRecordDetailDrawer({ taskId, record, isOpen, onClose }: Props) {
+  const navigate = useNavigate()
   const { data: routes } = useTaskRoutes()
   const query = useTaskRecordDetail(taskId, record?.unit_id, isOpen)
+  const isVulScanRecord = Boolean(record && (record.task_type === 'vul_scan' || record.stage === 'vul_scan'))
   const isWeakScanRecord = Boolean(record && (record.task_type === 'weak_scan' || record.stage === 'weak_scan' || record.route_code === 'weak_scan.site'))
   const weakScanFindingsQuery = useTaskWeakScanFindings(
     taskId,
@@ -837,9 +790,24 @@ export function TaskRecordDetailDrawer({ taskId, record, isOpen, onClose }: Prop
             )}
           </DrawerBody>
           <DrawerFooter>
-            <Button fullWidth variant="flat" className="rounded-xl bg-white/5 font-bold text-white hover:bg-white/10" onPress={onClose}>
-              关闭
-            </Button>
+            <div className="flex w-full flex-col gap-3 sm:flex-row">
+              {isVulScanRecord && taskId && (
+                <Button
+                  fullWidth
+                  color="primary"
+                  className="rounded-xl font-bold"
+                  onPress={() => {
+                    onClose()
+                    navigate(`/tasks/${taskId}?tab=findings`)
+                  }}
+                >
+                  去漏洞结果查看详情
+                </Button>
+              )}
+              <Button fullWidth variant="flat" className="rounded-xl bg-white/5 font-bold text-white hover:bg-white/10" onPress={onClose}>
+                关闭
+              </Button>
+            </div>
           </DrawerFooter>
         </>
       </DrawerContent>
