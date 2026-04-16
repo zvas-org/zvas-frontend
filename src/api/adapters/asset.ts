@@ -374,6 +374,10 @@ function mapToFindingSummaryView(dto: any): FindingSummaryView {
   }
 }
 
+export async function deleteAssetPoolFinding(poolId: string, findingId: string): Promise<void> {
+  await httpClient.delete(`/asset-pools/${poolId}/findings/${findingId}`)
+}
+
 export function useAssetPoolFindings(
   id?: string,
   params?: { page?: number; page_size?: number; url?: string; poc_id?: string; severity?: string; status?: string },

@@ -29,8 +29,9 @@ import {
 } from '@heroicons/react/24/outline'
 import { type SetURLSearchParams, useNavigate, useSearchParams } from 'react-router-dom'
 
-import { type FindingSummaryView, useAssetPoolFindings } from '@/api/adapters/asset'
+import { deleteAssetPoolFinding, type FindingSummaryView, useAssetPoolFindings } from '@/api/adapters/asset'
 import { APPLE_TABLE_CLASSES } from '@/utils/theme'
+import { ConfirmModal } from '@/components/common/ConfirmModal'
 
 const PAGE_SIZE = 20
 
@@ -333,6 +334,8 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
   const [page, setPage] = useState(1)
   const [draftFilters, setDraftFilters] = useState<FindingFilterState>(urlFilters)
   const [selectedItem, setSelectedItem] = useState<FindingSummaryView | null>(null)
+  const [pendingDeleteItem, setPendingDeleteItem] = useState<FindingSummaryView | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const queryParams = useMemo(() => ({
     page,
@@ -369,6 +372,21 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
   function handleFilterEnter(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Enter') {
       handleApplyFilters()
+    }
+  }
+
+  async function handleConfirmDelete() {
+    if (!pendingDeleteItem) return
+    try {
+      setIsDeleting(true)
+      await deleteAssetPoolFinding(poolId, pendingDeleteItem.finding_id)
+      if (selectedItem?.finding_id === pendingDeleteItem.finding_id) {
+        setSelectedItem(null)
+      }
+      setPendingDeleteItem(null)
+      await refetch()
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -481,7 +499,7 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
             <TableColumn width={220}>漏洞名称</TableColumn>
             <TableColumn width={110}>级别</TableColumn>
             <TableColumn width={220}>来源任务</TableColumn>
-            <TableColumn width={140}>详情</TableColumn>
+            <TableColumn width={210}>操作</TableColumn>
             <TableColumn width={190}>发现时间</TableColumn>
           </TableHeader>
           <TableBody
@@ -521,9 +539,14 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
                   )}
                 </TableCell>
                 <TableCell>
-                  <Button size="sm" variant="flat" className="rounded-xl bg-white/6 font-bold text-white hover:bg-white/10" onPress={() => setSelectedItem(item)}>
-                    查看详情
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="flat" className="rounded-xl bg-white/6 font-bold text-white hover:bg-white/10" onPress={() => setSelectedItem(item)}>
+                      查看详情
+                    </Button>
+                    <Button size="sm" color="danger" variant="flat" className="rounded-xl font-bold" onPress={() => setPendingDeleteItem(item)}>
+                      删除
+                    </Button>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <span className="font-mono text-[12px] text-apple-text-secondary">{formatDateTime(item.created_at)}</span>
@@ -556,6 +579,16 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
       </div>
 
       <FindingsDrawer item={selectedItem} onClose={() => setSelectedItem(null)} />
+      <ConfirmModal
+        isOpen={Boolean(pendingDeleteItem)}
+        onClose={() => (!isDeleting ? setPendingDeleteItem(null) : undefined)}
+        onConfirm={handleConfirmDelete}
+        title="删除漏洞记录"
+        message={`确定删除漏洞“${pendingDeleteItem?.title || pendingDeleteItem?.rule_id || pendingDeleteItem?.finding_id || ''}”吗？删除后该误报会立即从当前资产池漏洞清单中移除，并同步修正关联摘要计数。`}
+        confirmText="确认删除"
+        confirmColor="danger"
+        isLoading={isDeleting}
+      />
     </div>
   )
 }
