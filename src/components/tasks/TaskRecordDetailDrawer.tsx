@@ -282,27 +282,6 @@ function TruncatedText({
   )
 }
 
-function renderChipList(items: string[], mono = false) {
-  if (!items.length) return <span className="text-apple-text-tertiary">-</span>
-  return (
-    <div className="flex flex-wrap gap-2">
-      {items.map((item) => (
-        <Chip
-          key={item}
-          size="sm"
-          variant="flat"
-          classNames={{
-            base: 'border border-white/8 bg-white/[0.05]',
-            content: mono ? 'font-mono text-[11px] text-white' : 'text-[11px] text-white',
-          }}
-        >
-          {item}
-        </Chip>
-      ))}
-    </div>
-  )
-}
-
 function compareService(a: string, b: string): number {
   const left = a.trim().toLowerCase()
   const right = b.trim().toLowerCase()

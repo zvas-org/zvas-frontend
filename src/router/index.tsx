@@ -29,8 +29,7 @@ const WorkersPage = lazy(() => import('@/pages/tasks/WorkersPage').then(m => ({ 
 const TaskDetailPage = lazy(() => import('@/pages/tasks/TaskDetailPage').then(m => ({ default: m.TaskDetailPage })))
 
 const FindingsPage = lazy(() => import('@/pages/findings/FindingsPage').then(m => ({ default: m.FindingsPage })))
-const EvidencesPage = lazy(() => import('@/pages/findings/EvidencesPage').then(m => ({ default: m.EvidencesPage })))
-const ReportsPage = lazy(() => import('@/pages/findings/ReportsPage').then(m => ({ default: m.ReportsPage })))
+const WeakScanFindingsPage = lazy(() => import('@/pages/findings/WeakScanFindingsPage').then(m => ({ default: m.WeakScanFindingsPage })))
 
 /**
  * 局部骨架屏占位
@@ -198,18 +197,10 @@ export const router = createBrowserRouter(
               ),
             },
             {
-              path: 'findings/evidences',
+              path: 'findings/weak-scan',
               element: (
                 <Suspense fallback={renderPageLoader()}>
-                  <EvidencesPage />
-                </Suspense>
-              ),
-            },
-            {
-              path: 'findings/reports',
-              element: (
-                <Suspense fallback={renderPageLoader()}>
-                  <ReportsPage />
+                  <WeakScanFindingsPage />
                 </Suspense>
               ),
             },

@@ -62,8 +62,7 @@ const MENU_CONFIG: MainMenu[] = [
      key: 'findings', label: '漏洞管理', icon: <ShieldExclamationIcon className="w-[18px] h-[18px]" />,
      children: [
        { key: 'findings-list', path: '/findings', label: '漏洞结果', kicker: 'THREAT INTELLIGENCE' },
-       { key: 'findings-evidences', path: '/findings/evidences', label: '证据管理', kicker: 'EVIDENCES' },
-       { key: 'findings-reports', path: '/findings/reports', label: '报告中心', kicker: 'REPORTS' }
+       { key: 'findings-weak-scan', path: '/findings/weak-scan', label: '弱点结果', kicker: 'WEAK SCAN' }
      ]
   },
   {

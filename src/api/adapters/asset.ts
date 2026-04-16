@@ -227,8 +227,11 @@ export interface FindingSummaryView {
   title: string
   severity: string
   status: string
+  asset_pool_id: string
+  asset_pool_name: string
   asset_ref: string
   task_id: string
+  task_name: string
   snapshot_id: string
   asset_id: string
   rule_id: string
@@ -252,6 +255,9 @@ export interface AssetPoolWeakScanFindingVM {
   id: string
   task_unit_id: string
   task_id: string
+  task_name: string
+  asset_pool_id: string
+  asset_pool_name: string
   target_url: string
   site_asset_id: string
   finding_key: string

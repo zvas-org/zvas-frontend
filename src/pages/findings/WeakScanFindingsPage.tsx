@@ -18,7 +18,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAssetPools } from '@/api/adapters/asset'
-import { useFindings } from '@/api/adapters/finding'
+import { useWeakScanFindings } from '@/api/adapters/finding'
 import { APPLE_TABLE_CLASSES } from '@/utils/theme'
 
 const PAGE_SIZE = 20
@@ -28,12 +28,6 @@ function formatDateTime(value?: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`
-}
-
-function truncateText(value: string, limit = 48) {
-  const text = value.trim()
-  if (!text) return '-'
-  return text.length > limit ? `${text.slice(0, limit)}...` : text
 }
 
 function severityClass(severity: string) {
@@ -52,7 +46,13 @@ function severityClass(severity: string) {
   }
 }
 
-export function FindingsPage() {
+function truncateText(value: string, limit = 54) {
+  const text = value.trim()
+  if (!text) return '-'
+  return text.length > limit ? `${text.slice(0, limit)}...` : text
+}
+
+export function WeakScanFindingsPage() {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [url, setURL] = useState('')
@@ -67,9 +67,11 @@ export function FindingsPage() {
     url: url.trim() || undefined,
     asset_pool_id: assetPoolID === 'all' ? undefined : assetPoolID,
     task_name: taskName.trim() || undefined,
+    sort: 'matched_at',
+    order: 'desc',
   }), [assetPoolID, page, taskName, url])
 
-  const findingsQuery = useFindings(queryParams)
+  const findingsQuery = useWeakScanFindings(queryParams)
   const items = findingsQuery.data?.data || []
   const total = findingsQuery.data?.pagination?.total || 0
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -78,16 +80,16 @@ export function FindingsPage() {
     <div className="flex flex-col gap-8 w-full text-apple-text-primary animate-in fade-in duration-700 max-w-[1600px] mx-auto pb-20 p-4">
       <section className="flex flex-col gap-4 mt-4">
         <div>
-          <h1 className="text-[24px] font-semibold tracking-tight text-white">全局漏洞结果</h1>
+          <h1 className="text-[24px] font-semibold tracking-tight text-white">全局弱点结果</h1>
           <p className="mt-2 text-[13px] text-apple-text-tertiary">
-            汇总展示所有资产池与任务中由漏洞扫描产生的漏洞命中结果，便于运维人员跨任务查看当前风险面。
+            汇总展示所有弱点扫描任务产生的结果，适合从全局视角查看站点弱点、规则命中和来源任务。
           </p>
         </div>
         <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_240px_260px_auto]">
           <Input
             isClearable
             value={url}
-            placeholder="按 Base URL / Host 搜索"
+            placeholder="按 Base URL / 影响地址搜索"
             onValueChange={(value) => { setURL(value); setPage(1) }}
             variant="flat"
             startContent={<MagnifyingGlassIcon className="w-5 h-5 text-apple-text-tertiary" />}
@@ -135,82 +137,85 @@ export function FindingsPage() {
 
       <div className="rounded-[32px] border border-white/10 bg-white/[0.02] backdrop-blur-3xl overflow-x-auto">
         <Table
-          aria-label="Global findings table"
+          aria-label="Global weak scan findings table"
           layout="fixed"
           removeWrapper
           classNames={{
             ...APPLE_TABLE_CLASSES,
-            base: 'p-4 min-w-[1100px]',
+            base: 'p-4 min-w-[1200px]',
             tr: `${APPLE_TABLE_CLASSES.tr} cursor-default`,
           }}
         >
           <TableHeader>
-            <TableColumn width={240}>漏洞名称</TableColumn>
+            <TableColumn width={240}>规则名称</TableColumn>
             <TableColumn width={120}>等级</TableColumn>
-            <TableColumn width={220}>目标</TableColumn>
-            <TableColumn width={180}>POC / 模板</TableColumn>
-            <TableColumn width={200}>来源任务</TableColumn>
-            <TableColumn width={180}>最近发现时间</TableColumn>
+            <TableColumn width={130}>状态</TableColumn>
+            <TableColumn width={240}>目标</TableColumn>
+            <TableColumn width={220}>影响地址</TableColumn>
+            <TableColumn width={180}>来源任务</TableColumn>
+            <TableColumn width={180}>最近命中时间</TableColumn>
             <TableColumn width={120} align="end">操作</TableColumn>
           </TableHeader>
           <TableBody
-            emptyContent={<div className="h-40 flex items-center justify-center text-apple-text-tertiary font-bold">当前暂无漏洞结果。</div>}
+            emptyContent={<div className="h-40 flex items-center justify-center text-apple-text-tertiary font-bold">当前暂无弱点扫描结果。</div>}
             isLoading={findingsQuery.isPending}
             loadingContent={<Skeleton className="rounded-xl w-full h-40 bg-white/5" />}
           >
-            {items.map((item) => {
-              const target = item.base_url || item.target_url || item.link || item.asset_ref || '-'
-              return (
-                <TableRow key={item.finding_id}>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-semibold text-white">{item.title || '-'}</span>
-                      <span className="text-[11px] font-mono text-apple-text-tertiary">{truncateText(item.finding_id, 32)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.18em] uppercase border ${severityClass(item.severity)}`}>
-                      {item.severity || 'unknown'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip content={<div className="max-w-[420px] break-all text-xs">{target}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
-                      <span className="block truncate font-mono text-[12px] text-white">{target}</span>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    <span className="block truncate font-mono text-[12px] text-apple-text-secondary">{item.rule_id || '-'}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="block truncate text-[12px] font-semibold text-white">{item.task_name || item.task_id || '-'}</span>
-                      <span className="block truncate text-[11px] text-apple-text-tertiary">{item.asset_pool_name || '-'}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-[12px] font-mono text-apple-text-secondary">{formatDateTime(item.updated_at || item.created_at)}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end">
-                      <Button
-                        size="sm"
-                        variant="bordered"
-                        className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold"
-                        onPress={() => navigate(`/tasks/${item.task_id}?tab=findings`)}
-                      >
-                        查看任务
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-semibold text-white">{item.rule_name || item.rule_id || '-'}</span>
+                    <span className="text-[11px] font-mono text-apple-text-tertiary">{truncateText(item.rule_id || item.remote_vulnerability_id || item.finding_key, 32)}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.18em] uppercase border ${severityClass(item.severity)}`}>
+                    {item.severity || 'unknown'}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-[12px] font-mono text-apple-text-secondary">{item.status || '-'}</span>
+                </TableCell>
+                <TableCell>
+                  <Tooltip content={<div className="max-w-[420px] break-all text-xs">{item.target_url || '-'}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
+                    <span className="block truncate font-mono text-[12px] text-white">{item.target_url || '-'}</span>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Tooltip content={<div className="max-w-[420px] break-all text-xs">{item.affects_url || '-'}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
+                    <span className="block truncate font-mono text-[12px] text-apple-text-secondary">{item.affects_url || '-'}</span>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <span className="block truncate text-[12px] font-semibold text-white">{item.task_name || item.task_id || '-'}</span>
+                    <span className="block truncate text-[11px] text-apple-text-tertiary">{item.asset_pool_name || '-'}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-[12px] font-mono text-apple-text-secondary">{formatDateTime(item.matched_at || item.updated_at)}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="bordered"
+                      className="rounded-full border-white/10 text-apple-text-secondary hover:text-white hover:border-white/30 font-bold"
+                      onPress={() => navigate(`/tasks/${item.task_id}?tab=weak_scan`)}
+                    >
+                      查看任务
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
         {total > 0 && (
           <div className="px-6 py-4 flex flex-col md:flex-row gap-4 justify-between items-center border-t border-white/5 bg-white/[0.01]">
             <p className="text-[11px] text-apple-text-tertiary font-bold uppercase tracking-[0.2em]">
-              全局漏洞结果 <span className="text-white">{total}</span>
+              全局弱点结果 <span className="text-white">{total}</span>
             </p>
             {totalPages > 1 && (
               <Pagination
