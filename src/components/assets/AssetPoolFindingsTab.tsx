@@ -378,7 +378,7 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
         <div className="flex flex-col">
           <h3 className="mb-1 flex items-center gap-2 text-xl font-black tracking-tight text-white">
             <BugAntIcon className="h-6 w-6 text-apple-red-light drop-shadow-[0_0_8px_rgba(255,59,48,0.5)]" />
-            <span>资产池累计漏洞清单</span>
+            <span>资产池累计漏洞扫描结果</span>
           </h3>
           <p className="text-[13px] font-medium text-apple-text-tertiary">累计展示该资产池在所有任务快照中实际发现过的漏洞记录，可按 URL、POC ID、级别筛选并查看请求与响应报文。</p>
         </div>
@@ -458,7 +458,7 @@ function AssetPoolFindingsTabContent({ poolId, searchParams, setSearchParams, ur
 
       {isError && (
         <div className="rounded-[24px] border border-red-500/20 bg-red-500/5 p-6 text-sm text-red-200">
-          资产池漏洞清单加载失败，请稍后重试。
+          资产池漏洞扫描结果加载失败，请稍后重试。
         </div>
       )}
 

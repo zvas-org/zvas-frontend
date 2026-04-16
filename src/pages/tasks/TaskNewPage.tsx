@@ -257,13 +257,13 @@ export function TaskNewPage() {
              {allowAttackSurfaceOverrides && (
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="flex flex-col gap-1.5 rounded-[16px] border border-white/5 bg-white/[0.03] p-4">
-                   <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">漏洞扫描引擎</label>
+                   <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">漏洞扫描项</label>
                    <Switch size="sm" isSelected={enableVulScan} onValueChange={setEnableVulScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue' }}>
                      <span className="text-[13px] text-white">启用漏洞扫描</span>
                    </Switch>
                  </div>
                  <div className="flex flex-col gap-1.5 rounded-[16px] border border-white/5 bg-white/[0.03] p-4">
-                   <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">弱点扫描引擎</label>
+                   <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">弱点扫描项</label>
                    <Switch size="sm" isSelected={enableWeakScan} onValueChange={setEnableWeakScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue' }}>
                      <span className="text-[13px] text-white">启用弱点扫描</span>
                    </Switch>

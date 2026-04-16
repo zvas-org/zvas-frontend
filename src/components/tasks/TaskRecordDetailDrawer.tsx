@@ -415,7 +415,7 @@ function renderHTTPResult(detail: TaskRecordDetailVM) {
       <MessageBlock
         title="请求报文"
         content={requestMessage}
-        hint="请求报文按 gomap 实际请求模板持久化；其中 User-Agent 由引擎随机生成，这里以占位值记录。"
+        hint="请求报文按 gomap 实际请求模板持久化；其中 User-Agent 由执行端随机生成，这里以占位值记录。"
         copyable
       />
       <MessageBlock
@@ -512,12 +512,13 @@ function renderWeakScan(detail: TaskRecordDetailVM) {
 
   const summary = detail.weak_scan_summary
   const inProgress = isInProgressStatus(detail.status)
+  const weakScanTypeLabel = summary.engine ? '弱点扫描' : '-'
 
   return (
     <section className="space-y-4">
       <div className="space-y-1">
         <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-apple-text-tertiary">弱点扫描执行摘要</h3>
-        <p className="text-xs text-apple-text-tertiary">这里只展示弱点扫描单元的执行状态、时间和数量级摘要，具体弱点请前往“弱点结果”页查看。</p>
+        <p className="text-xs text-apple-text-tertiary">这里只展示弱点扫描单元的执行状态、时间和数量级摘要，具体弱点请前往“弱点扫描结果”页查看。</p>
       </div>
       <div className="space-y-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -531,7 +532,7 @@ function renderWeakScan(detail: TaskRecordDetailVM) {
           <DetailPair label="扫描结果" value={inProgress ? getInProgressDetailLabel(detail.status) : detail.result_summary || '-'} />
           <DetailPair label="弱点数量" value={inProgress ? getInProgressDetailLabel(detail.status) : summary.vulnerability_count} />
           <DetailPair label="扫描策略" value={summary.scan_profile || '-'} />
-          <DetailPair label="引擎标识" value={<TruncatedText value={summary.engine} limit={24} mono />} />
+          <DetailPair label="扫描类型" value={weakScanTypeLabel} />
           <DetailPair label="报告引用" value={<TruncatedText value={summary.report_ref} limit={48} mono />} />
           <DetailPair label="远端扫描 ID" value={<TruncatedText value={summary.remote_scan_id} limit={24} mono />} />
           <DetailPair label="远端目标 ID" value={<TruncatedText value={summary.remote_target_id} limit={24} mono />} />

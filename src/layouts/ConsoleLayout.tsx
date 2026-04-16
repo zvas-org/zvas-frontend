@@ -55,14 +55,14 @@ const MENU_CONFIG: MainMenu[] = [
        { key: 'tasks-list', path: '/tasks', label: '任务管理', kicker: 'TASKS & OPS' },
        { key: 'tasks-new', path: '/tasks/new', label: '新建任务', kicker: 'NEW TASK' },
        { key: 'tasks-templates', path: '/tasks/templates', label: '任务模板', kicker: 'TEMPLATES' },
-       { key: 'tasks-workers', path: '/tasks/workers', label: 'Worker / 引擎', kicker: 'WORKERS' }
+       { key: 'tasks-workers', path: '/tasks/workers', label: 'Worker 节点', kicker: 'WORKERS' }
      ]
   },
   {
      key: 'findings', label: '漏洞管理', icon: <ShieldExclamationIcon className="w-[18px] h-[18px]" />,
      children: [
        { key: 'findings-list', path: '/findings', label: '漏洞结果', kicker: 'THREAT INTELLIGENCE' },
-       { key: 'findings-weak-scan', path: '/findings/weak-scan', label: '弱点结果', kicker: 'WEAK SCAN' }
+       { key: 'findings-weak-scan', path: '/findings/weak-scan', label: '弱点扫描结果', kicker: 'WEAK SCAN' }
      ]
   },
   {

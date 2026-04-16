@@ -75,11 +75,11 @@ function ExpandedDomainRow({ poolId, item }: { poolId: string; item: PoolAssetVM
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1">
           <span className="text-[9px] uppercase font-black tracking-widest text-apple-text-tertiary">DNS 记录</span>
-          <span className="text-[12px] text-apple-text-secondary italic">待引擎结果补齐</span>
+          <span className="text-[12px] text-apple-text-secondary italic">待结果补齐</span>
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-[9px] uppercase font-black tracking-widest text-apple-text-tertiary">证书发现</span>
-          <span className="text-[12px] text-apple-text-secondary italic">待引擎结果补齐</span>
+          <span className="text-[12px] text-apple-text-secondary italic">待结果补齐</span>
         </div>
       </div>
     </div>

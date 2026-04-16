@@ -322,7 +322,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
         <div className="flex flex-col">
           <h3 className="mb-1 flex items-center gap-2 text-xl font-black tracking-tight text-white">
             <BugAntIcon className="h-6 w-6 text-apple-red-light drop-shadow-[0_0_8px_rgba(255,59,48,0.5)]" />
-            <span>当前任务漏洞清单</span>
+            <span>当前任务漏洞扫描结果</span>
           </h3>
           <p className="text-[13px] font-medium text-apple-text-tertiary">展示当前任务工作流中实际命中的漏洞记录，可按 URL、POC ID、级别筛选并查看请求与响应报文。</p>
         </div>
@@ -402,7 +402,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
 
       {isError && (
         <div className="rounded-[24px] border border-red-500/20 bg-red-500/5 p-6 text-sm text-red-200">
-          漏洞清单加载失败，请稍后重试。
+          漏洞扫描结果加载失败，请稍后重试。
         </div>
       )}
 

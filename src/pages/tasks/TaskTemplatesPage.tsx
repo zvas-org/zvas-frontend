@@ -37,9 +37,9 @@ export function TaskTemplatesPage() {
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-black tracking-tight flex items-center gap-3">
           <DocumentDuplicateIcon className="w-8 h-8 text-apple-text-secondary" />
-          任务引擎驱动模版
+          任务执行模板
         </h1>
-        <p className="text-[14px] text-apple-text-secondary">系统提供了预置扫描模版，用以固化检测场景的最佳实践与默认参数体系。</p>
+        <p className="text-[14px] text-apple-text-secondary">系统提供了预置扫描模板，用于固化检测场景的最佳实践与默认参数体系。</p>
         <div className="flex items-center gap-4 mt-2">
           <Input
             classNames={{

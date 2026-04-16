@@ -330,7 +330,7 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
       {/* <div className='bg-white/[0.02] border border-white/5 p-6 rounded-2xl backdrop-blur-3xl'>
         <h3 className='text-xl font-black text-white tracking-tight mb-1'>扫描记录</h3>
         <p className='text-[13px] text-apple-text-tertiary font-medium'>
-          按扫描类型拆分查看记录和详情，避免不同引擎结果结构混在同一视图里。
+          按扫描类型拆分查看记录和详情，避免不同结果结构混在同一视图里。
         </p>
       </div> */}
 

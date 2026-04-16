@@ -452,9 +452,9 @@ export function TaskWeakScanResultsTab({ taskId }: { taskId: string }) {
             emptyContent={(
               <div className="flex flex-col items-center gap-3 py-20 text-sm font-bold text-apple-text-tertiary">
                 <ShieldExclamationIcon className="h-12 w-12 text-apple-blue-light opacity-60 drop-shadow-[0_0_12px_rgba(10,132,255,0.35)]" />
-                <span className="text-[13px] font-black tracking-[0.08em] text-white">暂无弱点结果</span>
+                <span className="text-[13px] font-black tracking-[0.08em] text-white">暂无弱点扫描结果</span>
                 <span className="text-[12px] font-medium text-apple-text-tertiary">
-                  {hasActiveFilters ? '当前筛选条件下没有匹配的弱点结果。' : '当前任务还没有产出弱点结果。'}
+                  {hasActiveFilters ? '当前筛选条件下没有匹配的弱点扫描结果。' : '当前任务还没有产出弱点扫描结果。'}
                 </span>
               </div>
             )}

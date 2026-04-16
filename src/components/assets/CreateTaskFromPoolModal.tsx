@@ -213,7 +213,7 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    {allowAttackSurfaceOverrides && (
                      <div className="flex flex-col gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl md:col-span-2">
-                       <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">攻击面扫描开关</label>
+                       <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">扫描项选择</label>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                          <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3">
                            <span className="text-[12px] text-white font-bold">漏洞扫描</span>

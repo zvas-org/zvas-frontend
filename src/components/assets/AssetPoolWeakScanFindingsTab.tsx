@@ -172,6 +172,10 @@ function firstNonEmptyText(...values: unknown[]): string {
   return ''
 }
 
+function formatWeakScanSourceLabel(source?: string): string {
+  return (source || '').trim() ? '弱点扫描' : '-'
+}
+
 function truncateText(value: string, limit = 56): string {
   const text = value.trim()
   if (!text) return '-'
@@ -285,7 +289,7 @@ function WeakScanDrawer({ item, onClose }: { item: AssetPoolWeakScanFindingVM | 
                   <InfoCard label="远端结果 ID" value={item.remote_result_id || '-'} />
                   <InfoCard label="远端漏洞 ID" value={item.remote_vulnerability_id || '-'} />
                   <InfoCard label="CVSS 评分" value={firstNonEmptyText(item.cvss_score, item.cvss3, item.cvss2)} />
-                  <InfoCard label="来源引擎" value={item.source || '-'} />
+                  <InfoCard label="扫描类型" value={formatWeakScanSourceLabel(item.source)} />
                   <InfoCard label="标签" value={item.tags.length ? item.tags.join(', ') : '-'} />
                 </div>
 

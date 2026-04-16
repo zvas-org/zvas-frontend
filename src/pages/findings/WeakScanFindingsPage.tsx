@@ -80,7 +80,7 @@ export function WeakScanFindingsPage() {
     <div className="flex flex-col gap-8 w-full text-apple-text-primary animate-in fade-in duration-700 max-w-[1600px] mx-auto pb-20 p-4">
       <section className="flex flex-col gap-4 mt-4">
         <div>
-          <h1 className="text-[24px] font-semibold tracking-tight text-white">全局弱点结果</h1>
+          <h1 className="text-[24px] font-semibold tracking-tight text-white">全局弱点扫描结果</h1>
           <p className="mt-2 text-[13px] text-apple-text-tertiary">
             汇总展示所有弱点扫描任务产生的结果，适合从全局视角查看站点弱点、规则命中和来源任务。
           </p>
@@ -215,7 +215,7 @@ export function WeakScanFindingsPage() {
         {total > 0 && (
           <div className="px-6 py-4 flex flex-col md:flex-row gap-4 justify-between items-center border-t border-white/5 bg-white/[0.01]">
             <p className="text-[11px] text-apple-text-tertiary font-bold uppercase tracking-[0.2em]">
-              全局弱点结果 <span className="text-white">{total}</span>
+              全局弱点扫描结果 <span className="text-white">{total}</span>
             </p>
             {totalPages > 1 && (
               <Pagination
