@@ -48,7 +48,7 @@ const RECORD_TABS: Array<{
   {
     key: "weak_scan",
     label: "弱点扫描",
-    description: "查看 weakScan 执行摘要与明细入口",
+    description: "查看弱点扫描执行摘要与明细入口",
   },
 ];
 

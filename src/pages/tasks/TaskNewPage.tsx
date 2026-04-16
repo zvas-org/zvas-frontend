@@ -259,13 +259,13 @@ export function TaskNewPage() {
                  <div className="flex flex-col gap-1.5 rounded-[16px] border border-white/5 bg-white/[0.03] p-4">
                    <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">漏洞扫描引擎</label>
                    <Switch size="sm" isSelected={enableVulScan} onValueChange={setEnableVulScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue' }}>
-                     <span className="text-[13px] text-white">启用 nuclei 漏洞扫描</span>
+                     <span className="text-[13px] text-white">启用漏洞扫描</span>
                    </Switch>
                  </div>
                  <div className="flex flex-col gap-1.5 rounded-[16px] border border-white/5 bg-white/[0.03] p-4">
                    <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">弱点扫描引擎</label>
                    <Switch size="sm" isSelected={enableWeakScan} onValueChange={setEnableWeakScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue' }}>
-                     <span className="text-[13px] text-white">启用 weakScan 弱点扫描</span>
+                     <span className="text-[13px] text-white">启用弱点扫描</span>
                    </Switch>
                  </div>
                </div>
@@ -430,8 +430,8 @@ export function TaskNewPage() {
                 {!!tplDetail.default_port_scan_mode && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white font-mono h-6">{getPortModeLabel(portMode)}</Chip>}
                 {isSiteBasedSelectedTemplate && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">站点直扫</Chip>}
                 {httpProbe && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white font-mono h-6">http probe enabled</Chip>}
-                {allowAttackSurfaceOverrides && enableVulScan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">nuclei</Chip>}
-                {allowAttackSurfaceOverrides && enableWeakScan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">weakScan</Chip>}
+                {allowAttackSurfaceOverrides && enableVulScan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">漏洞扫描</Chip>}
+                {allowAttackSurfaceOverrides && enableWeakScan && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">弱点扫描</Chip>}
                 {tplDetail.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan) && <Chip size="sm" variant="flat" className="bg-white/5 border-white/10 text-white h-6">漏洞等级: {vulScanSeveritySummary}</Chip>}
              </div>
            </div>

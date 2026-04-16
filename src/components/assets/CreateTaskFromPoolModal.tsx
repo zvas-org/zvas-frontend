@@ -216,11 +216,11 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                        <label className="text-apple-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">攻击面扫描开关</label>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                          <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3">
-                           <span className="text-[12px] text-white font-bold">nuclei 漏洞扫描</span>
+                           <span className="text-[12px] text-white font-bold">漏洞扫描</span>
                            <Switch size="sm" isSelected={enableVulScan} onValueChange={setEnableVulScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue h-5 w-9', thumb: 'w-3 h-3 group-data-[selected=true]:ml-4' }} />
                          </div>
                          <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3">
-                           <span className="text-[12px] text-white font-bold">weakScan 弱点扫描</span>
+                           <span className="text-[12px] text-white font-bold">弱点扫描</span>
                            <Switch size="sm" isSelected={enableWeakScan} onValueChange={setEnableWeakScan} classNames={{ wrapper: 'group-data-[selected=true]:bg-apple-blue h-5 w-9', thumb: 'w-3 h-3 group-data-[selected=true]:ml-4' }} />
                          </div>
                        </div>
@@ -361,8 +361,8 @@ export function CreateTaskFromPoolModal({ poolId, poolName, isOpen, onClose }: P
                         {!!tplDetail.default_port_scan_mode && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-mono font-black border-r border-white/10 pr-2 mr-0.5" }}>{getPortModeLabel(portMode)}</Chip>}
                         {isSiteBasedSelectedTemplate && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black" }}>站点直扫</Chip>}
                         {httpProbe && <div className="w-1.5 h-1.5 rounded-full bg-apple-green animate-pulse" title="HomePage Probe Mode On" />}
-                        {allowAttackSurfaceOverrides && enableVulScan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>nuclei</Chip>}
-                        {allowAttackSurfaceOverrides && enableWeakScan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>weakScan</Chip>}
+                        {allowAttackSurfaceOverrides && enableVulScan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>漏洞扫描</Chip>}
+                        {allowAttackSurfaceOverrides && enableWeakScan && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>弱点扫描</Chip>}
                         {tplDetail.supports_vul_scan && (!allowAttackSurfaceOverrides || enableVulScan) && <Chip size="sm" variant="flat" classNames={{ base: "bg-transparent border-0 h-4", content: "text-[10px] font-black pl-1" }}>等级: {vulScanSeveritySummary}</Chip>}
                      </div>
                    </div>
