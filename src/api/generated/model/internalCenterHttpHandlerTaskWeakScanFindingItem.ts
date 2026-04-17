@@ -12,6 +12,8 @@ import type { InternalCenterHttpHandlerTaskWeakScanFindingItemRaw } from './inte
 export interface InternalCenterHttpHandlerTaskWeakScanFindingItem {
   affects_detail?: string;
   affects_url?: string;
+  asset_pool_id?: string;
+  asset_pool_name?: string;
   classification?: InternalCenterHttpHandlerTaskWeakScanFindingItemClassification;
   cvss2?: string;
   cvss3?: string;
@@ -39,6 +41,7 @@ export interface InternalCenterHttpHandlerTaskWeakScanFindingItem {
   tags?: string[];
   target_url?: string;
   task_id?: string;
+  task_name?: string;
   task_unit_id?: string;
   updated_at?: string;
 }

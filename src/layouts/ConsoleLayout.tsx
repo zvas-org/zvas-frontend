@@ -77,6 +77,7 @@ const MENU_CONFIG: MainMenu[] = [
      key: 'system', label: '系统管理', icon: <WrenchScrewdriverIcon className="w-[18px] h-[18px]" />,
      children: [
        { key: 'system-health', path: '/system/health', label: '系统健康', kicker: 'HEALTH' },
+       { key: 'system-network', path: '/system/network', label: '网络管理', kicker: 'NETWORK', permission: 'settings:manage' },
        { key: 'system-version', path: '/system/version', label: '系统版本', kicker: 'VERSION' },
        { key: 'system-settings', path: '/system/settings', label: '系统设置', kicker: 'SETTINGS', permission: 'settings:manage' }
      ]

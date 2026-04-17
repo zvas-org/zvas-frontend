@@ -12,6 +12,7 @@ import { RequireAuth, RouterErrorFallback } from '@/router/guards'
 // 路由懒加载，优化打包体积
 const OverviewPage = lazy(() => import('@/pages/OverviewPage').then(m => ({ default: m.OverviewPage })))
 const SystemHealthPage = lazy(() => import('@/pages/SystemHealthPage').then(m => ({ default: m.SystemHealthPage })))
+const SystemNetworkPage = lazy(() => import('@/pages/SystemNetworkPage').then(m => ({ default: m.SystemNetworkPage })))
 const SystemVersionPage = lazy(() => import('@/pages/SystemVersionPage').then(m => ({ default: m.SystemVersionPage })))
 const SystemSettingsPage = lazy(() => import('@/pages/SystemSettingsPage').then(m => ({ default: m.SystemSettingsPage })))
 const UserManagementPage = lazy(() => import('@/pages/UserManagementPage').then(m => ({ default: m.UserManagementPage })))
@@ -80,6 +81,14 @@ export const router = createBrowserRouter(
               element: (
                 <Suspense fallback={renderPageLoader()}>
                   <SystemHealthPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: 'system/network',
+              element: (
+                <Suspense fallback={renderPageLoader()}>
+                  <SystemNetworkPage />
                 </Suspense>
               ),
             },

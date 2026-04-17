@@ -10,6 +10,7 @@ import type { InternalCenterHttpHandlerAssetPoolFindingItemDetail } from './inte
 export interface InternalCenterHttpHandlerAssetPoolFindingItem {
   asset_id?: string;
   asset_pool_id?: string;
+  asset_pool_name?: string;
   created_at?: string;
   detail?: InternalCenterHttpHandlerAssetPoolFindingItemDetail;
   evidence_count?: number;
@@ -19,6 +20,7 @@ export interface InternalCenterHttpHandlerAssetPoolFindingItem {
   snapshot_id?: string;
   status?: string;
   task_id?: string;
+  task_name?: string;
   title?: string;
   updated_at?: string;
 }

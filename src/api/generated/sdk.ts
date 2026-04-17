@@ -29,10 +29,14 @@ import type {
   GetAssetPoolsIdFindingsParams,
   GetAssetPoolsIdInputsParams,
   GetAssetPoolsIdReportsParams,
+  GetAssetPoolsIdReportsVulnerabilityExcelParams,
+  GetAssetPoolsIdReportsVulnerabilityWordParams,
   GetAssetPoolsIdTasksParams,
   GetAssetPoolsIdWeakScanFindingsParams,
   GetAssetPoolsParams,
   GetAuditsParams,
+  GetFindingsParams,
+  GetFindingsWeakScanParams,
   GetTasksIdFindingsParams,
   GetTasksIdRecordsParams,
   GetTasksIdSnapshotAssetsParams,
@@ -64,6 +68,9 @@ import type {
   InternalCenterHttpHandlerLoginRequest,
   InternalCenterHttpHandlerLoginResponse,
   InternalCenterHttpHandlerLogoutResponse,
+  InternalCenterHttpHandlerNetworkConnectivityTestResponse,
+  InternalCenterHttpHandlerNetworkInterfaceListResponse,
+  InternalCenterHttpHandlerNetworkInterfaceResponse,
   InternalCenterHttpHandlerPoolInputRecordListResponse,
   InternalCenterHttpHandlerResetUserPasswordRequest,
   InternalCenterHttpHandlerRoleListResponse,
@@ -89,7 +96,10 @@ import type {
   InternalCenterHttpHandlerTaskTemplateListResponse,
   InternalCenterHttpHandlerTaskWeakScanFindingDetailResponse,
   InternalCenterHttpHandlerTaskWeakScanFindingListResponse,
+  InternalCenterHttpHandlerTestNetworkInterfaceRequest,
   InternalCenterHttpHandlerUpdateAssetPoolRequest,
+  InternalCenterHttpHandlerUpdateNetworkInterfaceRequest,
+  InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest,
   InternalCenterHttpHandlerUpdateUserRolesRequest,
   InternalCenterHttpHandlerUpdateUserStatusRequest,
   InternalCenterHttpHandlerUserCreateResponse,
@@ -1317,6 +1327,102 @@ export function useGetAssetPoolsIdFindings<TData = Awaited<ReturnType<typeof get
 
 
 /**
+ * @summary 删除资产池漏洞记录
+ */
+export type deleteAssetPoolsIdFindingsFindingIdResponse200 = {
+  data: ZvasPkgHttpxResponse
+  status: 200
+}
+
+export type deleteAssetPoolsIdFindingsFindingIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type deleteAssetPoolsIdFindingsFindingIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type deleteAssetPoolsIdFindingsFindingIdResponseSuccess = (deleteAssetPoolsIdFindingsFindingIdResponse200) & {
+  headers: Headers;
+};
+export type deleteAssetPoolsIdFindingsFindingIdResponseError = (deleteAssetPoolsIdFindingsFindingIdResponse401 | deleteAssetPoolsIdFindingsFindingIdResponse403) & {
+  headers: Headers;
+};
+
+export type deleteAssetPoolsIdFindingsFindingIdResponse = (deleteAssetPoolsIdFindingsFindingIdResponseSuccess | deleteAssetPoolsIdFindingsFindingIdResponseError)
+
+export const getDeleteAssetPoolsIdFindingsFindingIdUrl = (id: string,
+    findingId: string,) => {
+
+
+  
+
+  return `/asset-pools/${id}/findings/${findingId}`
+}
+
+export const deleteAssetPoolsIdFindingsFindingId = async (id: string,
+    findingId: string, options?: RequestInit): Promise<deleteAssetPoolsIdFindingsFindingIdResponse> => {
+  
+  return apiClient<deleteAssetPoolsIdFindingsFindingIdResponse>(getDeleteAssetPoolsIdFindingsFindingIdUrl(id,findingId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteAssetPoolsIdFindingsFindingIdMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAssetPoolsIdFindingsFindingId>>, TError,{id: string;findingId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAssetPoolsIdFindingsFindingId>>, TError,{id: string;findingId: string}, TContext> => {
+
+const mutationKey = ['deleteAssetPoolsIdFindingsFindingId'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAssetPoolsIdFindingsFindingId>>, {id: string;findingId: string}> = (props) => {
+          const {id,findingId} = props ?? {};
+
+          return  deleteAssetPoolsIdFindingsFindingId(id,findingId,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAssetPoolsIdFindingsFindingIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAssetPoolsIdFindingsFindingId>>>
+    
+    export type DeleteAssetPoolsIdFindingsFindingIdMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 删除资产池漏洞记录
+ */
+export const useDeleteAssetPoolsIdFindingsFindingId = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAssetPoolsIdFindingsFindingId>>, TError,{id: string;findingId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAssetPoolsIdFindingsFindingId>>,
+        TError,
+        {id: string;findingId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteAssetPoolsIdFindingsFindingIdMutationOptions(options), queryClient);
+    }
+    
+/**
  * @summary 查询资产池输入记录
  */
 export type getAssetPoolsIdInputsResponse200 = {
@@ -1683,6 +1789,282 @@ export function useGetAssetPoolsIdReports<TData = Awaited<ReturnType<typeof getA
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdReportsQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 导出资产池漏洞 Excel 清单
+ */
+export type getAssetPoolsIdReportsVulnerabilityExcelResponse200 = {
+  data: Blob
+  status: 200
+}
+
+export type getAssetPoolsIdReportsVulnerabilityExcelResponse401 = {
+  data: Blob
+  status: 401
+}
+
+export type getAssetPoolsIdReportsVulnerabilityExcelResponse403 = {
+  data: Blob
+  status: 403
+}
+
+export type getAssetPoolsIdReportsVulnerabilityExcelResponseSuccess = (getAssetPoolsIdReportsVulnerabilityExcelResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdReportsVulnerabilityExcelResponseError = (getAssetPoolsIdReportsVulnerabilityExcelResponse401 | getAssetPoolsIdReportsVulnerabilityExcelResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdReportsVulnerabilityExcelResponse = (getAssetPoolsIdReportsVulnerabilityExcelResponseSuccess | getAssetPoolsIdReportsVulnerabilityExcelResponseError)
+
+export const getGetAssetPoolsIdReportsVulnerabilityExcelUrl = (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/asset-pools/${id}/reports/vulnerability-excel?${stringifiedParams}` : `/asset-pools/${id}/reports/vulnerability-excel`
+}
+
+export const getAssetPoolsIdReportsVulnerabilityExcel = async (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams, options?: RequestInit): Promise<getAssetPoolsIdReportsVulnerabilityExcelResponse> => {
+  
+  return apiClient<getAssetPoolsIdReportsVulnerabilityExcelResponse>(getGetAssetPoolsIdReportsVulnerabilityExcelUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdReportsVulnerabilityExcelQueryKey = (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams,) => {
+    return [
+    `/asset-pools/${id}/reports/vulnerability-excel`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdReportsVulnerabilityExcelQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError = ErrorType<Blob>>(id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdReportsVulnerabilityExcelQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>> = ({ signal }) => getAssetPoolsIdReportsVulnerabilityExcel(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdReportsVulnerabilityExcelQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>>
+export type GetAssetPoolsIdReportsVulnerabilityExcelQueryError = ErrorType<Blob>
+
+
+export function useGetAssetPoolsIdReportsVulnerabilityExcel<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError = ErrorType<Blob>>(
+ id: string,
+    params: undefined |  GetAssetPoolsIdReportsVulnerabilityExcelParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdReportsVulnerabilityExcel<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError = ErrorType<Blob>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdReportsVulnerabilityExcel<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError = ErrorType<Blob>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 导出资产池漏洞 Excel 清单
+ */
+
+export function useGetAssetPoolsIdReportsVulnerabilityExcel<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError = ErrorType<Blob>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityExcelParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityExcel>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdReportsVulnerabilityExcelQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 导出资产池漏洞 Word 报告
+ */
+export type getAssetPoolsIdReportsVulnerabilityWordResponse200 = {
+  data: Blob
+  status: 200
+}
+
+export type getAssetPoolsIdReportsVulnerabilityWordResponse401 = {
+  data: Blob
+  status: 401
+}
+
+export type getAssetPoolsIdReportsVulnerabilityWordResponse403 = {
+  data: Blob
+  status: 403
+}
+
+export type getAssetPoolsIdReportsVulnerabilityWordResponseSuccess = (getAssetPoolsIdReportsVulnerabilityWordResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdReportsVulnerabilityWordResponseError = (getAssetPoolsIdReportsVulnerabilityWordResponse401 | getAssetPoolsIdReportsVulnerabilityWordResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdReportsVulnerabilityWordResponse = (getAssetPoolsIdReportsVulnerabilityWordResponseSuccess | getAssetPoolsIdReportsVulnerabilityWordResponseError)
+
+export const getGetAssetPoolsIdReportsVulnerabilityWordUrl = (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/asset-pools/${id}/reports/vulnerability-word?${stringifiedParams}` : `/asset-pools/${id}/reports/vulnerability-word`
+}
+
+export const getAssetPoolsIdReportsVulnerabilityWord = async (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams, options?: RequestInit): Promise<getAssetPoolsIdReportsVulnerabilityWordResponse> => {
+  
+  return apiClient<getAssetPoolsIdReportsVulnerabilityWordResponse>(getGetAssetPoolsIdReportsVulnerabilityWordUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdReportsVulnerabilityWordQueryKey = (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams,) => {
+    return [
+    `/asset-pools/${id}/reports/vulnerability-word`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdReportsVulnerabilityWordQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError = ErrorType<Blob>>(id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdReportsVulnerabilityWordQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>> = ({ signal }) => getAssetPoolsIdReportsVulnerabilityWord(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdReportsVulnerabilityWordQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>>
+export type GetAssetPoolsIdReportsVulnerabilityWordQueryError = ErrorType<Blob>
+
+
+export function useGetAssetPoolsIdReportsVulnerabilityWord<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError = ErrorType<Blob>>(
+ id: string,
+    params: undefined |  GetAssetPoolsIdReportsVulnerabilityWordParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdReportsVulnerabilityWord<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError = ErrorType<Blob>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdReportsVulnerabilityWord<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError = ErrorType<Blob>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 导出资产池漏洞 Word 报告
+ */
+
+export function useGetAssetPoolsIdReportsVulnerabilityWord<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError = ErrorType<Blob>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityWordParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityWord>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdReportsVulnerabilityWordQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2800,6 +3182,266 @@ export function useGetAuthMe<TData = Awaited<ReturnType<typeof getAuthMe>>, TErr
 
 
 /**
+ * @summary 查询全局漏洞结果列表
+ */
+export type getFindingsResponse200 = {
+  data: InternalCenterHttpHandlerAssetPoolFindingListResponse
+  status: 200
+}
+
+export type getFindingsResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getFindingsResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getFindingsResponseSuccess = (getFindingsResponse200) & {
+  headers: Headers;
+};
+export type getFindingsResponseError = (getFindingsResponse401 | getFindingsResponse403) & {
+  headers: Headers;
+};
+
+export type getFindingsResponse = (getFindingsResponseSuccess | getFindingsResponseError)
+
+export const getGetFindingsUrl = (params?: GetFindingsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/findings?${stringifiedParams}` : `/findings`
+}
+
+export const getFindings = async (params?: GetFindingsParams, options?: RequestInit): Promise<getFindingsResponse> => {
+  
+  return apiClient<getFindingsResponse>(getGetFindingsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetFindingsQueryKey = (params?: GetFindingsParams,) => {
+    return [
+    `/findings`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetFindingsQueryOptions = <TData = Awaited<ReturnType<typeof getFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(params?: GetFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindings>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFindingsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFindings>>> = ({ signal }) => getFindings(params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFindings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFindingsQueryResult = NonNullable<Awaited<ReturnType<typeof getFindings>>>
+export type GetFindingsQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetFindings<TData = Awaited<ReturnType<typeof getFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params: undefined |  GetFindingsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFindings>>,
+          TError,
+          Awaited<ReturnType<typeof getFindings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFindings<TData = Awaited<ReturnType<typeof getFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params?: GetFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFindings>>,
+          TError,
+          Awaited<ReturnType<typeof getFindings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFindings<TData = Awaited<ReturnType<typeof getFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params?: GetFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询全局漏洞结果列表
+ */
+
+export function useGetFindings<TData = Awaited<ReturnType<typeof getFindings>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params?: GetFindingsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindings>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFindingsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询全局弱点扫描结果列表
+ */
+export type getFindingsWeakScanResponse200 = {
+  data: InternalCenterHttpHandlerAssetPoolWeakScanFindingListResponse
+  status: 200
+}
+
+export type getFindingsWeakScanResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getFindingsWeakScanResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getFindingsWeakScanResponseSuccess = (getFindingsWeakScanResponse200) & {
+  headers: Headers;
+};
+export type getFindingsWeakScanResponseError = (getFindingsWeakScanResponse401 | getFindingsWeakScanResponse403) & {
+  headers: Headers;
+};
+
+export type getFindingsWeakScanResponse = (getFindingsWeakScanResponseSuccess | getFindingsWeakScanResponseError)
+
+export const getGetFindingsWeakScanUrl = (params?: GetFindingsWeakScanParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/findings/weak-scan?${stringifiedParams}` : `/findings/weak-scan`
+}
+
+export const getFindingsWeakScan = async (params?: GetFindingsWeakScanParams, options?: RequestInit): Promise<getFindingsWeakScanResponse> => {
+  
+  return apiClient<getFindingsWeakScanResponse>(getGetFindingsWeakScanUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetFindingsWeakScanQueryKey = (params?: GetFindingsWeakScanParams,) => {
+    return [
+    `/findings/weak-scan`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetFindingsWeakScanQueryOptions = <TData = Awaited<ReturnType<typeof getFindingsWeakScan>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(params?: GetFindingsWeakScanParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindingsWeakScan>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFindingsWeakScanQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFindingsWeakScan>>> = ({ signal }) => getFindingsWeakScan(params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFindingsWeakScan>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFindingsWeakScanQueryResult = NonNullable<Awaited<ReturnType<typeof getFindingsWeakScan>>>
+export type GetFindingsWeakScanQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetFindingsWeakScan<TData = Awaited<ReturnType<typeof getFindingsWeakScan>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params: undefined |  GetFindingsWeakScanParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindingsWeakScan>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFindingsWeakScan>>,
+          TError,
+          Awaited<ReturnType<typeof getFindingsWeakScan>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFindingsWeakScan<TData = Awaited<ReturnType<typeof getFindingsWeakScan>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params?: GetFindingsWeakScanParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindingsWeakScan>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFindingsWeakScan>>,
+          TError,
+          Awaited<ReturnType<typeof getFindingsWeakScan>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFindingsWeakScan<TData = Awaited<ReturnType<typeof getFindingsWeakScan>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params?: GetFindingsWeakScanParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindingsWeakScan>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询全局弱点扫描结果列表
+ */
+
+export function useGetFindingsWeakScan<TData = Awaited<ReturnType<typeof getFindingsWeakScan>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ params?: GetFindingsWeakScanParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFindingsWeakScan>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFindingsWeakScanQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
  * @summary 查询角色列表
  */
 export type getRolesResponse200 = {
@@ -3033,6 +3675,474 @@ export function useGetSystemHealth<TData = Awaited<ReturnType<typeof getSystemHe
 
 
 
+/**
+ * @summary 查询全部网口
+ */
+export type getSystemNetworkInterfacesResponse200 = {
+  data: InternalCenterHttpHandlerNetworkInterfaceListResponse
+  status: 200
+}
+
+export type getSystemNetworkInterfacesResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getSystemNetworkInterfacesResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getSystemNetworkInterfacesResponse503 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 503
+}
+
+export type getSystemNetworkInterfacesResponseSuccess = (getSystemNetworkInterfacesResponse200) & {
+  headers: Headers;
+};
+export type getSystemNetworkInterfacesResponseError = (getSystemNetworkInterfacesResponse401 | getSystemNetworkInterfacesResponse403 | getSystemNetworkInterfacesResponse503) & {
+  headers: Headers;
+};
+
+export type getSystemNetworkInterfacesResponse = (getSystemNetworkInterfacesResponseSuccess | getSystemNetworkInterfacesResponseError)
+
+export const getGetSystemNetworkInterfacesUrl = () => {
+
+
+  
+
+  return `/system/network/interfaces`
+}
+
+export const getSystemNetworkInterfaces = async ( options?: RequestInit): Promise<getSystemNetworkInterfacesResponse> => {
+  
+  return apiClient<getSystemNetworkInterfacesResponse>(getGetSystemNetworkInterfacesUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetSystemNetworkInterfacesQueryKey = () => {
+    return [
+    `/system/network/interfaces`
+    ] as const;
+    }
+
+    
+export const getGetSystemNetworkInterfacesQueryOptions = <TData = Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSystemNetworkInterfacesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>> = ({ signal }) => getSystemNetworkInterfaces({ signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSystemNetworkInterfacesQueryResult = NonNullable<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>>
+export type GetSystemNetworkInterfacesQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetSystemNetworkInterfaces<TData = Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemNetworkInterfaces>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemNetworkInterfaces>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemNetworkInterfaces<TData = Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemNetworkInterfaces>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemNetworkInterfaces>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemNetworkInterfaces<TData = Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询全部网口
+ */
+
+export function useGetSystemNetworkInterfaces<TData = Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfaces>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSystemNetworkInterfacesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 查询单个网口详情
+ */
+export type getSystemNetworkInterfacesNameResponse200 = {
+  data: InternalCenterHttpHandlerNetworkInterfaceResponse
+  status: 200
+}
+
+export type getSystemNetworkInterfacesNameResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getSystemNetworkInterfacesNameResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getSystemNetworkInterfacesNameResponse503 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 503
+}
+
+export type getSystemNetworkInterfacesNameResponseSuccess = (getSystemNetworkInterfacesNameResponse200) & {
+  headers: Headers;
+};
+export type getSystemNetworkInterfacesNameResponseError = (getSystemNetworkInterfacesNameResponse401 | getSystemNetworkInterfacesNameResponse403 | getSystemNetworkInterfacesNameResponse503) & {
+  headers: Headers;
+};
+
+export type getSystemNetworkInterfacesNameResponse = (getSystemNetworkInterfacesNameResponseSuccess | getSystemNetworkInterfacesNameResponseError)
+
+export const getGetSystemNetworkInterfacesNameUrl = (name: string,) => {
+
+
+  
+
+  return `/system/network/interfaces/${name}`
+}
+
+export const getSystemNetworkInterfacesName = async (name: string, options?: RequestInit): Promise<getSystemNetworkInterfacesNameResponse> => {
+  
+  return apiClient<getSystemNetworkInterfacesNameResponse>(getGetSystemNetworkInterfacesNameUrl(name),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetSystemNetworkInterfacesNameQueryKey = (name: string,) => {
+    return [
+    `/system/network/interfaces/${name}`
+    ] as const;
+    }
+
+    
+export const getGetSystemNetworkInterfacesNameQueryOptions = <TData = Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(name: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSystemNetworkInterfacesNameQueryKey(name);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>> = ({ signal }) => getSystemNetworkInterfacesName(name, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(name), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSystemNetworkInterfacesNameQueryResult = NonNullable<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>>
+export type GetSystemNetworkInterfacesNameQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetSystemNetworkInterfacesName<TData = Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ name: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemNetworkInterfacesName<TData = Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ name: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemNetworkInterfacesName<TData = Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ name: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询单个网口详情
+ */
+
+export function useGetSystemNetworkInterfacesName<TData = Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ name: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemNetworkInterfacesName>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSystemNetworkInterfacesNameQueryOptions(name,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 更新业务网口配置
+ */
+export type putSystemNetworkInterfacesNameResponse200 = {
+  data: InternalCenterHttpHandlerNetworkInterfaceResponse
+  status: 200
+}
+
+export type putSystemNetworkInterfacesNameResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type putSystemNetworkInterfacesNameResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type putSystemNetworkInterfacesNameResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type putSystemNetworkInterfacesNameResponse503 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 503
+}
+
+export type putSystemNetworkInterfacesNameResponseSuccess = (putSystemNetworkInterfacesNameResponse200) & {
+  headers: Headers;
+};
+export type putSystemNetworkInterfacesNameResponseError = (putSystemNetworkInterfacesNameResponse400 | putSystemNetworkInterfacesNameResponse401 | putSystemNetworkInterfacesNameResponse403 | putSystemNetworkInterfacesNameResponse503) & {
+  headers: Headers;
+};
+
+export type putSystemNetworkInterfacesNameResponse = (putSystemNetworkInterfacesNameResponseSuccess | putSystemNetworkInterfacesNameResponseError)
+
+export const getPutSystemNetworkInterfacesNameUrl = (name: string,) => {
+
+
+  
+
+  return `/system/network/interfaces/${name}`
+}
+
+export const putSystemNetworkInterfacesName = async (name: string,
+    internalCenterHttpHandlerUpdateNetworkInterfaceRequest: InternalCenterHttpHandlerUpdateNetworkInterfaceRequest, options?: RequestInit): Promise<putSystemNetworkInterfacesNameResponse> => {
+  
+  return apiClient<putSystemNetworkInterfacesNameResponse>(getPutSystemNetworkInterfacesNameUrl(name),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerUpdateNetworkInterfaceRequest,)
+  }
+);}
+  
+
+
+
+export const getPutSystemNetworkInterfacesNameMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putSystemNetworkInterfacesName>>, TError,{name: string;data: InternalCenterHttpHandlerUpdateNetworkInterfaceRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putSystemNetworkInterfacesName>>, TError,{name: string;data: InternalCenterHttpHandlerUpdateNetworkInterfaceRequest}, TContext> => {
+
+const mutationKey = ['putSystemNetworkInterfacesName'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putSystemNetworkInterfacesName>>, {name: string;data: InternalCenterHttpHandlerUpdateNetworkInterfaceRequest}> = (props) => {
+          const {name,data} = props ?? {};
+
+          return  putSystemNetworkInterfacesName(name,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutSystemNetworkInterfacesNameMutationResult = NonNullable<Awaited<ReturnType<typeof putSystemNetworkInterfacesName>>>
+    export type PutSystemNetworkInterfacesNameMutationBody = InternalCenterHttpHandlerUpdateNetworkInterfaceRequest
+    export type PutSystemNetworkInterfacesNameMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 更新业务网口配置
+ */
+export const usePutSystemNetworkInterfacesName = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putSystemNetworkInterfacesName>>, TError,{name: string;data: InternalCenterHttpHandlerUpdateNetworkInterfaceRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putSystemNetworkInterfacesName>>,
+        TError,
+        {name: string;data: InternalCenterHttpHandlerUpdateNetworkInterfaceRequest},
+        TContext
+      > => {
+      return useMutation(getPutSystemNetworkInterfacesNameMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 测试网口连通性
+ */
+export type postSystemNetworkInterfacesNameTestResponse200 = {
+  data: InternalCenterHttpHandlerNetworkConnectivityTestResponse
+  status: 200
+}
+
+export type postSystemNetworkInterfacesNameTestResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type postSystemNetworkInterfacesNameTestResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type postSystemNetworkInterfacesNameTestResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type postSystemNetworkInterfacesNameTestResponse503 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 503
+}
+
+export type postSystemNetworkInterfacesNameTestResponseSuccess = (postSystemNetworkInterfacesNameTestResponse200) & {
+  headers: Headers;
+};
+export type postSystemNetworkInterfacesNameTestResponseError = (postSystemNetworkInterfacesNameTestResponse400 | postSystemNetworkInterfacesNameTestResponse401 | postSystemNetworkInterfacesNameTestResponse403 | postSystemNetworkInterfacesNameTestResponse503) & {
+  headers: Headers;
+};
+
+export type postSystemNetworkInterfacesNameTestResponse = (postSystemNetworkInterfacesNameTestResponseSuccess | postSystemNetworkInterfacesNameTestResponseError)
+
+export const getPostSystemNetworkInterfacesNameTestUrl = (name: string,) => {
+
+
+  
+
+  return `/system/network/interfaces/${name}/test`
+}
+
+export const postSystemNetworkInterfacesNameTest = async (name: string,
+    internalCenterHttpHandlerTestNetworkInterfaceRequest: InternalCenterHttpHandlerTestNetworkInterfaceRequest, options?: RequestInit): Promise<postSystemNetworkInterfacesNameTestResponse> => {
+  
+  return apiClient<postSystemNetworkInterfacesNameTestResponse>(getPostSystemNetworkInterfacesNameTestUrl(name),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerTestNetworkInterfaceRequest,)
+  }
+);}
+  
+
+
+
+export const getPostSystemNetworkInterfacesNameTestMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSystemNetworkInterfacesNameTest>>, TError,{name: string;data: InternalCenterHttpHandlerTestNetworkInterfaceRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postSystemNetworkInterfacesNameTest>>, TError,{name: string;data: InternalCenterHttpHandlerTestNetworkInterfaceRequest}, TContext> => {
+
+const mutationKey = ['postSystemNetworkInterfacesNameTest'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSystemNetworkInterfacesNameTest>>, {name: string;data: InternalCenterHttpHandlerTestNetworkInterfaceRequest}> = (props) => {
+          const {name,data} = props ?? {};
+
+          return  postSystemNetworkInterfacesNameTest(name,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostSystemNetworkInterfacesNameTestMutationResult = NonNullable<Awaited<ReturnType<typeof postSystemNetworkInterfacesNameTest>>>
+    export type PostSystemNetworkInterfacesNameTestMutationBody = InternalCenterHttpHandlerTestNetworkInterfaceRequest
+    export type PostSystemNetworkInterfacesNameTestMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 测试网口连通性
+ */
+export const usePostSystemNetworkInterfacesNameTest = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSystemNetworkInterfacesNameTest>>, TError,{name: string;data: InternalCenterHttpHandlerTestNetworkInterfaceRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postSystemNetworkInterfacesNameTest>>,
+        TError,
+        {name: string;data: InternalCenterHttpHandlerTestNetworkInterfaceRequest},
+        TContext
+      > => {
+      return useMutation(getPostSystemNetworkInterfacesNameTestMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary 获取受保护的系统配置视图
  */
@@ -3641,6 +4751,107 @@ export function useGetTaskTemplatesCode<TData = Awaited<ReturnType<typeof getTas
 
 
 
+/**
+ * @summary 更新任务模板启用状态
+ */
+export type patchTaskTemplatesCodeStatusResponse200 = {
+  data: InternalCenterHttpHandlerTaskTemplateItemResponse
+  status: 200
+}
+
+export type patchTaskTemplatesCodeStatusResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type patchTaskTemplatesCodeStatusResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type patchTaskTemplatesCodeStatusResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type patchTaskTemplatesCodeStatusResponseSuccess = (patchTaskTemplatesCodeStatusResponse200) & {
+  headers: Headers;
+};
+export type patchTaskTemplatesCodeStatusResponseError = (patchTaskTemplatesCodeStatusResponse400 | patchTaskTemplatesCodeStatusResponse401 | patchTaskTemplatesCodeStatusResponse403) & {
+  headers: Headers;
+};
+
+export type patchTaskTemplatesCodeStatusResponse = (patchTaskTemplatesCodeStatusResponseSuccess | patchTaskTemplatesCodeStatusResponseError)
+
+export const getPatchTaskTemplatesCodeStatusUrl = (code: string,) => {
+
+
+  
+
+  return `/task-templates/${code}/status`
+}
+
+export const patchTaskTemplatesCodeStatus = async (code: string,
+    internalCenterHttpHandlerUpdateTaskTemplateStatusRequest: InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest, options?: RequestInit): Promise<patchTaskTemplatesCodeStatusResponse> => {
+  
+  return apiClient<patchTaskTemplatesCodeStatusResponse>(getPatchTaskTemplatesCodeStatusUrl(code),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerUpdateTaskTemplateStatusRequest,)
+  }
+);}
+  
+
+
+
+export const getPatchTaskTemplatesCodeStatusMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchTaskTemplatesCodeStatus>>, TError,{code: string;data: InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof patchTaskTemplatesCodeStatus>>, TError,{code: string;data: InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest}, TContext> => {
+
+const mutationKey = ['patchTaskTemplatesCodeStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchTaskTemplatesCodeStatus>>, {code: string;data: InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest}> = (props) => {
+          const {code,data} = props ?? {};
+
+          return  patchTaskTemplatesCodeStatus(code,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchTaskTemplatesCodeStatusMutationResult = NonNullable<Awaited<ReturnType<typeof patchTaskTemplatesCodeStatus>>>
+    export type PatchTaskTemplatesCodeStatusMutationBody = InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest
+    export type PatchTaskTemplatesCodeStatusMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 更新任务模板启用状态
+ */
+export const usePatchTaskTemplatesCodeStatus = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchTaskTemplatesCodeStatus>>, TError,{code: string;data: InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchTaskTemplatesCodeStatus>>,
+        TError,
+        {code: string;data: InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest},
+        TContext
+      > => {
+      return useMutation(getPatchTaskTemplatesCodeStatusMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary 查询任务列表
  */
