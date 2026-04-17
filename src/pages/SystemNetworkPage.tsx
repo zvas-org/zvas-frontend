@@ -13,6 +13,7 @@ import {
   Select,
   SelectItem,
   Skeleton,
+  Textarea,
 } from '@heroui/react'
 import {
   ArrowPathIcon,
@@ -251,12 +252,13 @@ export function SystemNetworkPage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-[1.6fr_0.8fr]">
-                  <Input
+                  <Textarea
                     label="DNS 服务器"
                     value={editDraft.dnsServers}
                     onValueChange={(value) => setEditDraft((current) => ({ ...current, dnsServers: value }))}
                     isDisabled={editDraft.mode !== 'static'}
                     placeholder={'每行一个 DNS，例如\n223.5.5.5\n114.114.114.114'}
+                    minRows={4}
                     classNames={inputClassNames}
                   />
                   <Input
