@@ -101,6 +101,14 @@ export interface TestNetworkInterfaceInput {
   count: number
 }
 
+/**
+ * ToggleNetworkInterfaceInput 定义网口启停动作入参。
+ */
+export interface ToggleNetworkInterfaceInput {
+  name: string
+  action: 'enable' | 'disable'
+}
+
 
 /**
  * useSystemHealthView 将生成代码结果转换为页面更稳定的视图结构。
@@ -218,6 +226,25 @@ export function useTestSystemNetworkInterface() {
         rttAvgMS: Number(response.data?.data?.rtt_avg_ms || 0),
         packetLoss: Number(response.data?.data?.packet_loss || 0),
       }
+    },
+  })
+}
+
+/**
+ * useToggleSystemNetworkInterface 对业务网口执行启用或停用动作。
+ */
+export function useToggleSystemNetworkInterface() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: ToggleNetworkInterfaceInput): Promise<NetworkInterfaceView> => {
+      const response = await httpClient.post<InternalCenterHttpHandlerNetworkInterfaceResponse>(
+        `/system/network/interfaces/${input.name}/${input.action}`,
+      )
+      return mapNetworkInterfaceView(response.data?.data)
+    },
+    onSuccess: (_, input) => {
+      queryClient.invalidateQueries({ queryKey: ['system', 'network', 'interfaces'] })
+      queryClient.invalidateQueries({ queryKey: ['system', 'network', 'interfaces', input.name] })
     },
   })
 }
