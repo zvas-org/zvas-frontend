@@ -1,10 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import type {
   GetUsersParams,
+  InternalCenterHttpHandlerCloneRoleRequest,
+  InternalCenterHttpHandlerCreatePermissionRequest,
+  InternalCenterHttpHandlerCreateRoleRequest,
+  InternalCenterHttpHandlerPermissionItem,
+  InternalCenterHttpHandlerPermissionListResponse,
+  InternalCenterHttpHandlerPermissionMutationResponse,
   InternalHandlerCommonActionResponse,
   InternalHandlerCreateUserRequest,
   InternalHandlerRoleItem,
   InternalHandlerRoleListResponse,
+  InternalCenterHttpHandlerRoleMutationResponse,
+  InternalCenterHttpHandlerUpdatePermissionRequest,
+  InternalCenterHttpHandlerUpdateRoleRequest,
   InternalHandlerUpdateUserRolesRequest,
   InternalHandlerUpdateUserStatusRequest,
   InternalHandlerUserCreateResponse,
@@ -12,11 +21,19 @@ import type {
   InternalHandlerUserListResponse,
 } from '@/api/generated/model'
 import {
+  deleteRolesId,
+  getPermissions,
   getRoles,
   getUsers,
+  patchPermissionsCode,
+  patchRolesId,
   patchUsersIdStatus,
+  postPermissions,
+  postRoles,
+  postRolesIdClone,
   postUsers,
   postUsersIdResetPassword,
+  useGetPermissions,
   useGetRoles,
   useGetUsers,
   putUsersIdRoles,
@@ -42,6 +59,14 @@ export interface RoleView {
   permissions: string[]
 }
 
+export interface PermissionView {
+  code: string
+  name: string
+  description: string
+  isBuiltin: boolean
+  status: 'active' | 'disabled'
+}
+
 export interface UserListView {
   items: UserView[]
   traceId: string
@@ -65,6 +90,37 @@ export interface ResetPasswordPayload {
 
 export interface ReplaceRolesPayload {
   roleCodes: string[]
+}
+
+export interface CreatePermissionPayload {
+  code: string
+  name: string
+  description: string
+}
+
+export interface UpdatePermissionPayload {
+  name: string
+  description: string
+  status: 'active' | 'disabled'
+}
+
+export interface CreateRolePayload {
+  code: string
+  name: string
+  description: string
+  permissionCodes: string[]
+}
+
+export interface UpdateRolePayload {
+  name: string
+  description: string
+  permissionCodes: string[]
+}
+
+export interface CloneRolePayload {
+  code: string
+  name: string
+  description: string
 }
 
 export interface UpdateStatusPayload {
@@ -108,6 +164,20 @@ export function useRoleOptionsView() {
       select: (response): RoleView[] => {
         const payload = response.data as InternalHandlerRoleListResponse
         return (payload.data || []).map(toRoleView)
+      },
+    },
+  })
+}
+
+/**
+ * usePermissionCatalogView 读取权限目录并转换为页面视图结构。
+ */
+export function usePermissionCatalogView() {
+  return useGetPermissions({
+    query: {
+      select: (response): PermissionView[] => {
+        const payload = response.data as InternalCenterHttpHandlerPermissionListResponse
+        return (payload.data || []).map(toPermissionView)
       },
     },
   })
@@ -190,6 +260,86 @@ export async function replaceUserRoles(userID: string, payload: ReplaceRolesPayl
 }
 
 /**
+ * createPermission 执行权限创建动作。
+ */
+export async function createPermission(payload: CreatePermissionPayload) {
+  const response = await postPermissions({
+    code: payload.code,
+    name: payload.name,
+    description: payload.description,
+  } satisfies InternalCenterHttpHandlerCreatePermissionRequest)
+
+  const body = response.data as InternalCenterHttpHandlerPermissionMutationResponse
+  return toPermissionView(body.data)
+}
+
+/**
+ * updatePermission 执行权限更新动作。
+ */
+export async function updatePermission(code: string, payload: UpdatePermissionPayload) {
+  const response = await patchPermissionsCode(code, {
+    name: payload.name,
+    description: payload.description,
+    status: payload.status,
+  } satisfies InternalCenterHttpHandlerUpdatePermissionRequest)
+
+  const body = response.data as InternalCenterHttpHandlerPermissionMutationResponse
+  return toPermissionView(body.data)
+}
+
+/**
+ * createRole 执行角色创建动作。
+ */
+export async function createRole(payload: CreateRolePayload) {
+  const response = await postRoles({
+    code: payload.code,
+    name: payload.name,
+    description: payload.description,
+    permission_codes: payload.permissionCodes,
+  } satisfies InternalCenterHttpHandlerCreateRoleRequest)
+
+  const body = response.data as InternalCenterHttpHandlerRoleMutationResponse
+  return toRoleView(body.data)
+}
+
+/**
+ * updateRole 执行角色更新动作。
+ */
+export async function updateRole(roleID: string, payload: UpdateRolePayload) {
+  const response = await patchRolesId(roleID, {
+    name: payload.name,
+    description: payload.description,
+    permission_codes: payload.permissionCodes,
+  } satisfies InternalCenterHttpHandlerUpdateRoleRequest)
+
+  const body = response.data as InternalCenterHttpHandlerRoleMutationResponse
+  return toRoleView(body.data)
+}
+
+/**
+ * deleteRole 执行角色删除动作。
+ */
+export async function deleteRole(roleID: string) {
+  const response = await deleteRolesId(roleID)
+  const body = response.data as InternalHandlerCommonActionResponse
+  return Boolean(body.data?.success)
+}
+
+/**
+ * cloneRole 执行角色克隆动作。
+ */
+export async function cloneRole(roleID: string, payload: CloneRolePayload) {
+  const response = await postRolesIdClone(roleID, {
+    code: payload.code,
+    name: payload.name,
+    description: payload.description,
+  } satisfies InternalCenterHttpHandlerCloneRoleRequest)
+
+  const body = response.data as InternalCenterHttpHandlerRoleMutationResponse
+  return toRoleView(body.data)
+}
+
+/**
  * refetchUsers 提供非 Hook 场景下的列表读取能力。
  */
 export async function refetchUsers(params: GetUsersParams) {
@@ -215,6 +365,15 @@ export async function refetchRoles() {
   return (body.data || []).map(toRoleView)
 }
 
+/**
+ * refetchPermissions 提供非 Hook 场景下的权限目录读取能力。
+ */
+export async function refetchPermissions() {
+  const response = await getPermissions()
+  const body = response.data as InternalCenterHttpHandlerPermissionListResponse
+  return (body.data || []).map(toPermissionView)
+}
+
 function toUserView(user?: InternalHandlerUserListItem | null): UserView {
   return {
     id: user?.id || '',
@@ -236,5 +395,15 @@ function toRoleView(role?: InternalHandlerRoleItem | null): RoleView {
     description: role?.description || '',
     isBuiltin: Boolean(role?.is_builtin),
     permissions: roleWithPermissions?.permissions || [],
+  }
+}
+
+function toPermissionView(permission?: InternalCenterHttpHandlerPermissionItem | null): PermissionView {
+  return {
+    code: permission?.code || '',
+    name: permission?.name || '',
+    description: permission?.description || '',
+    isBuiltin: Boolean(permission?.is_builtin),
+    status: permission?.status === 'disabled' ? 'disabled' : 'active',
   }
 }

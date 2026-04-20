@@ -590,7 +590,7 @@ export function UserManagementPage() {
                     >
                     {roleOptions.map((role) => (
                       <SelectItem key={role.code} textValue={`${role.name} / ${role.code}`}>
-                        {role.name} / {role.code}
+                        {role.name} / {role.code} {role.isBuiltin ? '(系统内置)' : '(自定义)'}
                       </SelectItem>
                     ))}
                   </Select>
@@ -731,7 +731,7 @@ export function UserManagementPage() {
                     >
                     {roleOptions.map((role) => (
                       <SelectItem key={role.code} textValue={`${role.name} / ${role.code}`}>
-                        {role.name} / {role.code}
+                        {role.name} / {role.code} {role.isBuiltin ? '(系统内置)' : '(自定义)'}
                       </SelectItem>
                     ))}
                   </Select>

@@ -59,9 +59,12 @@ import type {
   InternalCenterHttpHandlerAssetRelationListResponse,
   InternalCenterHttpHandlerAuditListResponse,
   InternalCenterHttpHandlerChangePasswordRequest,
+  InternalCenterHttpHandlerCloneRoleRequest,
   InternalCenterHttpHandlerCommonActionResponse,
   InternalCenterHttpHandlerCreateAssetPoolRequest,
   InternalCenterHttpHandlerCreateAssetPoolTaskRequest,
+  InternalCenterHttpHandlerCreatePermissionRequest,
+  InternalCenterHttpHandlerCreateRoleRequest,
   InternalCenterHttpHandlerCreateTargetSetRequest,
   InternalCenterHttpHandlerCreateTaskRequest,
   InternalCenterHttpHandlerCreateUserRequest,
@@ -74,9 +77,12 @@ import type {
   InternalCenterHttpHandlerNetworkConnectivityTestResponse,
   InternalCenterHttpHandlerNetworkInterfaceListResponse,
   InternalCenterHttpHandlerNetworkInterfaceResponse,
+  InternalCenterHttpHandlerPermissionListResponse,
+  InternalCenterHttpHandlerPermissionMutationResponse,
   InternalCenterHttpHandlerPoolInputRecordListResponse,
   InternalCenterHttpHandlerResetUserPasswordRequest,
   InternalCenterHttpHandlerRoleListResponse,
+  InternalCenterHttpHandlerRoleMutationResponse,
   InternalCenterHttpHandlerSeedImportResponse,
   InternalCenterHttpHandlerSystemHealthResponse,
   InternalCenterHttpHandlerSystemSettingsResponse,
@@ -103,6 +109,8 @@ import type {
   InternalCenterHttpHandlerTestNetworkInterfaceRequest,
   InternalCenterHttpHandlerUpdateAssetPoolRequest,
   InternalCenterHttpHandlerUpdateNetworkInterfaceRequest,
+  InternalCenterHttpHandlerUpdatePermissionRequest,
+  InternalCenterHttpHandlerUpdateRoleRequest,
   InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest,
   InternalCenterHttpHandlerUpdateUserRolesRequest,
   InternalCenterHttpHandlerUpdateUserStatusRequest,
@@ -3447,6 +3455,330 @@ export function useGetFindingsWeakScan<TData = Awaited<ReturnType<typeof getFind
 
 
 /**
+ * @summary 查询权限目录
+ */
+export type getPermissionsResponse200 = {
+  data: InternalCenterHttpHandlerPermissionListResponse
+  status: 200
+}
+
+export type getPermissionsResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getPermissionsResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getPermissionsResponseSuccess = (getPermissionsResponse200) & {
+  headers: Headers;
+};
+export type getPermissionsResponseError = (getPermissionsResponse401 | getPermissionsResponse403) & {
+  headers: Headers;
+};
+
+export type getPermissionsResponse = (getPermissionsResponseSuccess | getPermissionsResponseError)
+
+export const getGetPermissionsUrl = () => {
+
+
+  
+
+  return `/permissions`
+}
+
+export const getPermissions = async ( options?: RequestInit): Promise<getPermissionsResponse> => {
+  
+  return apiClient<getPermissionsResponse>(getGetPermissionsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPermissionsQueryKey = () => {
+    return [
+    `/permissions`
+    ] as const;
+    }
+
+    
+export const getGetPermissionsQueryOptions = <TData = Awaited<ReturnType<typeof getPermissions>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPermissions>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPermissionsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPermissions>>> = ({ signal }) => getPermissions({ signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPermissions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPermissionsQueryResult = NonNullable<Awaited<ReturnType<typeof getPermissions>>>
+export type GetPermissionsQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetPermissions<TData = Awaited<ReturnType<typeof getPermissions>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPermissions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPermissions>>,
+          TError,
+          Awaited<ReturnType<typeof getPermissions>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPermissions<TData = Awaited<ReturnType<typeof getPermissions>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPermissions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPermissions>>,
+          TError,
+          Awaited<ReturnType<typeof getPermissions>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPermissions<TData = Awaited<ReturnType<typeof getPermissions>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPermissions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询权限目录
+ */
+
+export function useGetPermissions<TData = Awaited<ReturnType<typeof getPermissions>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPermissions>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPermissionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 创建自定义权限
+ */
+export type postPermissionsResponse200 = {
+  data: InternalCenterHttpHandlerPermissionMutationResponse
+  status: 200
+}
+
+export type postPermissionsResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type postPermissionsResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type postPermissionsResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type postPermissionsResponseSuccess = (postPermissionsResponse200) & {
+  headers: Headers;
+};
+export type postPermissionsResponseError = (postPermissionsResponse400 | postPermissionsResponse401 | postPermissionsResponse403) & {
+  headers: Headers;
+};
+
+export type postPermissionsResponse = (postPermissionsResponseSuccess | postPermissionsResponseError)
+
+export const getPostPermissionsUrl = () => {
+
+
+  
+
+  return `/permissions`
+}
+
+export const postPermissions = async (internalCenterHttpHandlerCreatePermissionRequest: InternalCenterHttpHandlerCreatePermissionRequest, options?: RequestInit): Promise<postPermissionsResponse> => {
+  
+  return apiClient<postPermissionsResponse>(getPostPermissionsUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerCreatePermissionRequest,)
+  }
+);}
+  
+
+
+
+export const getPostPermissionsMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPermissions>>, TError,{data: InternalCenterHttpHandlerCreatePermissionRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postPermissions>>, TError,{data: InternalCenterHttpHandlerCreatePermissionRequest}, TContext> => {
+
+const mutationKey = ['postPermissions'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPermissions>>, {data: InternalCenterHttpHandlerCreatePermissionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postPermissions(data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPermissionsMutationResult = NonNullable<Awaited<ReturnType<typeof postPermissions>>>
+    export type PostPermissionsMutationBody = InternalCenterHttpHandlerCreatePermissionRequest
+    export type PostPermissionsMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 创建自定义权限
+ */
+export const usePostPermissions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPermissions>>, TError,{data: InternalCenterHttpHandlerCreatePermissionRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPermissions>>,
+        TError,
+        {data: InternalCenterHttpHandlerCreatePermissionRequest},
+        TContext
+      > => {
+      return useMutation(getPostPermissionsMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 更新自定义权限
+ */
+export type patchPermissionsCodeResponse200 = {
+  data: InternalCenterHttpHandlerPermissionMutationResponse
+  status: 200
+}
+
+export type patchPermissionsCodeResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type patchPermissionsCodeResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type patchPermissionsCodeResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type patchPermissionsCodeResponseSuccess = (patchPermissionsCodeResponse200) & {
+  headers: Headers;
+};
+export type patchPermissionsCodeResponseError = (patchPermissionsCodeResponse400 | patchPermissionsCodeResponse401 | patchPermissionsCodeResponse403) & {
+  headers: Headers;
+};
+
+export type patchPermissionsCodeResponse = (patchPermissionsCodeResponseSuccess | patchPermissionsCodeResponseError)
+
+export const getPatchPermissionsCodeUrl = (code: string,) => {
+
+
+  
+
+  return `/permissions/${code}`
+}
+
+export const patchPermissionsCode = async (code: string,
+    internalCenterHttpHandlerUpdatePermissionRequest: InternalCenterHttpHandlerUpdatePermissionRequest, options?: RequestInit): Promise<patchPermissionsCodeResponse> => {
+  
+  return apiClient<patchPermissionsCodeResponse>(getPatchPermissionsCodeUrl(code),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerUpdatePermissionRequest,)
+  }
+);}
+  
+
+
+
+export const getPatchPermissionsCodeMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchPermissionsCode>>, TError,{code: string;data: InternalCenterHttpHandlerUpdatePermissionRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof patchPermissionsCode>>, TError,{code: string;data: InternalCenterHttpHandlerUpdatePermissionRequest}, TContext> => {
+
+const mutationKey = ['patchPermissionsCode'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchPermissionsCode>>, {code: string;data: InternalCenterHttpHandlerUpdatePermissionRequest}> = (props) => {
+          const {code,data} = props ?? {};
+
+          return  patchPermissionsCode(code,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchPermissionsCodeMutationResult = NonNullable<Awaited<ReturnType<typeof patchPermissionsCode>>>
+    export type PatchPermissionsCodeMutationBody = InternalCenterHttpHandlerUpdatePermissionRequest
+    export type PatchPermissionsCodeMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 更新自定义权限
+ */
+export const usePatchPermissionsCode = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchPermissionsCode>>, TError,{code: string;data: InternalCenterHttpHandlerUpdatePermissionRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchPermissionsCode>>,
+        TError,
+        {code: string;data: InternalCenterHttpHandlerUpdatePermissionRequest},
+        TContext
+      > => {
+      return useMutation(getPatchPermissionsCodeMutationOptions(options), queryClient);
+    }
+    
+/**
  * @summary 查询角色列表
  */
 export type getRolesResponse200 = {
@@ -3569,6 +3901,407 @@ export function useGetRoles<TData = Awaited<ReturnType<typeof getRoles>>, TError
 
 
 
+/**
+ * @summary 创建自定义角色
+ */
+export type postRolesResponse200 = {
+  data: InternalCenterHttpHandlerRoleMutationResponse
+  status: 200
+}
+
+export type postRolesResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type postRolesResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type postRolesResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type postRolesResponseSuccess = (postRolesResponse200) & {
+  headers: Headers;
+};
+export type postRolesResponseError = (postRolesResponse400 | postRolesResponse401 | postRolesResponse403) & {
+  headers: Headers;
+};
+
+export type postRolesResponse = (postRolesResponseSuccess | postRolesResponseError)
+
+export const getPostRolesUrl = () => {
+
+
+  
+
+  return `/roles`
+}
+
+export const postRoles = async (internalCenterHttpHandlerCreateRoleRequest: InternalCenterHttpHandlerCreateRoleRequest, options?: RequestInit): Promise<postRolesResponse> => {
+  
+  return apiClient<postRolesResponse>(getPostRolesUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerCreateRoleRequest,)
+  }
+);}
+  
+
+
+
+export const getPostRolesMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRoles>>, TError,{data: InternalCenterHttpHandlerCreateRoleRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postRoles>>, TError,{data: InternalCenterHttpHandlerCreateRoleRequest}, TContext> => {
+
+const mutationKey = ['postRoles'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRoles>>, {data: InternalCenterHttpHandlerCreateRoleRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postRoles(data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostRolesMutationResult = NonNullable<Awaited<ReturnType<typeof postRoles>>>
+    export type PostRolesMutationBody = InternalCenterHttpHandlerCreateRoleRequest
+    export type PostRolesMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 创建自定义角色
+ */
+export const usePostRoles = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRoles>>, TError,{data: InternalCenterHttpHandlerCreateRoleRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postRoles>>,
+        TError,
+        {data: InternalCenterHttpHandlerCreateRoleRequest},
+        TContext
+      > => {
+      return useMutation(getPostRolesMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 删除自定义角色
+ */
+export type deleteRolesIdResponse200 = {
+  data: InternalCenterHttpHandlerCommonActionResponse
+  status: 200
+}
+
+export type deleteRolesIdResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type deleteRolesIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type deleteRolesIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type deleteRolesIdResponseSuccess = (deleteRolesIdResponse200) & {
+  headers: Headers;
+};
+export type deleteRolesIdResponseError = (deleteRolesIdResponse400 | deleteRolesIdResponse401 | deleteRolesIdResponse403) & {
+  headers: Headers;
+};
+
+export type deleteRolesIdResponse = (deleteRolesIdResponseSuccess | deleteRolesIdResponseError)
+
+export const getDeleteRolesIdUrl = (id: string,) => {
+
+
+  
+
+  return `/roles/${id}`
+}
+
+export const deleteRolesId = async (id: string, options?: RequestInit): Promise<deleteRolesIdResponse> => {
+  
+  return apiClient<deleteRolesIdResponse>(getDeleteRolesIdUrl(id),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteRolesIdMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRolesId>>, TError,{id: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteRolesId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteRolesId'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteRolesId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteRolesId(id,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteRolesIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRolesId>>>
+    
+    export type DeleteRolesIdMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 删除自定义角色
+ */
+export const useDeleteRolesId = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRolesId>>, TError,{id: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteRolesId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteRolesIdMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 更新自定义角色
+ */
+export type patchRolesIdResponse200 = {
+  data: InternalCenterHttpHandlerRoleMutationResponse
+  status: 200
+}
+
+export type patchRolesIdResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type patchRolesIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type patchRolesIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type patchRolesIdResponseSuccess = (patchRolesIdResponse200) & {
+  headers: Headers;
+};
+export type patchRolesIdResponseError = (patchRolesIdResponse400 | patchRolesIdResponse401 | patchRolesIdResponse403) & {
+  headers: Headers;
+};
+
+export type patchRolesIdResponse = (patchRolesIdResponseSuccess | patchRolesIdResponseError)
+
+export const getPatchRolesIdUrl = (id: string,) => {
+
+
+  
+
+  return `/roles/${id}`
+}
+
+export const patchRolesId = async (id: string,
+    internalCenterHttpHandlerUpdateRoleRequest: InternalCenterHttpHandlerUpdateRoleRequest, options?: RequestInit): Promise<patchRolesIdResponse> => {
+  
+  return apiClient<patchRolesIdResponse>(getPatchRolesIdUrl(id),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerUpdateRoleRequest,)
+  }
+);}
+  
+
+
+
+export const getPatchRolesIdMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchRolesId>>, TError,{id: string;data: InternalCenterHttpHandlerUpdateRoleRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof patchRolesId>>, TError,{id: string;data: InternalCenterHttpHandlerUpdateRoleRequest}, TContext> => {
+
+const mutationKey = ['patchRolesId'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchRolesId>>, {id: string;data: InternalCenterHttpHandlerUpdateRoleRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchRolesId(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchRolesIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchRolesId>>>
+    export type PatchRolesIdMutationBody = InternalCenterHttpHandlerUpdateRoleRequest
+    export type PatchRolesIdMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 更新自定义角色
+ */
+export const usePatchRolesId = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchRolesId>>, TError,{id: string;data: InternalCenterHttpHandlerUpdateRoleRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchRolesId>>,
+        TError,
+        {id: string;data: InternalCenterHttpHandlerUpdateRoleRequest},
+        TContext
+      > => {
+      return useMutation(getPatchRolesIdMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 克隆角色为自定义角色
+ */
+export type postRolesIdCloneResponse200 = {
+  data: InternalCenterHttpHandlerRoleMutationResponse
+  status: 200
+}
+
+export type postRolesIdCloneResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type postRolesIdCloneResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type postRolesIdCloneResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type postRolesIdCloneResponseSuccess = (postRolesIdCloneResponse200) & {
+  headers: Headers;
+};
+export type postRolesIdCloneResponseError = (postRolesIdCloneResponse400 | postRolesIdCloneResponse401 | postRolesIdCloneResponse403) & {
+  headers: Headers;
+};
+
+export type postRolesIdCloneResponse = (postRolesIdCloneResponseSuccess | postRolesIdCloneResponseError)
+
+export const getPostRolesIdCloneUrl = (id: string,) => {
+
+
+  
+
+  return `/roles/${id}/clone`
+}
+
+export const postRolesIdClone = async (id: string,
+    internalCenterHttpHandlerCloneRoleRequest: InternalCenterHttpHandlerCloneRoleRequest, options?: RequestInit): Promise<postRolesIdCloneResponse> => {
+  
+  return apiClient<postRolesIdCloneResponse>(getPostRolesIdCloneUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerCloneRoleRequest,)
+  }
+);}
+  
+
+
+
+export const getPostRolesIdCloneMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRolesIdClone>>, TError,{id: string;data: InternalCenterHttpHandlerCloneRoleRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof postRolesIdClone>>, TError,{id: string;data: InternalCenterHttpHandlerCloneRoleRequest}, TContext> => {
+
+const mutationKey = ['postRolesIdClone'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRolesIdClone>>, {id: string;data: InternalCenterHttpHandlerCloneRoleRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postRolesIdClone(id,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostRolesIdCloneMutationResult = NonNullable<Awaited<ReturnType<typeof postRolesIdClone>>>
+    export type PostRolesIdCloneMutationBody = InternalCenterHttpHandlerCloneRoleRequest
+    export type PostRolesIdCloneMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 克隆角色为自定义角色
+ */
+export const usePostRolesIdClone = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRolesIdClone>>, TError,{id: string;data: InternalCenterHttpHandlerCloneRoleRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postRolesIdClone>>,
+        TError,
+        {id: string;data: InternalCenterHttpHandlerCloneRoleRequest},
+        TContext
+      > => {
+      return useMutation(getPostRolesIdCloneMutationOptions(options), queryClient);
+    }
+    
 /**
  * @summary 获取系统健康状态
  */
