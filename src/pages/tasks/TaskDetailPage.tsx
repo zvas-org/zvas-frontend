@@ -7,10 +7,10 @@ import {
 } from '@heroui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, PlayIcon } from '@heroicons/react/24/outline'
 
 import type { TaskDetailVM } from '@/api/adapters/task'
-import { useTaskDetail, useTaskProgress, useTaskRecords, useRunTask, usePauseTask, useResumeTask, useStopTask, useDeleteTask, getTaskStatusInfo } from '@/api/adapters/task'
+import { useTaskDetail, useTaskProgress, useTaskRecords, useRunTask, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
 import { TaskOverviewTab } from '@/components/tasks/TaskOverviewTab'
 import { TaskAssetViewTab } from '@/components/tasks/TaskAssetViewTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
@@ -20,7 +20,6 @@ import { TaskReportsTab } from '@/components/tasks/TaskReportsTab'
 import { TaskWeakScanResultsTab } from '@/components/tasks/TaskWeakScanResultsTab'
 import { PauseIcon, PlayIcon as PlayIconSolid, StopIcon } from '@heroicons/react/24/solid'
 import { useUrlTabState } from '@/hooks/useUrlTabState'
-import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { useAuthStore } from '@/store/auth'
 import { PERMISSIONS, hasPermission } from '@/utils/permissions'
 
@@ -61,11 +60,9 @@ export function TaskDetailPage() {
   const pauseTask = usePauseTask()
   const resumeTask = useResumeTask()
   const stopTask = useStopTask()
-  const deleteTask = useDeleteTask()
 
   const [activeTab, setActiveTab] = useUrlTabState<TaskDetailTabKey>({ param: 'tab', defaultValue: 'overview', values: TASK_DETAIL_TABS })
   const [runError, setRunError] = useState<string | null>(null)
-  const [deleteVisible, setDeleteVisible] = useState(false)
   const task = detailQuery.data
   const progress = progressQuery.data
   const canCreateTask = hasPermission(currentUser?.permissions, PERMISSIONS.taskCreate)
@@ -172,16 +169,6 @@ export function TaskDetailPage() {
                  启动任务
                </Button>
              )}
-             <Button
-               variant="flat"
-               size="sm"
-               isDisabled={!canControlTask}
-               className="h-10 rounded-xl bg-apple-red/10 text-apple-red-light font-black px-4 flex items-center gap-2"
-               onPress={() => setDeleteVisible(true)}
-             >
-               <TrashIcon className="w-4 h-4" />
-               <span>删除</span>
-             </Button>
           </div>
         </div>
       </div>
@@ -214,22 +201,6 @@ export function TaskDetailPage() {
         {selectedTab === 'weak_scan' && <TaskWeakScanResultsTab taskId={task.id} />}
         {selectedTab === 'reports' && canReadReports && <TaskReportsTab taskId={task.id} />}
       </div>
-
-      <ConfirmModal
-        isOpen={deleteVisible}
-        onClose={() => setDeleteVisible(false)}
-        title="确认删除当前任务？"
-        message={`将只删除任务 "${task.name || '未命名任务'}"，不会删除资产池。任务会立即从任务列表中移除，关联执行数据将在后台异步清理。`}
-        confirmText="确认删除"
-        confirmColor="danger"
-        isLoading={deleteTask.isPending}
-        onConfirm={async () => {
-          if (!id) return
-          await deleteTask.mutateAsync(id)
-          setDeleteVisible(false)
-          navigate('/tasks')
-        }}
-      />
     </div>
   )
 }

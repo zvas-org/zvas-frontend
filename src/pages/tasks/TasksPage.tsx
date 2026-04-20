@@ -170,7 +170,11 @@ export function TasksPage() {
               const planLabels = mapStageLabels(routesData, task.route_plan.length > 0 ? task.route_plan : task.stage_plan)
 
               return (
-                <TableRow key={rowKey}>
+                <TableRow
+                  key={rowKey}
+                  className="cursor-pointer hover:bg-white/[0.03]"
+                  onClick={() => navigate(buildTaskDetailPath(rowKey, taskHasWeakScanPlan(task)))}
+                >
                   <TableCell>
                     <span className="text-sm font-bold text-white whitespace-nowrap overflow-hidden text-ellipsis block tracking-tight">{task.name || 'Untitled Task'}</span>
                   </TableCell>
@@ -211,34 +215,26 @@ export function TasksPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex justify-end gap-2 pr-2">
+                    <div className="flex justify-end gap-2 pr-2" onClick={(event) => event.stopPropagation()}>
                       <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 mr-2">
                         {statusInfo.canPause && (
-                          <Button isIconOnly size="sm" variant="light" isDisabled={!canControlTask} className="h-7 w-7 min-w-0 text-apple-warning hover:bg-apple-warning/20" onPress={() => pauseTask.mutate(task.id)}>
+                          <Button aria-label="暂停任务" isIconOnly size="sm" variant="light" isDisabled={!canControlTask} className="h-7 w-7 min-w-0 text-apple-warning hover:bg-apple-warning/20" onPress={() => pauseTask.mutate(task.id)}>
                             <PauseIcon className="w-4 h-4" />
                           </Button>
                         )}
                         {statusInfo.canResume && (
-                          <Button isIconOnly size="sm" variant="light" isDisabled={!canControlTask} className="h-7 w-7 min-w-0 text-apple-green hover:bg-apple-green/20" onPress={() => resumeTask.mutate(task.id)}>
+                          <Button aria-label="恢复任务" isIconOnly size="sm" variant="light" isDisabled={!canControlTask} className="h-7 w-7 min-w-0 text-apple-green hover:bg-apple-green/20" onPress={() => resumeTask.mutate(task.id)}>
                             <PlayIcon className="w-4 h-4" />
                           </Button>
                         )}
                         {statusInfo.canStop && (
-                          <Button isIconOnly size="sm" variant="light" isDisabled={!canControlTask} className="h-7 w-7 min-w-0 text-apple-red hover:bg-apple-red/20" onPress={() => stopTask.mutate(task.id)}>
+                          <Button aria-label="终止任务" isIconOnly size="sm" variant="light" isDisabled={!canControlTask} className="h-7 w-7 min-w-0 text-apple-red hover:bg-apple-red/20" onPress={() => stopTask.mutate(task.id)}>
                             <StopIcon className="w-4 h-4" />
                           </Button>
                         )}
                       </div>
-
                       <Button
-                        size="sm"
-                        variant="bordered"
-                        className="rounded-lg border-white/10 text-white font-bold h-7 min-w-0 px-3 text-[11px] hover:border-white/30 transition-all"
-                        onPress={() => navigate(buildTaskDetailPath(rowKey, taskHasWeakScanPlan(task)))}
-                      >
-                        监控
-                      </Button>
-                      <Button
+                        aria-label="删除任务"
                         isIconOnly
                         size="sm"
                         variant="light"
