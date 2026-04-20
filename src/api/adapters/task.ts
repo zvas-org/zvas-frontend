@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { httpClient } from '@/api/client'
-import type { PaginationMeta } from './asset'
+import type { PaginationMeta, ReportSummaryView } from './asset'
 import { parseHttpProbeSummary } from './asset'
 
 export const TERMINAL_TASK_STATUSES = ['succeeded', 'failed', 'stopped', 'deleted']
@@ -827,6 +827,44 @@ export function useTaskWeakScanFindings(
     enabled: Boolean(id && enabled),
     refetchInterval: enabled ? 5000 : false,
   })
+}
+
+export function useTaskReports(id?: string, params?: { page?: number; page_size?: number; status?: string }) {
+  return useQuery({
+    queryKey: ['tasks', id, 'reports', params],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: ReportSummaryView[]; pagination?: PaginationMeta }>(`/tasks/${id}/reports`, { params })
+      return res.data
+    },
+    enabled: Boolean(id),
+  })
+}
+
+export async function downloadTaskVulnerabilityReport(
+  taskId: string,
+  format: 'word' | 'excel',
+  params?: { url?: string; poc_id?: string; severity?: string; status?: string; keyword?: string },
+): Promise<void> {
+  const endpoint = format === 'word' ? `/tasks/${taskId}/reports/vulnerability-word` : `/tasks/${taskId}/reports/vulnerability-excel`
+  const response = await httpClient.get<Blob>(endpoint, {
+    params,
+    responseType: 'blob',
+  })
+  const disposition = String(response.headers['content-disposition'] || '')
+  const matched = disposition.match(/filename\*=UTF-8''([^;]+)/i)
+  const fallback = format === 'word' ? 'task-vulnerability-report.docx' : 'task-vulnerability-checklist.xlsx'
+  const fileName = matched ? decodeURIComponent(matched[1]) : fallback
+  const blob = new Blob([response.data], {
+    type: response.headers['content-type'] || 'application/octet-stream',
+  })
+  const href = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = href
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(href)
 }
 
 export interface CreateTaskAssetPoolConfig {

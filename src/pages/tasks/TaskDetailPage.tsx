@@ -7,7 +7,7 @@ import {
 } from '@heroui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon, EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, PlayIcon } from '@heroicons/react/24/outline'
 
 import type { TaskDetailVM } from '@/api/adapters/task'
 import { useTaskDetail, useTaskProgress, useTaskRecords, useRunTask, usePauseTask, useResumeTask, useStopTask, getTaskStatusInfo } from '@/api/adapters/task'
@@ -16,6 +16,7 @@ import { TaskAssetViewTab } from '@/components/tasks/TaskAssetViewTab'
 import { TaskProgressTab } from '@/components/tasks/TaskProgressTab'
 import { TaskRecordsTab } from '@/components/tasks/TaskRecordsTab'
 import { TaskFindingsTab } from '@/components/tasks/TaskFindingsTab'
+import { TaskReportsTab } from '@/components/tasks/TaskReportsTab'
 import { TaskWeakScanResultsTab } from '@/components/tasks/TaskWeakScanResultsTab'
 import { PauseIcon, PlayIcon as PlayIconSolid, StopIcon } from '@heroicons/react/24/solid'
 import { useUrlTabState } from '@/hooks/useUrlTabState'
@@ -192,19 +193,8 @@ export function TaskDetailPage() {
         {selectedTab === 'progress' && <TaskProgressTab progress={progress} />}
         {selectedTab === 'findings' && <TaskFindingsTab taskId={task.id} />}
         {selectedTab === 'weak_scan' && <TaskWeakScanResultsTab taskId={task.id} />}
-        {selectedTab === 'reports' && <PlaceholderTab title="待模块接入" desc="系统将在扫描结束后统一生成分析报表，当前模块暂未开放。" />}
+        {selectedTab === 'reports' && <TaskReportsTab taskId={task.id} />}
       </div>
-    </div>
-  )
-}
-
-function PlaceholderTab({ title, desc }: { title: string, desc: string }) {
-  return (
-    <div className="bg-white/[0.01] border border-white/5 border-dashed p-16 rounded-[32px] flex flex-col items-center justify-center text-center gap-3 animate-in fade-in duration-500 min-h-[400px]">
-      <EyeIcon className="w-12 h-12 text-apple-text-tertiary mb-2 opacity-50" />
-      <span className="text-[10px] text-apple-text-tertiary font-black tracking-[0.3em] uppercase bg-white/5 px-2 py-0.5 rounded-md">Reserved Edge</span>
-      <h3 className="text-2xl font-black text-white tracking-tight">{title}</h3>
-      <p className="text-sm text-apple-text-tertiary max-w-sm mt-1">{desc}</p>
     </div>
   )
 }
