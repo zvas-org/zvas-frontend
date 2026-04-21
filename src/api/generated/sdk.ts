@@ -30,6 +30,7 @@ import type {
   GetAssetPoolsIdInputsParams,
   GetAssetPoolsIdReportsParams,
   GetAssetPoolsIdReportsVulnerabilityExcelParams,
+  GetAssetPoolsIdReportsVulnerabilityHtmlParams,
   GetAssetPoolsIdReportsVulnerabilityWordParams,
   GetAssetPoolsIdTasksParams,
   GetAssetPoolsIdWeakScanFindingsParams,
@@ -41,6 +42,7 @@ import type {
   GetTasksIdRecordsParams,
   GetTasksIdReportsParams,
   GetTasksIdReportsVulnerabilityExcelParams,
+  GetTasksIdReportsVulnerabilityHtmlParams,
   GetTasksIdReportsVulnerabilityWordParams,
   GetTasksIdSnapshotAssetsParams,
   GetTasksIdWeakScanFindingsParams,
@@ -1940,6 +1942,144 @@ export function useGetAssetPoolsIdReportsVulnerabilityExcel<TData = Awaited<Retu
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAssetPoolsIdReportsVulnerabilityExcelQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 导出资产池漏洞 HTML 报告
+ */
+export type getAssetPoolsIdReportsVulnerabilityHtmlResponse200 = {
+  data: Blob
+  status: 200
+}
+
+export type getAssetPoolsIdReportsVulnerabilityHtmlResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getAssetPoolsIdReportsVulnerabilityHtmlResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getAssetPoolsIdReportsVulnerabilityHtmlResponseSuccess = (getAssetPoolsIdReportsVulnerabilityHtmlResponse200) & {
+  headers: Headers;
+};
+export type getAssetPoolsIdReportsVulnerabilityHtmlResponseError = (getAssetPoolsIdReportsVulnerabilityHtmlResponse401 | getAssetPoolsIdReportsVulnerabilityHtmlResponse403) & {
+  headers: Headers;
+};
+
+export type getAssetPoolsIdReportsVulnerabilityHtmlResponse = (getAssetPoolsIdReportsVulnerabilityHtmlResponseSuccess | getAssetPoolsIdReportsVulnerabilityHtmlResponseError)
+
+export const getGetAssetPoolsIdReportsVulnerabilityHtmlUrl = (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/asset-pools/${id}/reports/vulnerability-html?${stringifiedParams}` : `/asset-pools/${id}/reports/vulnerability-html`
+}
+
+export const getAssetPoolsIdReportsVulnerabilityHtml = async (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams, options?: RequestInit): Promise<getAssetPoolsIdReportsVulnerabilityHtmlResponse> => {
+  
+  return apiClient<getAssetPoolsIdReportsVulnerabilityHtmlResponse>(getGetAssetPoolsIdReportsVulnerabilityHtmlUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAssetPoolsIdReportsVulnerabilityHtmlQueryKey = (id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams,) => {
+    return [
+    `/asset-pools/${id}/reports/vulnerability-html`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAssetPoolsIdReportsVulnerabilityHtmlQueryOptions = <TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssetPoolsIdReportsVulnerabilityHtmlQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>> = ({ signal }) => getAssetPoolsIdReportsVulnerabilityHtml(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAssetPoolsIdReportsVulnerabilityHtmlQueryResult = NonNullable<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>>
+export type GetAssetPoolsIdReportsVulnerabilityHtmlQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetAssetPoolsIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params: undefined |  GetAssetPoolsIdReportsVulnerabilityHtmlParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>,
+          TError,
+          Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAssetPoolsIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 导出资产池漏洞 HTML 报告
+ */
+
+export function useGetAssetPoolsIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params?: GetAssetPoolsIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAssetPoolsIdReportsVulnerabilityHtml>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAssetPoolsIdReportsVulnerabilityHtmlQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -7268,6 +7408,144 @@ export function useGetTasksIdReportsVulnerabilityExcel<TData = Awaited<ReturnTyp
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTasksIdReportsVulnerabilityExcelQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 导出任务漏洞 HTML 报告
+ */
+export type getTasksIdReportsVulnerabilityHtmlResponse200 = {
+  data: Blob
+  status: 200
+}
+
+export type getTasksIdReportsVulnerabilityHtmlResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getTasksIdReportsVulnerabilityHtmlResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getTasksIdReportsVulnerabilityHtmlResponseSuccess = (getTasksIdReportsVulnerabilityHtmlResponse200) & {
+  headers: Headers;
+};
+export type getTasksIdReportsVulnerabilityHtmlResponseError = (getTasksIdReportsVulnerabilityHtmlResponse401 | getTasksIdReportsVulnerabilityHtmlResponse403) & {
+  headers: Headers;
+};
+
+export type getTasksIdReportsVulnerabilityHtmlResponse = (getTasksIdReportsVulnerabilityHtmlResponseSuccess | getTasksIdReportsVulnerabilityHtmlResponseError)
+
+export const getGetTasksIdReportsVulnerabilityHtmlUrl = (id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/tasks/${id}/reports/vulnerability-html?${stringifiedParams}` : `/tasks/${id}/reports/vulnerability-html`
+}
+
+export const getTasksIdReportsVulnerabilityHtml = async (id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams, options?: RequestInit): Promise<getTasksIdReportsVulnerabilityHtmlResponse> => {
+  
+  return apiClient<getTasksIdReportsVulnerabilityHtmlResponse>(getGetTasksIdReportsVulnerabilityHtmlUrl(id,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTasksIdReportsVulnerabilityHtmlQueryKey = (id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams,) => {
+    return [
+    `/tasks/${id}/reports/vulnerability-html`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetTasksIdReportsVulnerabilityHtmlQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTasksIdReportsVulnerabilityHtmlQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>> = ({ signal }) => getTasksIdReportsVulnerabilityHtml(id,params, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTasksIdReportsVulnerabilityHtmlQueryResult = NonNullable<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>>
+export type GetTasksIdReportsVulnerabilityHtmlQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetTasksIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params: undefined |  GetTasksIdReportsVulnerabilityHtmlParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 导出任务漏洞 HTML 报告
+ */
+
+export function useGetTasksIdReportsVulnerabilityHtml<TData = Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    params?: GetTasksIdReportsVulnerabilityHtmlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdReportsVulnerabilityHtml>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTasksIdReportsVulnerabilityHtmlQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

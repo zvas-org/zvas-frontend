@@ -7,6 +7,8 @@ import { useAuthStore } from '@/store/auth'
 import { APPLE_TABLE_CLASSES } from '@/utils/theme'
 import { PERMISSIONS, hasPermission } from '@/utils/permissions'
 
+type ReportFormat = 'word' | 'excel' | 'html'
+
 function statusColor(status: string): 'default' | 'primary' | 'success' | 'warning' | 'danger' {
   switch (status?.toLowerCase()) {
     case 'generated':
@@ -34,16 +36,23 @@ function scopeLabel(scopeType: string, scopeID: string): string {
       return '漏洞扫描报告'
     case 'asset_pool_vulnerability_excel':
       return '漏洞扫描清单'
+    case 'asset_pool_vulnerability_html':
+      return 'HTML 漏洞报告'
     default:
       return scopeID || '-'
   }
+}
+
+function reportNameLabel(name: string, scopeType: string): string {
+  if (name) return name
+  return scopeLabel(scopeType, '漏洞扫描导出')
 }
 
 export function AssetPoolReportsTab({ poolId }: { poolId: string }) {
   const currentUser = useAuthStore((state) => state.currentUser)
   const [page, setPage] = useState(1)
   const [pageSize] = useState(20)
-  const [exporting, setExporting] = useState<'word' | 'excel' | ''>('')
+  const [exporting, setExporting] = useState<ReportFormat | ''>('')
   const [exportError, setExportError] = useState('')
 
   const { data, isPending, isError, refetch } = useAssetPoolReports(poolId, {
@@ -56,7 +65,7 @@ export function AssetPoolReportsTab({ poolId }: { poolId: string }) {
   const totalPages = Math.ceil(total / pageSize)
   const canExportReports = hasPermission(currentUser?.permissions, PERMISSIONS.reportExport)
 
-  async function handleExport(format: 'word' | 'excel') {
+  async function handleExport(format: ReportFormat) {
     try {
       setExportError('')
       setExporting(format)
@@ -77,7 +86,7 @@ export function AssetPoolReportsTab({ poolId }: { poolId: string }) {
             <DocumentChartBarIcon className="w-6 h-6 text-apple-blue-light drop-shadow-[0_0_8px_rgba(0,113,227,0.5)]" />
             <span>漏洞扫描报告导出</span>
           </h3>
-          <p className="text-[13px] text-apple-text-tertiary font-medium">导出当前资产池的漏洞扫描 Word 报告和 Excel 清单，并查看导出历史。</p>
+          <p className="text-[13px] text-apple-text-tertiary font-medium">导出当前资产池的漏洞扫描 Word 报告、Excel 清单和 HTML 报告，并查看导出历史。</p>
           {exportError ? <p className="mt-2 text-[12px] font-medium text-rose-300">{exportError}</p> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
@@ -100,6 +109,16 @@ export function AssetPoolReportsTab({ poolId }: { poolId: string }) {
             onPress={() => handleExport('excel')}
           >
             导出漏洞扫描清单
+          </Button>
+          <Button
+            variant="flat"
+            startContent={<ArrowDownTrayIcon className="w-4 h-4" />}
+            className="h-12 rounded-[16px] bg-white/8 border border-white/10 text-white font-bold"
+            isLoading={exporting === 'html'}
+            isDisabled={!canExportReports}
+            onPress={() => handleExport('html')}
+          >
+            导出 HTML 报告
           </Button>
           <Button
             variant="flat"
@@ -143,7 +162,7 @@ export function AssetPoolReportsTab({ poolId }: { poolId: string }) {
             {items.map((it) => (
               <TableRow key={it.id}>
                 <TableCell>
-                  <span className="font-bold text-[14px] text-white tracking-tight leading-tight block truncate">{it.name}</span>
+                  <span className="font-bold text-[14px] text-white tracking-tight leading-tight block truncate">{reportNameLabel(it.name, it.scope_type)}</span>
                 </TableCell>
                 <TableCell>
                   <span className="text-[10px] font-black tracking-widest text-apple-text-secondary uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">{scopeLabel(it.scope_type, it.scope_id)}</span>

@@ -842,17 +842,27 @@ export function useTaskReports(id?: string, params?: { page?: number; page_size?
 
 export async function downloadTaskVulnerabilityReport(
   taskId: string,
-  format: 'word' | 'excel',
+  format: 'word' | 'excel' | 'html',
   params?: { url?: string; poc_id?: string; severity?: string; status?: string; keyword?: string },
 ): Promise<void> {
-  const endpoint = format === 'word' ? `/tasks/${taskId}/reports/vulnerability-word` : `/tasks/${taskId}/reports/vulnerability-excel`
+  const endpoint =
+    format === 'word'
+      ? `/tasks/${taskId}/reports/vulnerability-word`
+      : format === 'excel'
+        ? `/tasks/${taskId}/reports/vulnerability-excel`
+        : `/tasks/${taskId}/reports/vulnerability-html`
   const response = await httpClient.get<Blob>(endpoint, {
     params,
     responseType: 'blob',
   })
   const disposition = String(response.headers['content-disposition'] || '')
   const matched = disposition.match(/filename\*=UTF-8''([^;]+)/i)
-  const fallback = format === 'word' ? 'task-vulnerability-report.docx' : 'task-vulnerability-checklist.xlsx'
+  const fallback =
+    format === 'word'
+      ? 'task-vulnerability-report.docx'
+      : format === 'excel'
+        ? 'task-vulnerability-checklist.xlsx'
+        : 'task-vulnerability-report.html'
   const fileName = matched ? decodeURIComponent(matched[1]) : fallback
   const blob = new Blob([response.data], {
     type: response.headers['content-type'] || 'application/octet-stream',

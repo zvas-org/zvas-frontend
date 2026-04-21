@@ -712,17 +712,27 @@ export function useAssetPoolObservations(poolId?: string, assetId?: string) {
 
 export async function downloadAssetPoolVulnerabilityReport(
   poolId: string,
-  format: 'word' | 'excel',
+  format: 'word' | 'excel' | 'html',
   params?: { url?: string; poc_id?: string; severity?: string; status?: string; keyword?: string },
 ): Promise<void> {
-  const endpoint = format === 'word' ? `/asset-pools/${poolId}/reports/vulnerability-word` : `/asset-pools/${poolId}/reports/vulnerability-excel`
+  const endpoint =
+    format === 'word'
+      ? `/asset-pools/${poolId}/reports/vulnerability-word`
+      : format === 'excel'
+        ? `/asset-pools/${poolId}/reports/vulnerability-excel`
+        : `/asset-pools/${poolId}/reports/vulnerability-html`
   const response = await httpClient.get<Blob>(endpoint, {
     params,
     responseType: 'blob',
   })
   const disposition = String(response.headers['content-disposition'] || '')
   const matched = disposition.match(/filename\*=UTF-8''([^;]+)/i)
-  const fallback = format === 'word' ? 'asset-pool-vulnerability-report.docx' : 'asset-pool-vulnerability-checklist.xlsx'
+  const fallback =
+    format === 'word'
+      ? 'asset-pool-vulnerability-report.docx'
+      : format === 'excel'
+        ? 'asset-pool-vulnerability-checklist.xlsx'
+        : 'asset-pool-vulnerability-report.html'
   const fileName = matched ? decodeURIComponent(matched[1]) : fallback
   const blob = new Blob([response.data], {
     type: response.headers['content-type'] || 'application/octet-stream',
