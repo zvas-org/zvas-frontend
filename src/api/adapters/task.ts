@@ -293,6 +293,41 @@ export interface TaskRecordVulnerabilityVM {
   raw: Record<string, any>
 }
 
+export interface VulnerabilityTypeDictItemVM {
+  vul_type_id: number
+  code: string
+  vul_type: string
+  default_severity: string
+  impact_zh: string
+  remediation_zh: string
+}
+
+export interface TaskFindingRuleMapVM {
+  template_id: string
+  current?: VulnerabilityTypeDictItemVM
+  candidates: VulnerabilityTypeDictItemVM[]
+}
+
+export interface UpdateTaskFindingPayload {
+  finding_patch?: {
+    rule_name?: string
+    severity?: string
+    matched_at?: string
+    target_url?: string
+    host?: string
+    ip?: string
+    port?: number
+    scheme?: string
+    matcher_name?: string
+    classification?: Record<string, any>
+    evidence?: Record<string, any>
+  }
+  mapping_patch?: {
+    vul_type_id?: number
+    clear_mapping?: boolean
+  }
+}
+
 export interface TaskRecordDetailVM extends TaskRecordVM {
   payload: Record<string, any>
   result: Record<string, any>
@@ -484,29 +519,51 @@ function mapToTaskRecordDetailVM(dto: any): TaskRecordDetailVM {
       stats: dto.vul_scan_summary.stats || {},
     } : undefined,
     weak_scan_summary: mapToTaskRecordWeakScanSummary(dto, result),
-    vulnerabilities: (dto.vulnerabilities || []).map((item: any) => {
-      const baseURL = item.base_url || item.site_url || ''
-      const link = item.link || item.raw?.['matched-at'] || item.target_url || baseURL || item.host || ''
-      return {
-      id: item.id || '',
-      vulnerability_key: item.vulnerability_key || '',
-      base_url: baseURL,
-      link,
-      target_url: item.target_url || '',
-      rule_id: item.rule_id || '',
-      rule_name: item.rule_name || '',
-      severity: item.severity || '',
-      tags: item.tags || [],
-      matcher_name: item.matcher_name || '',
-      matched_at: item.matched_at || '',
-      host: item.host || '',
-      ip: item.ip || '',
-      port: item.port ?? 0,
-      scheme: item.scheme || '',
-      classification: item.classification || {},
-      evidence: item.evidence || {},
-      raw: item.raw || {},
-    }}),
+    vulnerabilities: (dto.vulnerabilities || []).map(mapToTaskRecordVulnerabilityVM),
+  }
+}
+
+function mapToTaskRecordVulnerabilityVM(item: any): TaskRecordVulnerabilityVM {
+  const baseURL = item.base_url || item.site_url || ''
+  const link = item.link || item.raw?.['matched-at'] || item.target_url || baseURL || item.host || ''
+  return {
+    id: item.id || '',
+    vulnerability_key: item.vulnerability_key || '',
+    base_url: baseURL,
+    link,
+    target_url: item.target_url || '',
+    rule_id: item.rule_id || '',
+    rule_name: item.rule_name || '',
+    severity: item.severity || '',
+    tags: item.tags || [],
+    matcher_name: item.matcher_name || '',
+    matched_at: item.matched_at || '',
+    host: item.host || '',
+    ip: item.ip || '',
+    port: item.port ?? 0,
+    scheme: item.scheme || '',
+    classification: item.classification || {},
+    evidence: item.evidence || {},
+    raw: item.raw || {},
+  }
+}
+
+function mapToVulnerabilityTypeDictItemVM(dto: any): VulnerabilityTypeDictItemVM {
+  return {
+    vul_type_id: dto.vul_type_id ?? 0,
+    code: dto.code || '',
+    vul_type: dto.vul_type || '',
+    default_severity: dto.default_severity || '',
+    impact_zh: dto.impact_zh || '',
+    remediation_zh: dto.remediation_zh || '',
+  }
+}
+
+function mapToTaskFindingRuleMapVM(dto: any): TaskFindingRuleMapVM {
+  return {
+    template_id: dto.template_id || '',
+    current: dto.current ? mapToVulnerabilityTypeDictItemVM(dto.current) : undefined,
+    candidates: (dto.candidates || []).map(mapToVulnerabilityTypeDictItemVM),
   }
 }
 
@@ -740,33 +797,62 @@ export function useTaskFindings(
       const res = await httpClient.get<{ data: any[]; pagination?: PaginationMeta }>(`/tasks/${id}/findings`, { params })
       return {
         ...res.data,
-        data: (res.data.data || []).map((item: any) => {
-          const baseURL = item.base_url || item.site_url || ''
-          const link = item.link || item.raw?.['matched-at'] || item.target_url || baseURL || item.host || ''
-          return {
-          id: item.id || '',
-          vulnerability_key: item.vulnerability_key || '',
-          base_url: baseURL,
-          link,
-          target_url: item.target_url || '',
-          rule_id: item.rule_id || '',
-          rule_name: item.rule_name || '',
-          severity: item.severity || '',
-          tags: item.tags || [],
-          matcher_name: item.matcher_name || '',
-          matched_at: item.matched_at || '',
-          host: item.host || '',
-          ip: item.ip || '',
-          port: item.port ?? 0,
-          scheme: item.scheme || '',
-          classification: item.classification || {},
-          evidence: item.evidence || {},
-          raw: item.raw || {},
-        }}),
+        data: (res.data.data || []).map(mapToTaskRecordVulnerabilityVM),
       }
     },
     enabled: Boolean(id && enabled),
     refetchInterval: enabled ? 5000 : false,
+  })
+}
+
+export function useTaskFindingDetail(taskId?: string, findingId?: string, enabled = true) {
+  return useQuery({
+    queryKey: ['tasks', taskId, 'findings', findingId, 'detail'],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: any }>(`/tasks/${taskId}/findings/${findingId}`)
+      return mapToTaskRecordVulnerabilityVM(res.data.data)
+    },
+    enabled: Boolean(taskId && findingId && enabled),
+  })
+}
+
+export function useTaskFindingRuleMap(templateId?: string, enabled = true) {
+  return useQuery({
+    queryKey: ['vulnerability-localization', 'rule-map', templateId],
+    queryFn: async () => {
+      const res = await httpClient.get<{ data: any }>(`/vulnerability-localization/rule-map/${templateId}`)
+      return mapToTaskFindingRuleMapVM(res.data.data)
+    },
+    enabled: Boolean(templateId && enabled),
+  })
+}
+
+export function useUpdateTaskFinding() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ taskId, findingId, payload }: { taskId: string; findingId: string; payload: UpdateTaskFindingPayload }) => {
+      const res = await httpClient.put<{ data: any }>(`/tasks/${taskId}/findings/${findingId}`, payload)
+      return mapToTaskRecordVulnerabilityVM(res.data.data)
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'findings'] })
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'records'] })
+      qc.invalidateQueries({ queryKey: ['vulnerability-localization', 'rule-map'] })
+    },
+  })
+}
+
+export function useDeleteTaskFinding() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ taskId, findingId }: { taskId: string; findingId: string }) => {
+      await httpClient.delete(`/tasks/${taskId}/findings/${findingId}`)
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'findings'] })
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'records'] })
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'reports'] })
+    },
   })
 }
 
