@@ -217,6 +217,34 @@ describe('TaskFindingsTab', () => {
     }))
   })
 
+  it('renders long text fields as single-column sections and hides the advanced JSON editor', async () => {
+    const user = userEvent.setup()
+    renderTab()
+
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+
+    expect(screen.getByLabelText('漏洞描述')).toBeInTheDocument()
+    expect(screen.getByLabelText('修复建议')).toBeInTheDocument()
+    expect(screen.getByLabelText('请求报文')).toBeInTheDocument()
+    expect(screen.getByLabelText('响应报文')).toBeInTheDocument()
+    expect(screen.getByLabelText('复现命令')).toBeInTheDocument()
+
+    expect(screen.queryByLabelText('分类 JSON')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('证据 JSON')).not.toBeInTheDocument()
+    expect(screen.queryByText('高级字段')).not.toBeInTheDocument()
+  })
+
+  it('keeps request response and curl editors visible without tab switching', async () => {
+    const user = userEvent.setup()
+    renderTab()
+
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+
+    expect(screen.getByLabelText('请求报文')).toBeVisible()
+    expect(screen.getByLabelText('响应报文')).toBeVisible()
+    expect(screen.getByLabelText('复现命令')).toBeVisible()
+  })
+
   it('confirms and deletes a finding from the action column', async () => {
     const user = userEvent.setup()
     renderTab()

@@ -80,8 +80,6 @@ type FindingEditorState = {
   request: string
   response: string
   curlCommand: string
-  classificationJSON: string
-  evidenceJSON: string
 }
 
 const EMPTY_FILTERS: FindingFilterState = {
@@ -105,8 +103,6 @@ const EMPTY_EDITOR_STATE: FindingEditorState = {
   request: '',
   response: '',
   curlCommand: '',
-  classificationJSON: '{}',
-  evidenceJSON: '{}',
 }
 
 const inputClassNames = {
@@ -115,9 +111,23 @@ const inputClassNames = {
   label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
 }
 
-const textareaClassNames = {
-  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] min-h-[148px] items-start',
-  input: 'text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all overflow-auto',
+const autoTextareaClassNames = {
+  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] items-start',
+  input: 'text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all',
+  innerWrapper: 'items-start',
+  label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
+}
+
+const fixedLogTextareaClassNames = {
+  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] h-[232px] items-start',
+  input: 'h-full overflow-auto text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all',
+  innerWrapper: 'h-full items-start',
+  label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
+}
+
+const fixedCommandTextareaClassNames = {
+  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] h-[152px] items-start',
+  input: 'h-full overflow-auto text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all',
   innerWrapper: 'items-start',
   label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
 }
@@ -162,14 +172,6 @@ function formatPlainValue(value: unknown): string {
   return String(value)
 }
 
-function safeJSONStringify(value: Record<string, unknown>): string {
-  try {
-    return JSON.stringify(value, null, 2)
-  } catch {
-    return '{}'
-  }
-}
-
 function getRawInfoMap(item: TaskRecordVulnerabilityVM): Record<string, unknown> {
   const info = item.raw?.info
   return info && typeof info === 'object' && !Array.isArray(info) ? (info as Record<string, unknown>) : {}
@@ -210,18 +212,6 @@ function truncateText(value: string, limit = 64): string {
   return text.length > limit ? `${text.slice(0, limit)}...` : text
 }
 
-function parseJSONObject(value: string, label: string): Record<string, unknown> {
-  const text = value.trim()
-  if (!text) {
-    return {}
-  }
-  const parsed = JSON.parse(text)
-  if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
-    throw new Error(`${label}必须是 JSON 对象`)
-  }
-  return parsed as Record<string, unknown>
-}
-
 function buildMappingPatch(selection: string, ruleMap?: TaskFindingRuleMapVM): UpdateTaskFindingPayload['mapping_patch'] | undefined {
   const currentID = ruleMap?.current?.vul_type_id ? String(ruleMap.current.vul_type_id) : NO_MAPPING_VALUE
   if (selection === currentID) {
@@ -258,8 +248,6 @@ function buildEditorState(item: TaskRecordVulnerabilityVM | null): FindingEditor
     request: formatPlainValue(evidence.request),
     response: formatPlainValue(evidence.response),
     curlCommand: formatPlainValue(evidence.curl_command),
-    classificationJSON: safeJSONStringify(classification),
-    evidenceJSON: safeJSONStringify(evidence),
   }
 }
 
@@ -363,8 +351,8 @@ function FindingsDrawer({
     setSaveError('')
     setSaveSuccess('')
     try {
-      const classification = parseJSONObject(formState.classificationJSON, '分类字段')
-      const evidence = parseJSONObject(formState.evidenceJSON, '证据字段')
+      const classification = { ...(activeItem?.classification || {}) }
+      const evidence = { ...(activeItem?.evidence || {}) }
       const description = formState.description.trim()
       const remediation = formState.remediation.trim()
       const request = formState.request.trim()
@@ -605,93 +593,60 @@ function FindingsDrawer({
                   </div>
                 </SectionCard>
 
-                <SectionCard title="说明与修复" description="映射命中后，展示会自动覆盖这里的漏洞名称、级别、描述与修复建议。">
-                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                <SectionCard title="说明与修复" description="漏洞描述与修复建议按内容自然展开，避免并排阅读拥挤。">
+                  <div className="space-y-4">
                     <Textarea
                       label="漏洞描述"
                       labelPlacement="outside"
-                      minRows={5}
-                      maxRows={18}
+                      minRows={4}
                       value={formState.description}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, description: value }))}
                       isDisabled={!isEditing}
-                      classNames={textareaClassNames}
+                      classNames={autoTextareaClassNames}
                     />
                     <Textarea
                       label="修复建议"
                       labelPlacement="outside"
-                      minRows={5}
-                      maxRows={18}
+                      minRows={4}
                       value={formState.remediation}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, remediation: value }))}
                       isDisabled={!isEditing}
-                      classNames={textareaClassNames}
+                      classNames={autoTextareaClassNames}
                     />
                   </div>
                 </SectionCard>
 
-                <SectionCard title="请求与响应" description="这里编辑的是 finding 原始证据内容，保存后会进入漏洞详情与导出链路。">
+                <SectionCard title="请求与响应" description="报文与复现命令全部直接展示，长内容在各自输入框内部滚动。">
                   <div className="space-y-4">
                     <Textarea
                       label="请求报文"
                       labelPlacement="outside"
-                      minRows={6}
-                      maxRows={24}
+                      minRows={8}
+                      maxRows={8}
                       value={formState.request}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, request: value }))}
                       isDisabled={!isEditing}
-                      classNames={textareaClassNames}
+                      classNames={fixedLogTextareaClassNames}
                     />
                     <Textarea
                       label="响应报文"
                       labelPlacement="outside"
-                      minRows={6}
-                      maxRows={24}
+                      minRows={8}
+                      maxRows={8}
                       value={formState.response}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, response: value }))}
                       isDisabled={!isEditing}
-                      classNames={textareaClassNames}
+                      classNames={fixedLogTextareaClassNames}
                     />
                     <Textarea
                       label="复现命令"
                       labelPlacement="outside"
-                      minRows={4}
-                      maxRows={16}
+                      minRows={5}
+                      maxRows={5}
                       value={formState.curlCommand}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, curlCommand: value }))}
                       isDisabled={!isEditing}
-                      classNames={textareaClassNames}
-                    />
-                  </div>
-                </SectionCard>
-
-                <SectionCard title="高级字段" description="如需补充更多分类字段或证据字段，可直接编辑 JSON 对象。">
-                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                    <Textarea
-                      label="分类 JSON"
-                      labelPlacement="outside"
-                      minRows={10}
-                      maxRows={24}
-                      value={formState.classificationJSON}
-                      onValueChange={(value) => setFormState((prev) => ({ ...prev, classificationJSON: value }))}
-                      isDisabled={!isEditing}
-                      classNames={{
-                        ...textareaClassNames,
-                        input: 'font-mono text-xs leading-6 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all overflow-auto',
-                      }}
-                    />
-                    <Textarea
-                      label="证据 JSON"
-                      labelPlacement="outside"
-                      minRows={10}
-                      maxRows={24}
-                      value={formState.evidenceJSON}
-                      onValueChange={(value) => setFormState((prev) => ({ ...prev, evidenceJSON: value }))}
-                      isDisabled={!isEditing}
-                      classNames={{
-                        ...textareaClassNames,
-                        input: 'font-mono text-xs leading-6 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all overflow-auto',
-                      }}
+                      classNames={fixedCommandTextareaClassNames}
                     />
                   </div>
                 </SectionCard>

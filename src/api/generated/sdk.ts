@@ -100,6 +100,7 @@ import type {
   InternalCenterHttpHandlerTaskProgressResponse,
   InternalCenterHttpHandlerTaskRecordDetailResponse,
   InternalCenterHttpHandlerTaskRecordListResponse,
+  InternalCenterHttpHandlerTaskRecordVulnerabilityItem,
   InternalCenterHttpHandlerTaskRouteListResponse,
   InternalCenterHttpHandlerTaskRunResponse,
   InternalCenterHttpHandlerTaskSnapshotAssetItemResponse,
@@ -113,12 +114,14 @@ import type {
   InternalCenterHttpHandlerUpdateNetworkInterfaceRequest,
   InternalCenterHttpHandlerUpdatePermissionRequest,
   InternalCenterHttpHandlerUpdateRoleRequest,
+  InternalCenterHttpHandlerUpdateTaskFindingRequest,
   InternalCenterHttpHandlerUpdateTaskTemplateStatusRequest,
   InternalCenterHttpHandlerUpdateUserRolesRequest,
   InternalCenterHttpHandlerUpdateUserStatusRequest,
   InternalCenterHttpHandlerUserCreateResponse,
   InternalCenterHttpHandlerUserListResponse,
   InternalCenterHttpHandlerUserPermissionSnapshotResponse,
+  ZvasInternalPlatformModelVulnerabilityRuleMapDetail,
   ZvasPkgHttpxResponse
 } from './model';
 
@@ -6652,6 +6655,336 @@ export function useGetTasksIdFindings<TData = Awaited<ReturnType<typeof getTasks
 
 
 /**
+ * @summary 查询任务漏洞详情
+ */
+export type getTasksIdFindingsFindingIdResponse200 = {
+  data: InternalCenterHttpHandlerTaskRecordVulnerabilityItem
+  status: 200
+}
+
+export type getTasksIdFindingsFindingIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getTasksIdFindingsFindingIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getTasksIdFindingsFindingIdResponseSuccess = (getTasksIdFindingsFindingIdResponse200) & {
+  headers: Headers;
+};
+export type getTasksIdFindingsFindingIdResponseError = (getTasksIdFindingsFindingIdResponse401 | getTasksIdFindingsFindingIdResponse403) & {
+  headers: Headers;
+};
+
+export type getTasksIdFindingsFindingIdResponse = (getTasksIdFindingsFindingIdResponseSuccess | getTasksIdFindingsFindingIdResponseError)
+
+export const getGetTasksIdFindingsFindingIdUrl = (id: string,
+    findingId: string,) => {
+
+
+  
+
+  return `/tasks/${id}/findings/${findingId}`
+}
+
+export const getTasksIdFindingsFindingId = async (id: string,
+    findingId: string, options?: RequestInit): Promise<getTasksIdFindingsFindingIdResponse> => {
+  
+  return apiClient<getTasksIdFindingsFindingIdResponse>(getGetTasksIdFindingsFindingIdUrl(id,findingId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTasksIdFindingsFindingIdQueryKey = (id: string,
+    findingId: string,) => {
+    return [
+    `/tasks/${id}/findings/${findingId}`
+    ] as const;
+    }
+
+    
+export const getGetTasksIdFindingsFindingIdQueryOptions = <TData = Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(id: string,
+    findingId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTasksIdFindingsFindingIdQueryKey(id,findingId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>> = ({ signal }) => getTasksIdFindingsFindingId(id,findingId, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id && findingId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTasksIdFindingsFindingIdQueryResult = NonNullable<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>>
+export type GetTasksIdFindingsFindingIdQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetTasksIdFindingsFindingId<TData = Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    findingId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdFindingsFindingId<TData = Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    findingId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>,
+          TError,
+          Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTasksIdFindingsFindingId<TData = Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    findingId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询任务漏洞详情
+ */
+
+export function useGetTasksIdFindingsFindingId<TData = Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ id: string,
+    findingId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTasksIdFindingsFindingId>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTasksIdFindingsFindingIdQueryOptions(id,findingId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * @summary 更新任务漏洞结果
+ */
+export type putTasksIdFindingsFindingIdResponse200 = {
+  data: InternalCenterHttpHandlerTaskRecordVulnerabilityItem
+  status: 200
+}
+
+export type putTasksIdFindingsFindingIdResponse400 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 400
+}
+
+export type putTasksIdFindingsFindingIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type putTasksIdFindingsFindingIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type putTasksIdFindingsFindingIdResponseSuccess = (putTasksIdFindingsFindingIdResponse200) & {
+  headers: Headers;
+};
+export type putTasksIdFindingsFindingIdResponseError = (putTasksIdFindingsFindingIdResponse400 | putTasksIdFindingsFindingIdResponse401 | putTasksIdFindingsFindingIdResponse403) & {
+  headers: Headers;
+};
+
+export type putTasksIdFindingsFindingIdResponse = (putTasksIdFindingsFindingIdResponseSuccess | putTasksIdFindingsFindingIdResponseError)
+
+export const getPutTasksIdFindingsFindingIdUrl = (id: string,
+    findingId: string,) => {
+
+
+  
+
+  return `/tasks/${id}/findings/${findingId}`
+}
+
+export const putTasksIdFindingsFindingId = async (id: string,
+    findingId: string,
+    internalCenterHttpHandlerUpdateTaskFindingRequest: InternalCenterHttpHandlerUpdateTaskFindingRequest, options?: RequestInit): Promise<putTasksIdFindingsFindingIdResponse> => {
+  
+  return apiClient<putTasksIdFindingsFindingIdResponse>(getPutTasksIdFindingsFindingIdUrl(id,findingId),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      internalCenterHttpHandlerUpdateTaskFindingRequest,)
+  }
+);}
+  
+
+
+
+export const getPutTasksIdFindingsFindingIdMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTasksIdFindingsFindingId>>, TError,{id: string;findingId: string;data: InternalCenterHttpHandlerUpdateTaskFindingRequest}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof putTasksIdFindingsFindingId>>, TError,{id: string;findingId: string;data: InternalCenterHttpHandlerUpdateTaskFindingRequest}, TContext> => {
+
+const mutationKey = ['putTasksIdFindingsFindingId'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putTasksIdFindingsFindingId>>, {id: string;findingId: string;data: InternalCenterHttpHandlerUpdateTaskFindingRequest}> = (props) => {
+          const {id,findingId,data} = props ?? {};
+
+          return  putTasksIdFindingsFindingId(id,findingId,data,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutTasksIdFindingsFindingIdMutationResult = NonNullable<Awaited<ReturnType<typeof putTasksIdFindingsFindingId>>>
+    export type PutTasksIdFindingsFindingIdMutationBody = InternalCenterHttpHandlerUpdateTaskFindingRequest
+    export type PutTasksIdFindingsFindingIdMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 更新任务漏洞结果
+ */
+export const usePutTasksIdFindingsFindingId = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTasksIdFindingsFindingId>>, TError,{id: string;findingId: string;data: InternalCenterHttpHandlerUpdateTaskFindingRequest}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putTasksIdFindingsFindingId>>,
+        TError,
+        {id: string;findingId: string;data: InternalCenterHttpHandlerUpdateTaskFindingRequest},
+        TContext
+      > => {
+      return useMutation(getPutTasksIdFindingsFindingIdMutationOptions(options), queryClient);
+    }
+    
+/**
+ * @summary 删除任务漏洞结果
+ */
+export type deleteTasksIdFindingsFindingIdResponse200 = {
+  data: InternalCenterHttpHandlerTaskDeleteData
+  status: 200
+}
+
+export type deleteTasksIdFindingsFindingIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type deleteTasksIdFindingsFindingIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type deleteTasksIdFindingsFindingIdResponseSuccess = (deleteTasksIdFindingsFindingIdResponse200) & {
+  headers: Headers;
+};
+export type deleteTasksIdFindingsFindingIdResponseError = (deleteTasksIdFindingsFindingIdResponse401 | deleteTasksIdFindingsFindingIdResponse403) & {
+  headers: Headers;
+};
+
+export type deleteTasksIdFindingsFindingIdResponse = (deleteTasksIdFindingsFindingIdResponseSuccess | deleteTasksIdFindingsFindingIdResponseError)
+
+export const getDeleteTasksIdFindingsFindingIdUrl = (id: string,
+    findingId: string,) => {
+
+
+  
+
+  return `/tasks/${id}/findings/${findingId}`
+}
+
+export const deleteTasksIdFindingsFindingId = async (id: string,
+    findingId: string, options?: RequestInit): Promise<deleteTasksIdFindingsFindingIdResponse> => {
+  
+  return apiClient<deleteTasksIdFindingsFindingIdResponse>(getDeleteTasksIdFindingsFindingIdUrl(id,findingId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteTasksIdFindingsFindingIdMutationOptions = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTasksIdFindingsFindingId>>, TError,{id: string;findingId: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTasksIdFindingsFindingId>>, TError,{id: string;findingId: string}, TContext> => {
+
+const mutationKey = ['deleteTasksIdFindingsFindingId'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTasksIdFindingsFindingId>>, {id: string;findingId: string}> = (props) => {
+          const {id,findingId} = props ?? {};
+
+          return  deleteTasksIdFindingsFindingId(id,findingId,)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTasksIdFindingsFindingIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTasksIdFindingsFindingId>>>
+    
+    export type DeleteTasksIdFindingsFindingIdMutationError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+    /**
+ * @summary 删除任务漏洞结果
+ */
+export const useDeleteTasksIdFindingsFindingId = <TError = ErrorType<InternalCenterHttpHandlerErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTasksIdFindingsFindingId>>, TError,{id: string;findingId: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTasksIdFindingsFindingId>>,
+        TError,
+        {id: string;findingId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTasksIdFindingsFindingIdMutationOptions(options), queryClient);
+    }
+    
+/**
  * @summary 暂停任务
  */
 export type postTasksIdPauseResponse200 = {
@@ -9194,3 +9527,122 @@ export const usePatchUsersIdStatus = <TError = ErrorType<InternalCenterHttpHandl
       > => {
       return useMutation(getPatchUsersIdStatusMutationOptions(options), queryClient);
     }
+    
+/**
+ * @summary 查询漏洞映射详情
+ */
+export type getVulnerabilityLocalizationRuleMapTemplateIdResponse200 = {
+  data: ZvasInternalPlatformModelVulnerabilityRuleMapDetail
+  status: 200
+}
+
+export type getVulnerabilityLocalizationRuleMapTemplateIdResponse401 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 401
+}
+
+export type getVulnerabilityLocalizationRuleMapTemplateIdResponse403 = {
+  data: InternalCenterHttpHandlerErrorResponse
+  status: 403
+}
+
+export type getVulnerabilityLocalizationRuleMapTemplateIdResponseSuccess = (getVulnerabilityLocalizationRuleMapTemplateIdResponse200) & {
+  headers: Headers;
+};
+export type getVulnerabilityLocalizationRuleMapTemplateIdResponseError = (getVulnerabilityLocalizationRuleMapTemplateIdResponse401 | getVulnerabilityLocalizationRuleMapTemplateIdResponse403) & {
+  headers: Headers;
+};
+
+export type getVulnerabilityLocalizationRuleMapTemplateIdResponse = (getVulnerabilityLocalizationRuleMapTemplateIdResponseSuccess | getVulnerabilityLocalizationRuleMapTemplateIdResponseError)
+
+export const getGetVulnerabilityLocalizationRuleMapTemplateIdUrl = (templateId: string,) => {
+
+
+  
+
+  return `/vulnerability-localization/rule-map/${templateId}`
+}
+
+export const getVulnerabilityLocalizationRuleMapTemplateId = async (templateId: string, options?: RequestInit): Promise<getVulnerabilityLocalizationRuleMapTemplateIdResponse> => {
+  
+  return apiClient<getVulnerabilityLocalizationRuleMapTemplateIdResponse>(getGetVulnerabilityLocalizationRuleMapTemplateIdUrl(templateId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetVulnerabilityLocalizationRuleMapTemplateIdQueryKey = (templateId: string,) => {
+    return [
+    `/vulnerability-localization/rule-map/${templateId}`
+    ] as const;
+    }
+
+    
+export const getGetVulnerabilityLocalizationRuleMapTemplateIdQueryOptions = <TData = Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVulnerabilityLocalizationRuleMapTemplateIdQueryKey(templateId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>> = ({ signal }) => getVulnerabilityLocalizationRuleMapTemplateId(templateId, { signal });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(templateId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetVulnerabilityLocalizationRuleMapTemplateIdQueryResult = NonNullable<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>>
+export type GetVulnerabilityLocalizationRuleMapTemplateIdQueryError = ErrorType<InternalCenterHttpHandlerErrorResponse>
+
+
+export function useGetVulnerabilityLocalizationRuleMapTemplateId<TData = Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ templateId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>,
+          TError,
+          Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVulnerabilityLocalizationRuleMapTemplateId<TData = Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>,
+          TError,
+          Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetVulnerabilityLocalizationRuleMapTemplateId<TData = Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 查询漏洞映射详情
+ */
+
+export function useGetVulnerabilityLocalizationRuleMapTemplateId<TData = Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError = ErrorType<InternalCenterHttpHandlerErrorResponse>>(
+ templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVulnerabilityLocalizationRuleMapTemplateId>>, TError, TData>>, }
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetVulnerabilityLocalizationRuleMapTemplateIdQueryOptions(templateId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
