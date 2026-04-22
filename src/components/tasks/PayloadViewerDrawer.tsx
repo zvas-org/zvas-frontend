@@ -24,30 +24,6 @@ export function formatPayloadValue(value: unknown): string {
   }
 }
 
-export function summarizePayloadValue(value: unknown, emptyLabel: string): string {
-  if (value === null || value === undefined) return emptyLabel
-
-  if (typeof value === 'string') {
-    return hasMeaningfulPayloadText(value) ? `已捕获 ${value.length} 字符` : emptyLabel
-  }
-
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return `已捕获标量值（${String(value).length} 字符）`
-  }
-
-  if (Array.isArray(value)) {
-    return value.length ? `已捕获数组（${value.length} 项）` : emptyLabel
-  }
-
-  if (typeof value === 'object') {
-    const keys = Object.keys(value as Record<string, unknown>)
-    return keys.length ? `已捕获对象（${keys.length} 个字段）` : emptyLabel
-  }
-
-  const text = String(value)
-  return hasMeaningfulPayloadText(text) ? `已捕获 ${text.length} 字符` : emptyLabel
-}
-
 function PayloadBlock({ title, content }: { title: string; content: unknown }) {
   const text = formatPayloadValue(content)
   const hasContent = hasMeaningfulPayloadText(text)
@@ -102,7 +78,7 @@ export function PayloadViewerDrawer({
       <DrawerContent>
         <>
           <DrawerHeader className="flex flex-col gap-2">
-            <span className="text-[11px] font-black uppercase tracking-[0.28em] text-apple-text-tertiary">查看内容</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.28em] text-apple-text-tertiary">请求与响应详情</span>
           </DrawerHeader>
           <DrawerBody className="overflow-y-auto">
             <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">

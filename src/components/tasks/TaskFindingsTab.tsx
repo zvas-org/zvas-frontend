@@ -34,7 +34,6 @@ import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { FindingReportEditModal } from '@/components/tasks/FindingReportEditModal'
 import {
   PayloadViewerDrawer,
-  summarizePayloadValue,
 } from '@/components/tasks/PayloadViewerDrawer'
 import { useAuthStore } from '@/store/auth'
 import { PERMISSIONS, hasPermission } from '@/utils/permissions'
@@ -126,28 +125,6 @@ function RenderTextCell({ value, limit = 64, mono = false }: { value: string; li
     <Tooltip content={<div className="max-w-[420px] break-all text-xs">{text}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
       <span className={className}>{display}</span>
     </Tooltip>
-  )
-}
-
-function PayloadSummaryCell({ request, response }: { request: unknown; response: unknown }) {
-  const requestSummary = summarizePayloadValue(request, '暂无请求')
-  const responseSummary = summarizePayloadValue(response, '暂无响应')
-
-  return (
-    <div className="min-w-0 space-y-2">
-      <div className="flex items-start gap-2">
-        <span className="shrink-0 text-[11px] font-black uppercase tracking-[0.16em] text-apple-text-tertiary">请求摘要</span>
-        <div className="min-w-0 flex-1">
-          <span className="text-[12px] text-white">{requestSummary}</span>
-        </div>
-      </div>
-      <div className="flex items-start gap-2">
-        <span className="shrink-0 text-[11px] font-black uppercase tracking-[0.16em] text-apple-text-tertiary">响应摘要</span>
-        <div className="min-w-0 flex-1">
-          <span className="text-[12px] text-white">{responseSummary}</span>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -244,7 +221,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
             <span>当前任务漏洞扫描结果</span>
           </h3>
           <p className="text-[13px] font-medium text-apple-text-tertiary">
-            展示当前任务工作流中实际命中的漏洞记录，可筛选、查看详情、编辑误报覆盖并删除单条结果。
+            展示当前任务工作流中实际命中的漏洞记录，可筛选、查看请求与响应详情、编辑误报覆盖并删除单条结果。
           </p>
         </div>
         <Button
@@ -333,7 +310,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
           layout="fixed"
           classNames={{
             ...APPLE_TABLE_CLASSES,
-            base: 'min-w-[1820px] p-4',
+            base: 'min-w-[1760px] p-4',
             tr: `${APPLE_TABLE_CLASSES.tr} cursor-default`,
             td: `${APPLE_TABLE_CLASSES.td} align-top`,
           }}
@@ -344,11 +321,11 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
             <TableColumn width={160}>模板 ID</TableColumn>
             <TableColumn width={180}>漏洞名称</TableColumn>
             <TableColumn width={110}>级别</TableColumn>
-            <TableColumn width={260}>漏洞描述</TableColumn>
-            <TableColumn width={260}>修复建议</TableColumn>
-            <TableColumn width={280}>请求与响应</TableColumn>
+            <TableColumn width={240}>漏洞描述</TableColumn>
+            <TableColumn width={240}>修复建议</TableColumn>
+            <TableColumn width={110}>详情</TableColumn>
             <TableColumn width={180}>发现时间</TableColumn>
-            <TableColumn width={220}>操作</TableColumn>
+            <TableColumn width={190}>操作</TableColumn>
           </TableHeader>
           <TableBody
             isLoading={isPending}
@@ -370,10 +347,12 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                   <TableCell><RenderTextCell value={getBaseURL(item) || '-'} limit={40} mono /></TableCell>
                   <TableCell>
                     {matchedLink && matchedLink !== '-' ? (
-                      <a href={matchedLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[12px] font-semibold text-apple-blue-light hover:text-white">
-                        <LinkIcon className="h-4 w-4 flex-none" />
-                        <span className="truncate">{truncateText(matchedLink, 34)}</span>
-                      </a>
+                      <Tooltip content={<div className="max-w-[420px] break-all text-xs">{matchedLink}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
+                        <a href={matchedLink} target="_blank" rel="noreferrer" className="inline-flex max-w-full items-center gap-2 text-[12px] font-semibold text-apple-blue-light hover:text-white">
+                          <LinkIcon className="h-4 w-4 flex-none" />
+                          <span className="truncate">{truncateText(matchedLink, 34)}</span>
+                        </a>
+                      </Tooltip>
                     ) : (
                       <span className="text-apple-text-tertiary">-</span>
                     )}
@@ -388,16 +367,20 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                   <TableCell><RenderTextCell value={description || '-'} limit={72} /></TableCell>
                   <TableCell><RenderTextCell value={remediation || '-'} limit={72} /></TableCell>
                   <TableCell>
-                    <PayloadSummaryCell request={item.evidence?.request} response={item.evidence?.response} />
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      className="min-w-[72px] rounded-xl bg-white/6 font-bold text-white hover:bg-white/10"
+                      onPress={() => handleOpenPayloadViewer(item)}
+                    >
+                      详情
+                    </Button>
                   </TableCell>
                   <TableCell>
                     <span className="font-mono text-[12px] text-apple-text-secondary">{formatDateTime(item.matched_at)}</span>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap items-center gap-2">
-                      <Button size="sm" variant="flat" className="rounded-xl bg-white/6 font-bold text-white hover:bg-white/10" onPress={() => handleOpenPayloadViewer(item)}>
-                        查看
-                      </Button>
                       <Button
                         size="sm"
                         color="primary"

@@ -184,22 +184,23 @@ describe('TaskFindingsTab', () => {
     expect(screen.queryByText('high')).not.toBeInTheDocument()
   })
 
-  it('renders the request and response column with view edit and delete actions', () => {
+  it('renders the detail column with edit and delete actions', () => {
     renderTab()
 
-    expect(screen.getByRole('columnheader', { name: '请求与响应' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '查看' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: '详情' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '详情' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '编辑' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '删除' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '查看' })).not.toBeInTheDocument()
   })
 
-  it('opens a read-only payload viewer from the view action', async () => {
+  it('opens a read-only payload viewer from the detail action', async () => {
     const user = userEvent.setup()
     renderTab()
 
-    await user.click(screen.getByRole('button', { name: '查看' }))
+    await user.click(screen.getByRole('button', { name: '详情' }))
 
-    expect(await screen.findByText('查看内容')).toBeInTheDocument()
+    expect(await screen.findByText('请求与响应详情')).toBeInTheDocument()
     expect(screen.getByText('请求')).toBeInTheDocument()
     expect(screen.getByText('响应')).toBeInTheDocument()
     expect(screen.getByText('GET / HTTP/1.1')).toBeInTheDocument()
