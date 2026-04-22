@@ -184,15 +184,27 @@ describe('TaskFindingsTab', () => {
     expect(screen.queryByText('high')).not.toBeInTheDocument()
   })
 
-  it('opens the drawer and expands the mapping section', async () => {
+  it('renders view edit and delete actions without the legacy details button', () => {
+    renderTab()
+
+    expect(screen.getByRole('button', { name: '查看' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '编辑' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '删除' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '详情' })).not.toBeInTheDocument()
+  })
+
+  it('opens a read-only payload viewer from the view action', async () => {
     const user = userEvent.setup()
     renderTab()
 
-    await user.click(screen.getByRole('button', { name: '详情' }))
-    await user.click(screen.getByRole('button', { name: /映射覆盖/i }))
+    await user.click(screen.getByRole('button', { name: '查看' }))
 
-    expect(screen.getByText('当前展示策略')).toBeInTheDocument()
-    expect(screen.getAllByText('映射修复建议').length).toBeGreaterThan(0)
+    expect(await screen.findByText('查看内容')).toBeInTheDocument()
+    expect(screen.getByText('请求')).toBeInTheDocument()
+    expect(screen.getByText('响应')).toBeInTheDocument()
+    expect(screen.getByText('GET / HTTP/1.1')).toBeInTheDocument()
+    expect(screen.getByText('HTTP/1.1 200 OK')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '保存修改' })).not.toBeInTheDocument()
   })
 
   it('submits edited finding fields through the aggregate save API', async () => {
@@ -217,32 +229,20 @@ describe('TaskFindingsTab', () => {
     }))
   })
 
-  it('renders long text fields as single-column sections and hides the advanced JSON editor', async () => {
+  it('opens a focused edit modal with only the core report fields', async () => {
     const user = userEvent.setup()
     renderTab()
 
     await user.click(screen.getByRole('button', { name: '编辑' }))
 
+    expect(await screen.findByText('编辑漏洞结果')).toBeInTheDocument()
     expect(screen.getByLabelText('漏洞描述')).toBeInTheDocument()
     expect(screen.getByLabelText('修复建议')).toBeInTheDocument()
-    expect(screen.getByLabelText('请求报文')).toBeInTheDocument()
-    expect(screen.getByLabelText('响应报文')).toBeInTheDocument()
-    expect(screen.getByLabelText('复现命令')).toBeInTheDocument()
-
-    expect(screen.queryByLabelText('分类 JSON')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('证据 JSON')).not.toBeInTheDocument()
-    expect(screen.queryByText('高级字段')).not.toBeInTheDocument()
-  })
-
-  it('keeps request response and curl editors visible without tab switching', async () => {
-    const user = userEvent.setup()
-    renderTab()
-
-    await user.click(screen.getByRole('button', { name: '编辑' }))
-
-    expect(screen.getByLabelText('请求报文')).toBeVisible()
-    expect(screen.getByLabelText('响应报文')).toBeVisible()
-    expect(screen.getByLabelText('复现命令')).toBeVisible()
+    expect(screen.getByLabelText('漏洞名称')).toBeInTheDocument()
+    expect(screen.getAllByLabelText('漏洞级别').length).toBeGreaterThan(0)
+    expect(screen.queryByLabelText('请求报文')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('响应报文')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('复现命令')).not.toBeInTheDocument()
   })
 
   it('confirms and deletes a finding from the action column', async () => {
