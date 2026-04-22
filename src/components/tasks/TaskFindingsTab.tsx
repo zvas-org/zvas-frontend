@@ -17,8 +17,6 @@ import {
   Tooltip,
 } from '@heroui/react'
 import {
-  ArrowPathIcon,
-  BugAntIcon,
   LinkIcon,
   MagnifyingGlassIcon,
   ShieldExclamationIcon,
@@ -117,14 +115,20 @@ function RenderTextCell({ value, limit = 64, mono = false }: { value: string; li
   const text = value.trim()
   if (!text) return <span className="text-apple-text-tertiary">-</span>
   const display = truncateText(text, limit)
-  const className = mono ? 'font-mono text-[12px] text-white' : 'text-[13px] text-white'
+  const className = mono ? 'block max-w-full truncate font-mono text-[12px] text-white' : 'block max-w-full truncate text-[13px] text-white'
   if (display === text) {
-    return <span className={className}>{display}</span>
+    return (
+      <div className="min-w-0 max-w-full">
+        <span className={className}>{display}</span>
+      </div>
+    )
   }
   return (
-    <Tooltip content={<div className="max-w-[420px] break-all text-xs">{text}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
-      <span className={className}>{display}</span>
-    </Tooltip>
+    <div className="min-w-0 max-w-full">
+      <Tooltip content={<div className="max-w-[420px] break-all text-xs">{text}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
+        <span className={className}>{display}</span>
+      </Tooltip>
+    </div>
   )
 }
 
@@ -214,25 +218,6 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
 
   return (
     <div className="mb-8 flex w-full animate-in fade-in flex-col gap-6 duration-500">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col">
-          <h3 className="mb-1 flex items-center gap-2 text-xl font-black tracking-tight text-white">
-            <BugAntIcon className="h-6 w-6 text-apple-red-light drop-shadow-[0_0_8px_rgba(255,59,48,0.5)]" />
-            <span>当前任务漏洞扫描结果</span>
-          </h3>
-          <p className="text-[13px] font-medium text-apple-text-tertiary">
-            展示当前任务工作流中实际命中的漏洞记录，可筛选、查看请求与响应详情、编辑误报覆盖并删除单条结果。
-          </p>
-        </div>
-        <Button
-          variant="flat"
-          isIconOnly
-          className="h-12 w-12 rounded-[16px] border border-white/5 bg-apple-tertiary-bg/10 backdrop-blur-md transition-colors hover:bg-white/10"
-          onPress={() => refetch()}
-        >
-          <ArrowPathIcon className="h-5 w-5 text-apple-text-secondary" />
-        </Button>
-      </div>
 
       <section className="rounded-[28px] border border-white/8 bg-white/[0.02] p-4 backdrop-blur-3xl">
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_220px_auto]">
@@ -310,7 +295,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
           layout="fixed"
           classNames={{
             ...APPLE_TABLE_CLASSES,
-            base: 'min-w-[1760px] p-4',
+            base: 'min-w-[1680px] p-4',
             tr: `${APPLE_TABLE_CLASSES.tr} cursor-default`,
             td: `${APPLE_TABLE_CLASSES.td} align-top`,
           }}
@@ -321,11 +306,11 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
             <TableColumn width={160}>模板 ID</TableColumn>
             <TableColumn width={180}>漏洞名称</TableColumn>
             <TableColumn width={110}>级别</TableColumn>
-            <TableColumn width={240}>漏洞描述</TableColumn>
-            <TableColumn width={240}>修复建议</TableColumn>
-            <TableColumn width={110}>详情</TableColumn>
+            <TableColumn width={220}>漏洞描述</TableColumn>
+            <TableColumn width={220}>修复建议</TableColumn>
+            <TableColumn width={130}>请求与响应</TableColumn>
             <TableColumn width={180}>发现时间</TableColumn>
-            <TableColumn width={190}>操作</TableColumn>
+            <TableColumn width={170}>操作</TableColumn>
           </TableHeader>
           <TableBody
             isLoading={isPending}
@@ -348,9 +333,9 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                   <TableCell>
                     {matchedLink && matchedLink !== '-' ? (
                       <Tooltip content={<div className="max-w-[420px] break-all text-xs">{matchedLink}</div>} classNames={{ content: 'border border-white/10 bg-apple-bg/95 px-3 py-2 text-white' }}>
-                        <a href={matchedLink} target="_blank" rel="noreferrer" className="inline-flex max-w-full items-center gap-2 text-[12px] font-semibold text-apple-blue-light hover:text-white">
+                        <a href={matchedLink} target="_blank" rel="noreferrer" className="flex min-w-0 max-w-full items-center gap-2 text-[12px] font-semibold text-apple-blue-light hover:text-white">
                           <LinkIcon className="h-4 w-4 flex-none" />
-                          <span className="truncate">{truncateText(matchedLink, 34)}</span>
+                          <span className="min-w-0 flex-1 truncate">{truncateText(matchedLink, 34)}</span>
                         </a>
                       </Tooltip>
                     ) : (
@@ -373,7 +358,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                       className="min-w-[72px] rounded-xl bg-white/6 font-bold text-white hover:bg-white/10"
                       onPress={() => handleOpenPayloadViewer(item)}
                     >
-                      详情
+                      查看
                     </Button>
                   </TableCell>
                   <TableCell>

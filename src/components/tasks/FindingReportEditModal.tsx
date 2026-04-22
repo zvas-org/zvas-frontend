@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type Key, type ReactNode } from 'react'
 
 import {
+  Autocomplete,
+  AutocompleteItem,
   Button,
   Chip,
   Input,
@@ -51,16 +53,48 @@ const EMPTY_EDITOR_STATE: FindingEditorState = {
 }
 
 const inputClassNames = {
-  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07]',
+  base: 'min-w-0 w-full',
+  inputWrapper: 'h-14 w-full rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07]',
   input: 'text-sm text-white placeholder:text-apple-text-tertiary',
-  label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
 }
 
 const textareaClassNames = {
-  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] items-start',
-  input: 'text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all',
-  innerWrapper: 'items-start',
-  label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
+  base: 'min-w-0 w-full',
+  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] items-start !h-auto min-h-[148px] px-0',
+  input: 'min-w-0 w-full max-h-[240px] overflow-y-auto text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-words',
+  innerWrapper: 'items-start w-full',
+}
+
+function FieldLabel({ children }: { children: string }) {
+  return <div className="text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary">{children}</div>
+}
+
+function FieldGroup({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <FieldLabel>{label}</FieldLabel>
+      {children}
+    </div>
+  )
+}
+
+function CompactInfoField({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string
+  value: string
+  mono?: boolean
+}) {
+  return (
+    <div className="min-w-0 space-y-2">
+      <FieldLabel>{label}</FieldLabel>
+      <div className={`flex h-14 min-w-0 items-center rounded-[18px] border border-white/8 bg-white/5 px-4 text-sm ${mono ? 'font-mono text-[12px]' : ''} break-words text-white`}>
+        {value || '-'}
+      </div>
+    </div>
+  )
 }
 
 function formatPayloadValue(value: unknown): string {
@@ -90,7 +124,7 @@ function buildEditorState(item: TaskRecordVulnerabilityVM | null): FindingEditor
   }
 }
 
-function buildMappingPatch(
+export function buildMappingPatch(
   selection: string,
   ruleMap?: TaskFindingRuleMapVM,
 ): UpdateTaskFindingPayload['mapping_patch'] | undefined {
@@ -107,6 +141,14 @@ function buildMappingPatch(
     return undefined
   }
   return { vul_type_id: vulTypeID }
+}
+
+function readSingleSelectionValue(keys: 'all' | Set<Key>): string | undefined {
+  if (keys === 'all') {
+    return undefined
+  }
+  const [value] = Array.from(keys)
+  return value === undefined || value === null ? undefined : String(value)
 }
 
 export function FindingReportEditModal({
@@ -136,6 +178,7 @@ export function FindingReportEditModal({
   const [formState, setFormState] = useState<FindingEditorState>(EMPTY_EDITOR_STATE)
   const [mappingExpanded, setMappingExpanded] = useState(false)
   const [mappingSelection, setMappingSelection] = useState(NO_MAPPING_VALUE)
+  const [mappingQuery, setMappingQuery] = useState('')
   const [saveError, setSaveError] = useState('')
   const [saveSuccess, setSaveSuccess] = useState('')
 
@@ -144,6 +187,7 @@ export function FindingReportEditModal({
       setFormState({ ...EMPTY_EDITOR_STATE })
       setMappingExpanded(false)
       setMappingSelection(NO_MAPPING_VALUE)
+      setMappingQuery('')
       setSaveError('')
       setSaveSuccess('')
       return
@@ -155,13 +199,25 @@ export function FindingReportEditModal({
     if (!isOpen) {
       return
     }
-    setMappingSelection(ruleMap?.current?.vul_type_id ? String(ruleMap.current.vul_type_id) : NO_MAPPING_VALUE)
+    const nextSelection = ruleMap?.current?.vul_type_id ? String(ruleMap.current.vul_type_id) : NO_MAPPING_VALUE
+    setMappingSelection(nextSelection)
+    const nextLabel = nextSelection === NO_MAPPING_VALUE
+      ? '无映射'
+      : ruleMap?.candidates.find((candidate) => String(candidate.vul_type_id) === nextSelection)?.vul_type || ''
+    setMappingQuery(nextLabel)
   }, [isOpen, ruleMap])
 
   const mappingOptions = useMemo(
     () => [{ key: NO_MAPPING_VALUE, label: '无映射' }, ...((ruleMap?.candidates || []).map((candidate) => ({ key: String(candidate.vul_type_id), label: candidate.vul_type })))],
     [ruleMap],
   )
+  const filteredMappingOptions = useMemo(() => {
+    const keyword = mappingQuery.trim().toLowerCase()
+    if (!keyword) {
+      return mappingOptions
+    }
+    return mappingOptions.filter((candidate) => candidate.label.toLowerCase().includes(keyword))
+  }, [mappingOptions, mappingQuery])
   const selectedCandidate = useMemo(
     () => ruleMap?.candidates.find((candidate) => String(candidate.vul_type_id) === mappingSelection),
     [mappingSelection, ruleMap],
@@ -224,44 +280,43 @@ export function FindingReportEditModal({
     <Modal
       isOpen={isOpen}
       onOpenChange={(open) => !open && onClose()}
-      size="5xl"
+      size="4xl"
       backdrop="blur"
       scrollBehavior="inside"
       classNames={{
         backdrop: 'bg-apple-bg/80 backdrop-blur-md',
-        base: 'bg-apple-bg/92 text-apple-text-primary border border-white/10 rounded-[32px] shadow-2xl',
-        header: 'border-b border-white/6 px-6 py-5 sm:px-8 sm:py-6',
-        body: 'px-6 py-5 sm:px-8 sm:py-6',
-        footer: 'border-t border-white/6 px-6 py-5 sm:px-8 sm:py-6',
+        base: 'max-w-[960px] bg-apple-bg/92 text-apple-text-primary border border-white/10 rounded-[28px] shadow-2xl',
+        header: 'border-b border-white/6 px-5 py-4 sm:px-6 sm:py-5',
+        body: 'px-5 py-5 sm:px-6 sm:py-5',
+        footer: 'border-t border-white/6 px-5 py-4 sm:px-6 sm:py-5',
       }}
     >
       <ModalContent>
         <>
-          <ModalHeader className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-3">
-                <span className="text-[11px] font-black uppercase tracking-[0.28em] text-apple-text-tertiary">编辑漏洞报告</span>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="text-2xl font-black tracking-tight text-white">{activeItem?.rule_name || item?.rule_name || '漏洞报告'}</h3>
-                  <Chip size="sm" variant="flat" color={getSeverityColor(activeItem?.severity || item?.severity || '')} classNames={{ base: 'border-0 px-2 font-black uppercase tracking-[0.18em]' }}>
-                    {normalizeSeverityDisplay(activeItem?.severity || item?.severity || '') || '-'}
-                  </Chip>
-                </div>
+          <ModalHeader className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              <span className="text-[11px] font-black uppercase tracking-[0.28em] text-apple-text-tertiary">编辑漏洞报告</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <h3 className="text-xl font-black tracking-tight text-white">{activeItem?.rule_name || item?.rule_name || '漏洞报告'}</h3>
+                <Chip size="sm" variant="flat" color={getSeverityColor(activeItem?.severity || item?.severity || '')} classNames={{ base: 'border-0 px-2 font-black uppercase tracking-[0.18em]' }}>
+                  {normalizeSeverityDisplay(activeItem?.severity || item?.severity || '') || '-'}
+                </Chip>
               </div>
-              <Button
-                variant="flat"
-                className="rounded-xl bg-white/5 font-bold text-white hover:bg-white/10"
-                onPress={() => refetch()}
-                isDisabled={isPending}
-              >
-                刷新
-              </Button>
+              <p className="text-sm text-apple-text-secondary">仅编辑报告展示相关字段，短信息紧凑排布，长文本单独编辑。</p>
             </div>
+            <Button
+              variant="flat"
+              className="rounded-xl bg-white/5 font-bold text-white hover:bg-white/10"
+              onPress={() => refetch()}
+              isDisabled={isPending}
+            >
+              刷新
+            </Button>
           </ModalHeader>
 
-          <ModalBody className="space-y-6">
+          <ModalBody className="space-y-5">
             {isPending && !activeItem ? (
-              <div className="flex min-h-[320px] items-center justify-center">
+              <div className="flex min-h-[240px] items-center justify-center">
                 <Spinner color="primary" label="正在加载漏洞详情..." labelColor="primary" />
               </div>
             ) : null}
@@ -274,52 +329,106 @@ export function FindingReportEditModal({
 
             {activeItem ? (
               <>
-                <section className="space-y-4 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Input
-                      label="漏洞名称"
-                      labelPlacement="outside"
-                      value={formState.ruleName}
-                      onValueChange={(value) => setFormState((prev) => ({ ...prev, ruleName: value }))}
-                      classNames={inputClassNames}
-                    />
-                    <Select
-                      label="漏洞级别"
-                      labelPlacement="outside"
-                      selectedKeys={new Set([formState.severity || 'info'])}
-                      onChange={(event) => setFormState((prev) => ({ ...prev, severity: event.target.value || 'info' }))}
-                      classNames={{
-                        trigger: inputClassNames.inputWrapper,
-                        value: 'truncate pl-1 text-sm text-white',
-                        label: inputClassNames.label,
-                      }}
-                      popoverProps={{ classNames: { content: 'min-w-[220px] border border-white/10 bg-apple-bg/95 p-1 backdrop-blur-3xl shadow-2xl' } }}
-                    >
-                      {VULNERABILITY_SEVERITY_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} textValue={option.label}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </Select>
+                <section className="space-y-5 rounded-[24px] border border-white/8 bg-white/[0.03] p-4 sm:p-5">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                    <FieldGroup label="漏洞名称">
+                      <Input
+                        aria-label="漏洞名称"
+                        value={formState.ruleName}
+                        onValueChange={(value) => setFormState((prev) => ({ ...prev, ruleName: value }))}
+                        classNames={inputClassNames}
+                      />
+                    </FieldGroup>
+                    <FieldGroup label="漏洞级别">
+                      <Select
+                        aria-label="漏洞级别"
+                        selectedKeys={new Set([formState.severity || 'info'])}
+                        onChange={(event) => setFormState((prev) => ({ ...prev, severity: event.target.value || 'info' }))}
+                        onSelectionChange={(keys) => {
+                          setFormState((prev) => ({ ...prev, severity: readSingleSelectionValue(keys) || 'info' }))
+                        }}
+                        classNames={{
+                          base: 'min-w-0 w-full',
+                          trigger: inputClassNames.inputWrapper,
+                          value: 'truncate pl-1 text-sm text-white',
+                        }}
+                        popoverProps={{ classNames: { content: 'min-w-[220px] border border-white/10 bg-apple-bg/95 p-1 backdrop-blur-3xl shadow-2xl' } }}
+                      >
+                        {VULNERABILITY_SEVERITY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} textValue={option.label}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    </FieldGroup>
+                    <CompactInfoField label="模板 ID" value={ruleID || '-'} mono />
                   </div>
 
-                  <Textarea
-                    label="漏洞描述"
-                    labelPlacement="outside"
-                    minRows={5}
-                    value={formState.description}
-                    onValueChange={(value) => setFormState((prev) => ({ ...prev, description: value }))}
-                    classNames={textareaClassNames}
-                  />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                    <CompactInfoField label="当前映射" value={ruleMap?.current?.vul_type || '无映射'} />
+                    <FieldGroup label="覆盖到漏洞类型">
+                      <Autocomplete
+                        aria-label="覆盖到漏洞类型"
+                        items={filteredMappingOptions}
+                        selectedKey={mappingSelection}
+                        inputValue={mappingQuery}
+                        onInputChange={(value) => {
+                          setMappingQuery(value)
+                        }}
+                        onSelectionChange={(key) => {
+                          const nextValue = key === null ? NO_MAPPING_VALUE : String(key)
+                          const nextLabel = mappingOptions.find((candidate) => candidate.key === nextValue)?.label || ''
+                          setMappingSelection(nextValue || NO_MAPPING_VALUE)
+                          setMappingQuery(nextLabel)
+                        }}
+                        classNames={{
+                          base: 'min-w-0 w-full',
+                          popoverContent: 'min-w-[260px] border border-white/10 bg-apple-bg/95 p-1 backdrop-blur-3xl shadow-2xl',
+                          selectorButton: 'text-white',
+                          listboxWrapper: 'max-h-72',
+                        }}
+                        inputProps={{
+                          classNames: {
+                            base: 'min-w-0 w-full',
+                            inputWrapper: inputClassNames.inputWrapper,
+                            input: 'text-sm text-white placeholder:text-apple-text-tertiary',
+                          },
+                        }}
+                        placeholder="搜索漏洞类型或选择无映射"
+                        allowsCustomValue={false}
+                      >
+                        {(item) => (
+                          <AutocompleteItem key={item.key} textValue={item.label}>
+                            {item.label}
+                          </AutocompleteItem>
+                        )}
+                      </Autocomplete>
+                    </FieldGroup>
+                  </div>
 
-                  <Textarea
-                    label="修复建议"
-                    labelPlacement="outside"
-                    minRows={5}
-                    value={formState.remediation}
-                    onValueChange={(value) => setFormState((prev) => ({ ...prev, remediation: value }))}
-                    classNames={textareaClassNames}
-                  />
+                  <div className="space-y-4">
+                    <FieldGroup label="漏洞描述">
+                      <Textarea
+                        aria-label="漏洞描述"
+                        minRows={4}
+                        maxRows={10}
+                        value={formState.description}
+                        onValueChange={(value) => setFormState((prev) => ({ ...prev, description: value }))}
+                        classNames={textareaClassNames}
+                      />
+                    </FieldGroup>
+
+                    <FieldGroup label="修复建议">
+                      <Textarea
+                        aria-label="修复建议"
+                        minRows={4}
+                        maxRows={10}
+                        value={formState.remediation}
+                        onValueChange={(value) => setFormState((prev) => ({ ...prev, remediation: value }))}
+                        classNames={textareaClassNames}
+                      />
+                    </FieldGroup>
+                  </div>
                 </section>
 
                 <section className="rounded-[24px] border border-white/8 bg-white/[0.02]">
@@ -346,33 +455,13 @@ export function FindingReportEditModal({
                         </div>
                       ) : (
                         <>
-                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                            <Input label="模板 ID" labelPlacement="outside" value={ruleID || '-'} isDisabled classNames={inputClassNames} />
-                            <Input
-                              label="当前映射"
-                              labelPlacement="outside"
-                              value={ruleMap?.current?.vul_type || '无映射'}
-                              isDisabled
-                              classNames={inputClassNames}
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <CompactInfoField label="模板 ID" value={ruleID || '-'} mono />
+                            <CompactInfoField label="当前映射" value={ruleMap?.current?.vul_type || '无映射'} />
+                            <CompactInfoField
+                              label="展示级别"
+                              value={normalizeSeverityDisplay(selectedCandidate?.default_severity || ruleMap?.current?.default_severity || activeItem.severity || '') || '-'}
                             />
-                            <Select
-                              label="覆盖到漏洞类型"
-                              labelPlacement="outside"
-                              selectedKeys={new Set([mappingSelection])}
-                              onChange={(event) => setMappingSelection(event.target.value || NO_MAPPING_VALUE)}
-                              classNames={{
-                                trigger: inputClassNames.inputWrapper,
-                                value: 'truncate pl-1 text-sm text-white',
-                                label: inputClassNames.label,
-                              }}
-                              popoverProps={{ classNames: { content: 'min-w-[260px] border border-white/10 bg-apple-bg/95 p-1 backdrop-blur-3xl shadow-2xl' } }}
-                            >
-                              {mappingOptions.map((candidate) => (
-                                <SelectItem key={candidate.key} textValue={candidate.label}>
-                                  {candidate.label}
-                                </SelectItem>
-                              ))}
-                            </Select>
                           </div>
 
                           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

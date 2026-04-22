@@ -37,20 +37,20 @@ const RECORD_TABS: Array<{
   label: string;
   description: string;
 }> = [
-  { key: "all", label: "全部记录", description: "统一查看所有扫描单元" },
-  {
-    key: "port_scan",
-    label: "端口扫描",
-    description: "查看端口开放和服务识别",
-  },
-  { key: "http_probe", label: "站点识别", description: "查看请求与响应报文" },
-  { key: "vuln_scan", label: "漏洞扫描", description: "查看漏洞命中与摘要" },
-  {
-    key: "weak_scan",
-    label: "弱点扫描",
-    description: "查看弱点扫描执行摘要与明细入口",
-  },
-];
+    { key: "all", label: "全部记录", description: "统一查看当前任务生成的所有扫描记录" },
+    {
+      key: "port_scan",
+      label: "端口扫描",
+      description: "查看端口开放状态与基础服务识别结果",
+    },
+    { key: "http_probe", label: "站点识别", description: "查看请求响应摘要与站点指纹信息" },
+    { key: "vuln_scan", label: "漏洞扫描", description: "查看漏洞命中、报告字段与请求响应内容" },
+    {
+      key: "weak_scan",
+      label: "弱点扫描",
+      description: "查看弱点扫描结果与来源任务信息",
+    },
+  ];
 
 function formatDateTime(value?: string) {
   if (!value) return "-";
@@ -163,11 +163,10 @@ const SUMMARY_RENDERERS: Record<string, SummaryRenderer> = {
       <div className="flex flex-col gap-1 w-full overflow-hidden">
         <div className="flex items-center gap-2 w-full">
           <span
-            className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
-              sum.status_code && sum.status_code >= 200 && sum.status_code < 400
-                ? "bg-apple-green/20 text-apple-green-light"
-                : "bg-white/10 text-white/70"
-            }`}
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 ${sum.status_code && sum.status_code >= 200 && sum.status_code < 400
+              ? "bg-apple-green/20 text-apple-green-light"
+              : "bg-white/10 text-white/70"
+              }`}
           >
             {sum.status_code || "-"}
           </span>
@@ -196,26 +195,24 @@ const SUMMARY_RENDERERS: Record<string, SummaryRenderer> = {
     return (
       <div className="flex items-center gap-2 w-full overflow-hidden">
         <span
-          className={`shrink-0 w-1.5 h-1.5 rounded-full ${
-            isFound
-              ? "bg-apple-red"
-              : isSkipped
-                ? "bg-apple-amber"
-                : isClean
-                  ? "bg-apple-green"
-                  : "bg-white/30"
-          }`}
+          className={`shrink-0 w-1.5 h-1.5 rounded-full ${isFound
+            ? "bg-apple-red"
+            : isSkipped
+              ? "bg-apple-amber"
+              : isClean
+                ? "bg-apple-green"
+                : "bg-white/30"
+            }`}
         />
         <span
-          className={`text-[12px] truncate font-medium ${
-            isFound
-              ? "text-apple-red-light"
-              : isSkipped
-                ? "text-apple-amber"
-                : isClean
-                  ? "text-apple-green-light"
-                  : "text-apple-text-secondary"
-          }`}
+          className={`text-[12px] truncate font-medium ${isFound
+            ? "text-apple-red-light"
+            : isSkipped
+              ? "text-apple-amber"
+              : isClean
+                ? "text-apple-green-light"
+                : "text-apple-text-secondary"
+            }`}
         >
           {String(summary)}
         </span>
@@ -267,11 +264,10 @@ function renderStatus(item: TaskRecordVM) {
         </span>
         {obs.state !== "unknown" && obs.state !== "failed" && (
           <span
-            className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest ${
-              obs.state === "alive"
-                ? "border border-apple-green/40 text-apple-green-light bg-apple-green/10"
-                : "border border-white/20 text-apple-text-secondary bg-white/5"
-            }`}
+            className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest ${obs.state === "alive"
+              ? "border border-apple-green/40 text-apple-green-light bg-apple-green/10"
+              : "border border-white/20 text-apple-text-secondary bg-white/5"
+              }`}
           >
             {obs.label}
           </span>
@@ -346,11 +342,10 @@ export function TaskRecordsTab({ taskId }: { taskId?: string }) {
                 setPage(1);
                 setSelectedRecord(null);
               }}
-              className={`min-w-[180px] rounded-2xl border px-4 py-3 text-left transition-all ${
-                active
-                  ? "border-apple-blue/40 bg-apple-blue/10 shadow-lg shadow-apple-blue/10"
-                  : "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]"
-              }`}
+              className={`min-w-[180px] rounded-2xl border px-4 py-3 text-left transition-all ${active
+                ? "border-apple-blue/40 bg-apple-blue/10 shadow-lg shadow-apple-blue/10"
+                : "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]"
+                }`}
             >
               <div
                 className={`text-sm font-black ${active ? "text-white" : "text-apple-text-secondary"}`}

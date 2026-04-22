@@ -10,6 +10,7 @@ import {
   useUpdateTaskFinding,
 } from '@/api/adapters/task'
 import { AppProviders } from '@/app/providers'
+import { buildMappingPatch } from '@/components/tasks/FindingReportEditModal'
 import { TaskFindingsTab } from '@/components/tasks/TaskFindingsTab'
 import { useAuthStore } from '@/store/auth'
 
@@ -184,21 +185,20 @@ describe('TaskFindingsTab', () => {
     expect(screen.queryByText('high')).not.toBeInTheDocument()
   })
 
-  it('renders the detail column with edit and delete actions', () => {
+  it('renders the request-response column with view edit and delete actions', () => {
     renderTab()
 
-    expect(screen.getByRole('columnheader', { name: '详情' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '详情' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: '请求与响应' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '查看' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '编辑' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '删除' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '查看' })).not.toBeInTheDocument()
   })
 
-  it('opens a read-only payload viewer from the detail action', async () => {
+  it('opens a read-only payload viewer from the view action', async () => {
     const user = userEvent.setup()
     renderTab()
 
-    await user.click(screen.getByRole('button', { name: '详情' }))
+    await user.click(screen.getByRole('button', { name: '查看' }))
 
     expect(await screen.findByText('请求与响应详情')).toBeInTheDocument()
     expect(screen.getByText('请求')).toBeInTheDocument()
@@ -244,6 +244,21 @@ describe('TaskFindingsTab', () => {
     expect(screen.getByRole('button', { name: /映射覆盖/i })).toBeInTheDocument()
     expect(screen.queryByLabelText('请求报文')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('响应报文')).not.toBeInTheDocument()
+  })
+
+  it('builds a clear-mapping patch when switching an existing mapping to none', () => {
+    expect(buildMappingPatch('__none__', {
+      template_id: 'demo-rule',
+      current: {
+        vul_type_id: 2,
+        code: 'git-config',
+        vul_type: '敏感文件泄露',
+        default_severity: '高危',
+        impact_zh: '映射描述',
+        remediation_zh: '映射修复建议',
+      },
+      candidates: [],
+    })).toEqual({ clear_mapping: true })
   })
 
   it('confirms and deletes a finding from the action column', async () => {
