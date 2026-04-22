@@ -42,7 +42,6 @@ import { APPLE_TABLE_CLASSES } from '@/utils/theme'
 import {
   getSeverityColor,
   normalizeSeverityDisplay,
-  normalizeSeverityValue,
   VULNERABILITY_SEVERITY_OPTIONS,
 } from '@/utils/vulnerability'
 
@@ -57,12 +56,6 @@ const EMPTY_FILTERS: FindingFilterState = {
   url: '',
   pocID: '',
   severity: 'all',
-}
-
-const inputClassNames = {
-  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07]',
-  input: 'text-sm text-white placeholder:text-apple-text-tertiary',
-  label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
 }
 
 function formatDateTime(value?: string): string {
@@ -119,45 +112,6 @@ function truncateText(value: string, limit = 64): string {
   const text = value.trim()
   if (!text) return '-'
   return text.length > limit ? `${text.slice(0, limit)}...` : text
-}
-
-function buildMappingPatch(selection: string, ruleMap?: TaskFindingRuleMapVM): UpdateTaskFindingPayload['mapping_patch'] | undefined {
-  const currentID = ruleMap?.current?.vul_type_id ? String(ruleMap.current.vul_type_id) : NO_MAPPING_VALUE
-  if (selection === currentID) {
-    return undefined
-  }
-  if (selection === NO_MAPPING_VALUE) {
-    return currentID === NO_MAPPING_VALUE ? undefined : { clear_mapping: true }
-  }
-  const vulTypeID = Number(selection)
-  if (!Number.isInteger(vulTypeID) || vulTypeID <= 0) {
-    return undefined
-  }
-  return { vul_type_id: vulTypeID }
-}
-
-function buildEditorState(item: TaskRecordVulnerabilityVM | null): FindingEditorState {
-  if (!item) {
-    return { ...EMPTY_EDITOR_STATE }
-  }
-  const classification = { ...(item.classification || {}) }
-  const evidence = { ...(item.evidence || {}) }
-  return {
-    ruleName: item.rule_name || '',
-    severity: normalizeSeverityValue(item.severity || 'info') || 'info',
-    matchedAt: formatDateTimeInput(item.matched_at),
-    targetURL: item.target_url || '',
-    host: item.host || '',
-    ip: item.ip || '',
-    port: item.port ? String(item.port) : '',
-    scheme: item.scheme || '',
-    matcherName: item.matcher_name || '',
-    description: formatPayloadValue(classification.description),
-    remediation: formatPayloadValue(classification.remediation ?? classification.solution),
-    request: formatPayloadValue(evidence.request),
-    response: formatPayloadValue(evidence.response),
-    curlCommand: formatPayloadValue(evidence.curl_command),
-  }
 }
 
 function RenderTextCell({ value, limit = 64, mono = false }: { value: string; limit?: number; mono?: boolean }) {
