@@ -116,8 +116,9 @@ const inputClassNames = {
 }
 
 const textareaClassNames = {
-  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07]',
-  input: 'text-sm leading-7 text-white placeholder:text-apple-text-tertiary',
+  inputWrapper: 'rounded-[18px] border border-white/8 bg-white/5 transition-colors hover:bg-white/[0.07] min-h-[148px] items-start',
+  input: 'text-sm leading-7 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all overflow-auto',
+  innerWrapper: 'items-start',
   label: 'text-[11px] font-black uppercase tracking-[0.18em] text-apple-text-tertiary',
 }
 
@@ -610,6 +611,7 @@ function FindingsDrawer({
                       label="漏洞描述"
                       labelPlacement="outside"
                       minRows={5}
+                      maxRows={18}
                       value={formState.description}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, description: value }))}
                       isDisabled={!isEditing}
@@ -619,6 +621,7 @@ function FindingsDrawer({
                       label="修复建议"
                       labelPlacement="outside"
                       minRows={5}
+                      maxRows={18}
                       value={formState.remediation}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, remediation: value }))}
                       isDisabled={!isEditing}
@@ -633,6 +636,7 @@ function FindingsDrawer({
                       label="请求报文"
                       labelPlacement="outside"
                       minRows={6}
+                      maxRows={24}
                       value={formState.request}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, request: value }))}
                       isDisabled={!isEditing}
@@ -642,6 +646,7 @@ function FindingsDrawer({
                       label="响应报文"
                       labelPlacement="outside"
                       minRows={6}
+                      maxRows={24}
                       value={formState.response}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, response: value }))}
                       isDisabled={!isEditing}
@@ -651,6 +656,7 @@ function FindingsDrawer({
                       label="复现命令"
                       labelPlacement="outside"
                       minRows={4}
+                      maxRows={16}
                       value={formState.curlCommand}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, curlCommand: value }))}
                       isDisabled={!isEditing}
@@ -665,24 +671,26 @@ function FindingsDrawer({
                       label="分类 JSON"
                       labelPlacement="outside"
                       minRows={10}
+                      maxRows={24}
                       value={formState.classificationJSON}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, classificationJSON: value }))}
                       isDisabled={!isEditing}
                       classNames={{
                         ...textareaClassNames,
-                        input: 'font-mono text-xs leading-6 text-white placeholder:text-apple-text-tertiary',
+                        input: 'font-mono text-xs leading-6 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all overflow-auto',
                       }}
                     />
                     <Textarea
                       label="证据 JSON"
                       labelPlacement="outside"
                       minRows={10}
+                      maxRows={24}
                       value={formState.evidenceJSON}
                       onValueChange={(value) => setFormState((prev) => ({ ...prev, evidenceJSON: value }))}
                       isDisabled={!isEditing}
                       classNames={{
                         ...textareaClassNames,
-                        input: 'font-mono text-xs leading-6 text-white placeholder:text-apple-text-tertiary',
+                        input: 'font-mono text-xs leading-6 text-white placeholder:text-apple-text-tertiary whitespace-pre-wrap break-all overflow-auto',
                       }}
                     />
                   </div>
@@ -812,7 +820,7 @@ function FindingsDrawer({
 
 export function TaskFindingsTab({ taskId }: { taskId: string }) {
   const currentUser = useAuthStore((state) => state.currentUser)
-  const canUpdateFinding = hasPermission(currentUser?.permissions, PERMISSIONS.taskUpdate)
+  const canDeleteFinding = hasPermission(currentUser?.permissions, PERMISSIONS.taskUpdate)
   const [page, setPage] = useState(1)
   const [draftFilters, setDraftFilters] = useState<FindingFilterState>(EMPTY_FILTERS)
   const [filters, setFilters] = useState<FindingFilterState>(EMPTY_FILTERS)
@@ -1050,7 +1058,6 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                         variant="flat"
                         className="rounded-xl font-bold"
                         onPress={() => handleOpenDrawer(item, true)}
-                        isDisabled={!canUpdateFinding}
                       >
                         编辑
                       </Button>
@@ -1060,7 +1067,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                         variant="flat"
                         className="rounded-xl font-bold"
                         onPress={() => setPendingDeleteItem(item)}
-                        isDisabled={!canUpdateFinding}
+                        isDisabled={!canDeleteFinding}
                         startContent={<TrashIcon className="h-4 w-4" />}
                       >
                         删除
