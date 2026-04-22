@@ -110,6 +110,42 @@ function formatPayloadValue(value: unknown): string {
   }
 }
 
+function firstNonEmptyPayloadText(...values: unknown[]): string {
+  for (const value of values) {
+    const text = formatPayloadValue(value).trim()
+    if (text) {
+      return text
+    }
+  }
+  return ''
+}
+
+function getRawInfoMap(item: TaskRecordVulnerabilityVM | null): Record<string, unknown> {
+  const info = item?.raw?.info
+  return info && typeof info === 'object' && !Array.isArray(info) ? info as Record<string, unknown> : {}
+}
+
+function getOriginalFindingDescription(item: TaskRecordVulnerabilityVM | null): string {
+  const info = getRawInfoMap(item)
+  return firstNonEmptyPayloadText(info.description, item?.raw?.description)
+}
+
+function getOriginalFindingRemediation(item: TaskRecordVulnerabilityVM | null): string {
+  const info = getRawInfoMap(item)
+  const reference = Array.isArray(info.reference) ? info.reference.filter(Boolean).join('\n') : info.reference
+  return firstNonEmptyPayloadText(info.remediation, info.solution, item?.raw?.remediation, reference)
+}
+
+function getOriginalFindingRuleName(item: TaskRecordVulnerabilityVM | null): string {
+  const info = getRawInfoMap(item)
+  return firstNonEmptyPayloadText(info.name, item?.raw?.rule_name, item?.rule_name)
+}
+
+function getOriginalFindingSeverity(item: TaskRecordVulnerabilityVM | null): string {
+  const info = getRawInfoMap(item)
+  return normalizeSeverityValue(firstNonEmptyPayloadText(info.severity, item?.raw?.severity, item?.severity, 'info')) || 'info'
+}
+
 function buildEditorState(item: TaskRecordVulnerabilityVM | null): FindingEditorState {
   if (!item) {
     return { ...EMPTY_EDITOR_STATE }
@@ -143,6 +179,56 @@ export function buildMappingPatch(
   return { vul_type_id: vulTypeID }
 }
 
+export function buildFindingPatchPayload(
+  item: TaskRecordVulnerabilityVM,
+  formState: FindingEditorState,
+  mappingPatch?: UpdateTaskFindingPayload['mapping_patch'],
+): NonNullable<UpdateTaskFindingPayload['finding_patch']> {
+  const displayedState = buildEditorState(item)
+  const shouldRestoreOriginalFields = Boolean(mappingPatch)
+
+  const nextRuleName = shouldRestoreOriginalFields && formState.ruleName.trim() === displayedState.ruleName.trim()
+    ? getOriginalFindingRuleName(item)
+    : formState.ruleName.trim()
+  const nextSeverity = shouldRestoreOriginalFields && normalizeSeverityValue(formState.severity) === displayedState.severity
+    ? getOriginalFindingSeverity(item)
+    : normalizeSeverityValue(formState.severity)
+  const nextDescription = shouldRestoreOriginalFields && formState.description.trim() === displayedState.description.trim()
+    ? getOriginalFindingDescription(item)
+    : formState.description.trim()
+  const nextRemediation = shouldRestoreOriginalFields && formState.remediation.trim() === displayedState.remediation.trim()
+    ? getOriginalFindingRemediation(item)
+    : formState.remediation.trim()
+
+  const classification = { ...(item.classification || {}) }
+
+  if (nextDescription) {
+    classification.description = nextDescription
+  } else {
+    delete classification.description
+  }
+
+  if (nextRemediation) {
+    classification.remediation = nextRemediation
+  } else {
+    delete classification.remediation
+  }
+
+  return {
+    rule_name: nextRuleName,
+    severity: nextSeverity,
+    matched_at: item.matched_at || undefined,
+    target_url: item.target_url || undefined,
+    host: item.host || undefined,
+    ip: item.ip || undefined,
+    port: typeof item.port === 'number' ? item.port : undefined,
+    scheme: item.scheme || undefined,
+    matcher_name: item.matcher_name || undefined,
+    classification,
+    evidence: item.evidence || undefined,
+  }
+}
+
 function readSingleSelectionValue(keys: 'all' | Set<Key>): string | undefined {
   if (keys === 'all') {
     return undefined
@@ -168,6 +254,7 @@ export function FindingReportEditModal({
   const { data: detailItem, isPending, isError, error, refetch } = useTaskFindingDetail(taskId, findingId, isOpen)
   const activeItem = detailItem || item
   const ruleID = activeItem?.rule_id || ''
+  const displayTemplateID = activeItem?.template_id || ''
   const {
     data: ruleMap,
     isPending: isRuleMapPending,
@@ -232,45 +319,16 @@ export function FindingReportEditModal({
     setSaveSuccess('')
 
     try {
-      const classification = { ...(activeItem.classification || {}) }
-      const description = formState.description.trim()
-      const remediation = formState.remediation.trim()
-
-      if (description) {
-        classification.description = description
-      } else {
-        delete classification.description
-      }
-
-      if (remediation) {
-        classification.remediation = remediation
-      } else {
-        delete classification.remediation
-      }
+      const mappingPatch = buildMappingPatch(mappingSelection, ruleMap)
 
       const payload: UpdateTaskFindingPayload = {
-        finding_patch: {
-          rule_name: formState.ruleName.trim(),
-          severity: normalizeSeverityValue(formState.severity),
-          matched_at: activeItem.matched_at || undefined,
-          target_url: activeItem.target_url || undefined,
-          host: activeItem.host || undefined,
-          ip: activeItem.ip || undefined,
-          port: typeof activeItem.port === 'number' ? activeItem.port : undefined,
-          scheme: activeItem.scheme || undefined,
-          matcher_name: activeItem.matcher_name || undefined,
-          classification,
-          evidence: activeItem.evidence || undefined,
-        },
-        mapping_patch: buildMappingPatch(mappingSelection, ruleMap),
+        finding_patch: buildFindingPatchPayload(activeItem, formState, mappingPatch),
+        mapping_patch: mappingPatch,
       }
 
       const saved = await updateFindingMutation.mutateAsync({ taskId, findingId, payload })
       onSaved(saved)
-      setSaveSuccess('漏洞结果与映射覆盖已保存')
-      setFormState(buildEditorState(saved))
-      void refetch()
-      void refetchRuleMap()
+      onClose()
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : '保存失败，请稍后重试')
     }
@@ -361,7 +419,7 @@ export function FindingReportEditModal({
                         ))}
                       </Select>
                     </FieldGroup>
-                    <CompactInfoField label="模板 ID" value={ruleID || '-'} mono />
+                    <CompactInfoField label="模板 ID" value={displayTemplateID || '-'} mono />
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -456,7 +514,7 @@ export function FindingReportEditModal({
                       ) : (
                         <>
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <CompactInfoField label="模板 ID" value={ruleID || '-'} mono />
+                            <CompactInfoField label="模板 ID" value={displayTemplateID || '-'} mono />
                             <CompactInfoField label="当前映射" value={ruleMap?.current?.vul_type || '无映射'} />
                             <CompactInfoField
                               label="展示级别"

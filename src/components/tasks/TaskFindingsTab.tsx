@@ -30,6 +30,7 @@ import {
 } from '@/api/adapters/task'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { FindingReportEditModal } from '@/components/tasks/FindingReportEditModal'
+import { ManualTaskFindingModal } from '@/components/tasks/ManualTaskFindingModal'
 import {
   PayloadViewerDrawer,
 } from '@/components/tasks/PayloadViewerDrawer'
@@ -80,7 +81,65 @@ function getBaseURL(item: TaskRecordVulnerabilityVM): string {
   return firstNonEmptyText(item.base_url, item.host)
 }
 
+function isManualFinding(item: TaskRecordVulnerabilityVM): boolean {
+  return item.raw?.source === 'manual' || item.matcher_name === 'manual'
+}
+
+function getProtocolHint(item: TaskRecordVulnerabilityVM): string {
+  const scheme = firstNonEmptyText(item.scheme)
+  if (scheme) return scheme
+  const urlText = firstNonEmptyText(item.target_url, item.base_url)
+  if (!urlText) return 'https'
+  try {
+    return new URL(urlText).protocol.replace(/:$/, '') || 'https'
+  } catch {
+    return 'https'
+  }
+}
+
+function getOriginHint(item: TaskRecordVulnerabilityVM): string {
+  const urlText = firstNonEmptyText(item.target_url, item.base_url)
+  if (urlText) {
+    try {
+      return new URL(urlText).origin
+    } catch {
+      // fall through to host-based reconstruction
+    }
+  }
+  const host = firstNonEmptyText(item.host)
+  if (!host) return ''
+  return `${getProtocolHint(item)}://${host}`
+}
+
+function deriveMatchedLinkFromRequest(request: unknown, item: TaskRecordVulnerabilityVM): string {
+  if (typeof request !== 'string' || !request.trim()) return ''
+  const lines = request.split(/\r?\n/)
+  const requestLine = lines.find((line) => line.trim())
+  if (!requestLine) return ''
+
+  const match = requestLine.match(/^[A-Z]+\s+(\S+)(?:\s+HTTP\/[\d.]+)?$/i)
+  if (!match) return ''
+  const rawTarget = match[1]?.trim()
+  if (!rawTarget) return ''
+  if (/^https?:\/\//i.test(rawTarget)) return rawTarget
+  if (!rawTarget.startsWith('/')) return ''
+
+  const hostHeader = lines
+    .map((line) => line.match(/^host:\s*(.+)$/i)?.[1]?.trim() || '')
+    .find(Boolean)
+  if (hostHeader) {
+    return `${getProtocolHint(item)}://${hostHeader}${rawTarget}`
+  }
+
+  const origin = getOriginHint(item)
+  if (!origin) return ''
+  return `${origin}${rawTarget}`
+}
+
 function getMatchedLink(item: TaskRecordVulnerabilityVM): string {
+  if (isManualFinding(item)) {
+    return firstNonEmptyText(item.link, deriveMatchedLinkFromRequest(item.evidence?.request, item), item.raw?.['matched-at'])
+  }
   return firstNonEmptyText(item.link, item.raw?.['matched-at'], item.target_url, item.host)
 }
 
@@ -134,13 +193,16 @@ function RenderTextCell({ value, limit = 64, mono = false }: { value: string; li
 
 export function TaskFindingsTab({ taskId }: { taskId: string }) {
   const currentUser = useAuthStore((state) => state.currentUser)
-  const canDeleteFinding = hasPermission(currentUser?.permissions, PERMISSIONS.taskUpdate)
+  const canDeleteFinding = currentUser?.role === 'admin'
+    || currentUser?.roles?.includes('admin')
+    || hasPermission(currentUser?.permissions, PERMISSIONS.taskUpdate)
   const [page, setPage] = useState(1)
   const [draftFilters, setDraftFilters] = useState<FindingFilterState>(EMPTY_FILTERS)
   const [filters, setFilters] = useState<FindingFilterState>(EMPTY_FILTERS)
   const [editingItem, setEditingItem] = useState<TaskRecordVulnerabilityVM | null>(null)
   const [payloadViewerItem, setPayloadViewerItem] = useState<TaskRecordVulnerabilityVM | null>(null)
   const [pendingDeleteItem, setPendingDeleteItem] = useState<TaskRecordVulnerabilityVM | null>(null)
+  const [manualImportOpen, setManualImportOpen] = useState(false)
 
   const queryParams = useMemo(() => ({
     page,
@@ -273,6 +335,13 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
             <Button variant="flat" className="h-12 rounded-[18px] border border-white/8 bg-white/5 px-5 font-bold text-white hover:bg-white/[0.08]" onPress={handleResetFilters}>
               重置
             </Button>
+            <Button
+              variant="flat"
+              className="h-12 rounded-[18px] border border-white/8 bg-white/5 px-5 font-bold text-white hover:bg-white/[0.08]"
+              onPress={() => setManualImportOpen(true)}
+            >
+              手动导入漏洞
+            </Button>
           </div>
         </div>
         {hasActiveFilters ? (
@@ -342,7 +411,7 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
                       <span className="text-apple-text-tertiary">-</span>
                     )}
                   </TableCell>
-                  <TableCell><RenderTextCell value={item.rule_id || '-'} limit={26} mono /></TableCell>
+                  <TableCell><RenderTextCell value={item.template_id || '-'} limit={26} mono /></TableCell>
                   <TableCell><RenderTextCell value={item.rule_name || '-'} limit={28} /></TableCell>
                   <TableCell>
                     <Chip size="sm" variant="flat" color={getSeverityColor(item.severity)} classNames={{ base: 'border-0 px-1 font-black uppercase tracking-[0.12em]' }}>
@@ -430,6 +499,16 @@ export function TaskFindingsTab({ taskId }: { taskId: string }) {
         onClose={handleCloseEditModal}
         onSaved={(item) => {
           setEditingItem(item)
+          void refetch()
+        }}
+      />
+
+      <ManualTaskFindingModal
+        taskId={taskId}
+        isOpen={manualImportOpen}
+        onClose={() => setManualImportOpen(false)}
+        onSuccess={() => {
+          setManualImportOpen(false)
           void refetch()
         }}
       />

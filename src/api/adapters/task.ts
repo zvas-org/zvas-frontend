@@ -278,6 +278,7 @@ export interface TaskRecordVulnerabilityVM {
   base_url: string
   link: string
   target_url: string
+  template_id?: string
   rule_id: string
   rule_name: string
   severity: string
@@ -326,6 +327,18 @@ export interface UpdateTaskFindingPayload {
     vul_type_id?: number
     clear_mapping?: boolean
   }
+}
+
+export interface CreateManualTaskFindingPayload {
+  rule_name: string
+  severity: string
+  target_url: string
+  template_id?: string
+  description: string
+  remediation: string
+  request?: string
+  response?: string
+  matched_at?: string
 }
 
 export interface TaskRecordDetailVM extends TaskRecordVM {
@@ -525,13 +538,15 @@ function mapToTaskRecordDetailVM(dto: any): TaskRecordDetailVM {
 
 function mapToTaskRecordVulnerabilityVM(item: any): TaskRecordVulnerabilityVM {
   const baseURL = item.base_url || item.site_url || ''
-  const link = item.link || item.raw?.['matched-at'] || item.target_url || baseURL || item.host || ''
+  const isManualFinding = item.raw?.source === 'manual' || item.matcher_name === 'manual'
+  const link = item.link || item.raw?.['matched-at'] || (isManualFinding ? '' : (item.target_url || baseURL || item.host || ''))
   return {
     id: item.id || '',
     vulnerability_key: item.vulnerability_key || '',
     base_url: baseURL,
     link,
     target_url: item.target_url || '',
+    template_id: item.template_id || item.raw?.template_id || item.rule_id || '',
     rule_id: item.rule_id || '',
     rule_name: item.rule_name || '',
     severity: item.severity || '',
@@ -838,6 +853,21 @@ export function useUpdateTaskFinding() {
       qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'findings'] })
       qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'records'] })
       qc.invalidateQueries({ queryKey: ['vulnerability-localization', 'rule-map'] })
+    },
+  })
+}
+
+export function useCreateManualTaskFinding() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ taskId, payload }: { taskId: string; payload: CreateManualTaskFindingPayload }) => {
+      const res = await httpClient.post<{ data: any }>(`/tasks/${taskId}/findings/manual`, payload)
+      return mapToTaskRecordVulnerabilityVM(res.data.data)
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'findings'] })
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'records'] })
+      qc.invalidateQueries({ queryKey: ['tasks', vars.taskId, 'reports'] })
     },
   })
 }
