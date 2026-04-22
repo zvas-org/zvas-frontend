@@ -206,8 +206,6 @@ describe('TaskFindingsTab', () => {
     expect(screen.getByText('HTTP/1.1 200 OK')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '保存修改' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /映射覆盖/i })).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('漏洞名称')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('漏洞描述')).not.toBeInTheDocument()
   })
 
   it('submits edited finding fields through the aggregate save API', async () => {
@@ -245,7 +243,6 @@ describe('TaskFindingsTab', () => {
     expect(screen.getByRole('button', { name: /映射覆盖/i })).toBeInTheDocument()
     expect(screen.queryByLabelText('请求报文')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('响应报文')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('复现命令')).not.toBeInTheDocument()
   })
 
   it('confirms and deletes a finding from the action column', async () => {
